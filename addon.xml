@@ -11,10 +11,10 @@
         <disclaimer>Still under development</disclaimer>
         <news>v0.0.2 (2018-01-31)
 - initial regexp filtering
-        v0.0.1  (2018-01-21)
+v0.0.1  (2018-01-21)
 - work in progress</news>
         <platform>all</platform>
-        <license>GPL 2.0</license>
+        <license>GNU General Public License v3.0</license>
         <forum></forum>
         <website></website>
         <source>https://github.com/bkiziuk/service.subsmangler</source>
