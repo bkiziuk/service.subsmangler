@@ -1,0 +1,28 @@
+msgid ""
+msgstr ""
+
+#English
+
+msgctxt "#32001"
+msgid "Settings"
+msgstr ""
+
+msgctxt "#32002"
+msgid "Conversion active"
+msgstr ""
+
+msgctxt "#32003"
+msgid "Font size"
+msgstr ""
+
+msgctxt "#32004"
+msgid "Remove Closed Captioning"
+msgstr ""
+
+msgctxt "#32005"
+msgid "Remove advertisements"
+msgstr ""
+
+msgctxt "#32006"
+msgid "Auto-update filtering definitions"
+msgstr ""

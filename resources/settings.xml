@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<settings>
+    <category label="32001">
+      <setting id="ServiceEnabled" type="bool" label="32002" default="true"/>
+      <setting id="SubsFontSize" type="slider" label="32003" default="18" range="10,30" enable="eq(-1,true)"/>
+      <setting id="RemoveCCmarks" type="bool" label="32004" default="true" enable="eq(-2,true)"/>
+      <setting id="RemoveAdds" type="bool" label="32005" default="true" enable="eq(-3,true)"/>
+      <setting id="AutoUpdateDef" type="bool" label="32006" default="true" enable="eq(-4,true)"/>
+    </category>  
+</settings>
