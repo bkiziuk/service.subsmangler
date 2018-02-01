@@ -62,3 +62,15 @@ msgstr ""
 msgctxt "#32029"
 msgid "None"
 msgstr ""
+
+msgctxt "#32030"
+msgid "Logging destination"
+msgstr ""
+
+msgctxt "#32031"
+msgid "Kodi's kodi.log"
+msgstr ""
+
+msgctxt "#32032"
+msgid "Separate log file"
+msgstr ""

@@ -2,6 +2,7 @@ import os
 import re
 import string
 import time
+import datetime
 import xbmc
 import xbmcgui
 import xbmcaddon
@@ -136,13 +137,15 @@ def GetSettings():
     global setting_RemoveCCmarks
     global setting_RemoveAds
     global setting_AutoUpdateDef
+    global setting_SeparateLogFile
 
-    setting_LogLevel = __addon__.getSetting("LogLevel")
     setting_ServiceEnabled = __addon__.getSetting("ServiceEnabled")
     setting_SubsFontSize = int(float(__addon__.getSetting("SubsFontSize")))
     setting_RemoveCCmarks = __addon__.getSetting("RemoveCCmarks")
     setting_RemoveAds = __addon__.getSetting("RemoveAdds")
     setting_AutoUpdateDef = __addon__.getSetting("AutoUpdateDef")
+    setting_LogLevel = __addon__.getSetting("LogLevel")
+    setting_SeparateLogFile = __addon__.getSetting("SeparateLogFile")
 
     Log("Reading settings.", xbmc.LOGINFO)
     Log("Setting: ServiceEnabled = " + setting_ServiceEnabled, xbmc.LOGINFO)
@@ -151,6 +154,7 @@ def GetSettings():
     Log("              RemoveAds = " + setting_RemoveAds, xbmc.LOGINFO)
     Log("          AutoUpdateDef = " + setting_AutoUpdateDef, xbmc.LOGINFO)
     Log("               LogLevel = " + setting_LogLevel, xbmc.LOGINFO)
+    Log("        SeparateLogFile = " + setting_SeparateLogFile, xbmc.LOGINFO)
 
 
 
@@ -169,7 +173,47 @@ def Log(message, severity=xbmc.LOGDEBUG):
 
     if setting_LogLevel >= severity:
         # log the message to Log
-        xbmc.log("SubsMangler: " + message, level=xbmc.LOGNONE)
+        if setting_SeparateLogFile == "0":
+            # use kodi.log for logging
+            xbmc.log("SubsMangler: " + message, level=xbmc.LOGNONE)
+        else:
+            # use own log file located in addon's datadir
+            # prepare datadir
+            # directory and file is local to the filesystem
+            # no need to use xbmcvfs
+            logfile = os.path.join(__addonworkdir__, 'smangler.log')
+            xbmc.log("SUBSM: " + logfile)
+            if not os.path.isdir(__addonworkdir__):
+                xmbc.log("SubsMangler: profile directory doesn't exist: " + __addonworkdir__ + "   Trying to create.", level=xbmc.LOGNOTICE)
+                try:
+                    os.mkdir(__addonworkdir__)
+                    xbmc.log("SubsMangler: profile directory created: " + __addonworkdir__, level=xbmc.LOGNOTICE)
+                except OSError as e:
+                    xbmc.log("SubsMangler: Log: can't create directory: " +__addonworkdir__, level=xbmc.LOGERROR)
+                    xbmc.Log("Exception: " + e.errno + " - " + e.message, xbmc.LOGERROR)
+            else:
+                # konstruct log text
+                logtext = str(datetime.datetime.now())
+                if severity == xbmc.LOGDEBUG:
+                    logtext += "   DEBUG: "
+                elif severity == xbmc.LOGINFO:
+                    logtext += "    INFO: "
+                elif severity == xbmc.LOGNOTICE:
+                    logtext += "  NOTICE: "
+                elif severity == xbmc.LOGWARNING:
+                    logtext += " WARNING: "
+                elif severity == xbmc.LOGSEVERE:
+                    logtext += "  SEVERE: "
+                elif severity == xbmc.LOGFATAL:
+                    logtext += "   FATAL: "
+                else:
+                    logtext += "    NONE: "
+                logtext += message + "\n"
+
+                # append line to file
+                f = open(logfile, "a") 
+                f.write(logtext) 
+                f.close 
 
 
 
@@ -202,7 +246,11 @@ def GetDefinitions(section):
                     # truncate any comment at the end of line
                     # https://stackoverflow.com/questions/509211/understanding-pythons-slice-notation
                     pos = line.find("#")
-                    line = line[:pos].strip()
+                    # if there is no comment, pos==-1
+                    if pos >= 0:
+                        line = line[:pos]
+                    # strip whitespaces
+                    line = line.strip()
                     # check if line is not empty, empty line is "falsy"
                     # https://stackoverflow.com/questions/9573244/most-elegant-way-to-check-if-the-string-is-empty-in-python
                     if line:
@@ -224,10 +272,10 @@ def GetDefinitions(section):
 def RemoveStrings(line, deflist):    
     # iterate over every entry on the list
     for pattern in deflist:
-        if re.match(pattern, line):
+        if re.search(pattern, line):
             Log("RemoveStrings: Subtitles line: " + line, xbmc.LOGDEBUG)
             Log("                matches regex: " + pattern, xbmc.LOGDEBUG)
-            line = re.sub(pattern, line, '')
+            line = re.sub(pattern, '', line)
             Log("          Resulting string is: " + line, xbmc.LOGDEBUG)
     return line
 
@@ -356,6 +404,7 @@ def MangleSubtitles(originalinputfile):
             else:
                 # save changed line
                 line.plaintext = subsline.decode('utf-8')
+        Log("Filtering lists applied.", xbmc.LOGINFO)
 
     #save subs
     subs.save(tempoutputfile)

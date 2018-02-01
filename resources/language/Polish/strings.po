@@ -62,3 +62,15 @@ msgstr "Fatal"
 msgctxt "#32029"
 msgid "None"
 msgstr "None"
+
+msgctxt "#32030"
+msgid "Logging destination"
+msgstr "Miejsce składowania logów"
+
+msgctxt "#32031"
+msgid "Kodi's kodi.log"
+msgstr "Plik logów Kodi (kodi.log)"
+
+msgctxt "#32032"
+msgid "Separate log file"
+msgstr "Osobny plik z logami"
