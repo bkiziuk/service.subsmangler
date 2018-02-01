@@ -16,8 +16,6 @@ from resources.lib import pysubs2
 
 
 
-# xbmc loglevels
-# https://forum.kodi.tv/showthread.php?tid=324570&pid=2671926#pid2671926
 
 
 
@@ -70,11 +68,11 @@ class XBMCPlayer(xbmc.Player):
 
         # detect if Player is running by checking xbmc.Player().isPlayingVideo() or xbmc.getCondVisibility('Player.HasVideo')
         # use ConditionalVisibility checks: http://kodi.wiki/view/List_of_boolean_conditions
-        #xbmc.log("SubsMangler: xbmc.Player().isPlayingVideo(): " + str(xbmc.Player().isPlayingVideo()), level=xbmc.LOGINFO)
+        #Log("xbmc.Player().isPlayingVideo(): " + str(xbmc.Player().isPlayingVideo()), xbmc.LOGINFO)
         #if xbmc.Player().isPlayingVideo():
         if xbmc.getCondVisibility('Player.HasVideo'):
             # player has just been started, check what contents does it play and from
-            xbmc.log("SubsMangler: VideoPlayer START detected", level=xbmc.LOGINFO)
+            Log("VideoPlayer START detected", xbmc.LOGINFO)
             # get info on file being played
             subtitlePath, playingFilename, playingFilenamePath, playingFps = GetPlayingInfo()
 
@@ -91,7 +89,7 @@ class XBMCPlayer(xbmc.Player):
     def onPlayBackEnded( self ):
         # Will be called when xbmc stops playing a file
         # player finished playing video
-        xbmc.log("SubsMangler: VideoPlayer END detected", level=xbmc.LOGINFO)
+        Log("VideoPlayer END detected", xbmc.LOGINFO)
 
         # stop monitoring dir for changed files
         rt.stop()
@@ -99,7 +97,7 @@ class XBMCPlayer(xbmc.Player):
     def onPlayBackStopped( self ):
         # Will be called when user stops xbmc playing a file
         # player has just been stopped
-        xbmc.log("SubsMangler: VideoPlayer STOP detected", level=xbmc.LOGINFO)
+        Log("VideoPlayer STOP detected", xbmc.LOGINFO)
 
         # stop monitoring dir for changed files
         rt.stop()
@@ -115,11 +113,11 @@ class XBMCMonitor(xbmc.Monitor):
 
     def onAbortRequested(self):
         # Will be called when XBMC requests Abort
-        xbmc.log("SubsMangler: Abort requested in Monitor class.")
+        Log("Abort requested in Monitor class.")
 
     def onSettingsChanged(self):
         # Will be called when addon settings are changed
-        xbmc.log("SubsMangler: Addon settings changed.")
+        Log("Addon settings changed.")
         GetSettings()
 
         # if service is not enabled any more, stop timer
@@ -132,24 +130,46 @@ class XBMCMonitor(xbmc.Monitor):
 # settings are read only during addon's start - so for service type addon we need to re-read them after they are altered
 # https://forum.kodi.tv/showthread.php?tid=201423&pid=1766246#pid1766246
 def GetSettings():
+    global setting_LogLevel
     global setting_SubsFontSize
     global setting_ServiceEnabled
     global setting_RemoveCCmarks
     global setting_RemoveAds
     global setting_AutoUpdateDef
 
+    setting_LogLevel = __addon__.getSetting("LogLevel")
     setting_ServiceEnabled = __addon__.getSetting("ServiceEnabled")
     setting_SubsFontSize = int(float(__addon__.getSetting("SubsFontSize")))
     setting_RemoveCCmarks = __addon__.getSetting("RemoveCCmarks")
     setting_RemoveAds = __addon__.getSetting("RemoveAdds")
     setting_AutoUpdateDef = __addon__.getSetting("AutoUpdateDef")
 
-    xbmc.log("SubsMangler: Reading settings.", level=xbmc.LOGINFO)
-    xbmc.log("SubsMangler: Setting: ServiceEnabled = " + setting_ServiceEnabled, level=xbmc.LOGINFO)
-    xbmc.log("SubsMangler: Setting: SubsFontSize = " + str(setting_SubsFontSize), level=xbmc.LOGINFO)
-    xbmc.log("SubsMangler: Setting: RemoveCCmarks = " + setting_RemoveCCmarks, level=xbmc.LOGINFO)
-    xbmc.log("SubsMangler: Setting: RemoveAds = " + setting_RemoveAds, level=xbmc.LOGINFO)
-    xbmc.log("SubsMangler: Setting: AutoUpdateDef = " + setting_AutoUpdateDef, level=xbmc.LOGINFO)
+    Log("Reading settings.", xbmc.LOGINFO)
+    Log("Setting: ServiceEnabled = " + setting_ServiceEnabled, xbmc.LOGINFO)
+    Log("           SubsFontSize = " + str(setting_SubsFontSize), xbmc.LOGINFO)
+    Log("          RemoveCCmarks = " + setting_RemoveCCmarks, xbmc.LOGINFO)
+    Log("              RemoveAds = " + setting_RemoveAds, xbmc.LOGINFO)
+    Log("          AutoUpdateDef = " + setting_AutoUpdateDef, xbmc.LOGINFO)
+    Log("               LogLevel = " + setting_LogLevel, xbmc.LOGINFO)
+
+
+
+# parses log events based on internal logging level
+# xbmc loglevels: https://forum.kodi.tv/showthread.php?tid=324570&pid=2671926#pid2671926
+# 0 = LOGDEBUG
+# 1 = LOGINFO
+# 2 = LOGNOTICE
+# 3 = LOGWARNING
+# 4 = LOGERROR
+# 5 = LOGSEVERE
+# 6 = LOGFATAL
+# 7 = LOGNONE
+def Log(message, severity=xbmc.LOGDEBUG):
+    global setting_LogLevel
+
+    if setting_LogLevel >= severity:
+        # log the message to Log
+        xbmc.log("SubsMangler: " + message, level=xbmc.LOGNONE)
 
 
 
@@ -189,12 +209,12 @@ def GetDefinitions(section):
                         # add to list
                         importedlist.append(line)
 
-        xbmc.log("SubsMangler: Definitions imported. Section: " + section, level=xbmc.LOGINFO)
+        Log("Definitions imported. Section: " + section, xbmc.LOGINFO)
         # dump imported list
         for entry in importedlist:
-            xbmc.log("SubsMangler: Entry: " + entry, level=xbmc.LOGINFO)
+            Log("Entry: " + entry, xbmc.LOGDEBUG)
     else:
-        xbmc.log("SubsMangler: Definitions file does not exist: " + deffilename, level=xbmc.LOGINFO)
+        Log("Definitions file does not exist: " + deffilename, xbmc.LOGINFO)
     
     return importedlist
 
@@ -204,8 +224,11 @@ def GetDefinitions(section):
 def RemoveStrings(line, deflist):    
     # iterate over every entry on the list
     for pattern in deflist:
-        line = re.sub(pattern, line, '')
-
+        if re.match(pattern, line):
+            Log("RemoveStrings: Subtitles line: " + line, xbmc.LOGDEBUG)
+            Log("                matches regex: " + pattern, xbmc.LOGDEBUG)
+            line = re.sub(pattern, line, '')
+            Log("          Resulting string is: " + line, xbmc.LOGDEBUG)
     return line
 
 
@@ -241,7 +264,7 @@ def MangleSubtitles(originalinputfile):
     tempfile = "processed_subtitles"
 
     if not xbmcvfs.exists(originalinputfile):
-        xbmc.log("SubsMangler: File does not exist: " + originalinputfile)
+        Log("File does not exist: " + originalinputfile)
         return
 
     # as pysubs2 library doesn't support Kodi's virtual file system and file can not be processed remotely on smb:// share,
@@ -253,7 +276,7 @@ def MangleSubtitles(originalinputfile):
     # copy file to temp
     copy_file(originalinputfile, tempinputfile)
 
-    xbmc.log("SubsMangler: Subtitles file processing started.", level=xbmc.LOGNOTICE)
+    Log("Subtitles file processing started.", xbmc.LOGNOTICE)
 
     # record start time of processing
     MangleStartTime = time.time()
@@ -274,16 +297,16 @@ def MangleSubtitles(originalinputfile):
             if enc == "NO_MATCH":
                 break
             # encoding does not match
-            xbmc.log("SubsMangler: Input file test for: " + enc + " failed.", level=xbmc.LOGINFO)
+            Log("Input file test for: " + enc + " failed.", xbmc.LOGINFO)
             continue
 
     # no encodings match
     if enc == "NO_MATCH":
-        xbmc.log("SubsMangler: No tried encodings match input file.", level=xbmc.LOGERROR)
+        Log("No tried encodings match input file.", xbmc.LOGNOTICE)
         return
 
-    xbmc.log("SubsMangler: Input encoding used: " + enc, level=xbmc.LOGINFO)
-    xbmc.log("SubsMangler: Input FPS: " + str(playingFps), level=xbmc.LOGINFO)
+    Log("Input encoding used: " + enc, xbmc.LOGINFO)
+    Log("          Input FPS: " + str(playingFps), xbmc.LOGINFO)
 
     # load input_file into pysubs2 library
     subs = pysubs2.load(tempinputfile, encoding=enc, fps=float(playingFps))
@@ -303,10 +326,12 @@ def MangleSubtitles(originalinputfile):
     # http://pythonhosted.org/pysubs2/api-reference.html#ssafile-a-subtitle-file
     if setting_RemoveCCmarks or setting_RemoveAds:
         # load definitions from file
+        Log("Definitions file used: " + deffilename, xbmc.LOGINFO)
         CCmarksList = GetDefinitions("CCmarks")
         AdsList = GetDefinitions("Ads")
 
         # iterate over every line of subtitles and try to match  Regular Expressions filters
+        Log("Applying filtering lists.", xbmc.LOGINFO)
         for line in subs:
             # load single line to temp variable for processing
             subsline = line.text.encode('utf-8')
@@ -327,6 +352,7 @@ def MangleSubtitles(originalinputfile):
             if not subsline:
                 # remove empty line
                 subs.remove(line)
+                Log("Resulting line is empty. Removing from file.", xbmc.LOGDEBUG)
             else:
                 # save changed line
                 line.plaintext = subsline.decode('utf-8')
@@ -341,15 +367,15 @@ def MangleSubtitles(originalinputfile):
     MangleEndTime = time.time()
     
     # truncating seconds: https://stackoverflow.com/questions/8595973/truncate-to-3-decimals-in-python/8595991#8595991
-    xbmc.log("SubsMangler: Subtitles file processing finished. Processing took: " + '%.3f'%(MangleEndTime - MangleStartTime) + " seconds.", level=xbmc.LOGNOTICE)
+    Log("Subtitles file processing finished. Processing took: " + '%.3f'%(MangleEndTime - MangleStartTime) + " seconds.", xbmc.LOGNOTICE)
 
     # fixme - debug check if file is already released
     try:
         fp = open(tempoutputfile)
         fp.close()
     except Exception as e:
-        xbmc.log("SubsMangler: tempoutputfile NOT released.", level=xbmc.LOGERROR)
-        xbmc.log("SubsMangler: Exception: " + e.errno + " - " + e.message, level=xbmc.LOGERROR)
+        Log("tempoutputfile NOT released.", xbmc.LOGERROR)
+        Log("Exception: " + e.errno + " - " + e.message, xbmc.LOGERROR)
 
     # copy new file back to its original location changing only its extension
     originaloutputfile = originalinputfile[:-4] + '.ass'
@@ -365,19 +391,19 @@ def MangleSubtitles(originalinputfile):
 # copy function
 def copy_file(srcFile, dstFile):
     try:
-        xbmc.log("SubsMangler: copy_file: srcFile: " + srcFile, level=xbmc.LOGINFO)
-        xbmc.log("SubsMangler: copy_file: dstFile: " + dstFile, level=xbmc.LOGINFO)
+        Log("copy_file: srcFile: " + srcFile, xbmc.LOGINFO)
+        Log("           dstFile: " + dstFile, xbmc.LOGINFO)
         if xbmcvfs.exists(dstFile):
-            xbmc.log("SubsMangler: copy_file: dstFile exists. Trying to remove.", level=xbmc.LOGINFO)
+            Log("copy_file: dstFile exists. Trying to remove.", xbmc.LOGINFO)
             delete_file(dstFile)
         else:
-            xbmc.log("SubsMangler: copy_file: dstFile does not exist.", level=xbmc.LOGINFO)
-        xbmc.log("SubsMangler: copy_file: Copy started.", level=xbmc.LOGINFO)
+            Log("copy_file: dstFile does not exist.", xbmc.LOGINFO)
+        Log("copy_file: Copy started.", xbmc.LOGINFO)
         success = xbmcvfs.copy(srcFile, dstFile)
-        xbmc.log("SubsMangler: copy_file: SuccessStatus: " + str(success), level=xbmc.LOGINFO)
+        Log("copy_file: SuccessStatus: " + str(success), xbmc.LOGINFO)
     except Exception as e:
-        xbmc.log("SubsMangler: copy_file: Copy failed.", level=xbmc.LOGERROR)
-        xbmc.log("SubsMangler: Exception: " + e.errno + " - " + e.message, level=xbmc.LOGERROR)
+        Log("copy_file: Copy failed.", xbmc.LOGERROR)
+        Log("Exception: " + e.errno + " - " + e.message, xbmc.LOGERROR)
 
     wait_for_file(dstFile, True)
 
@@ -386,20 +412,20 @@ def copy_file(srcFile, dstFile):
 # rename function
 def rename_file(oldfilepath, newfilepath):
     try:
-        xbmc.log("SubsMangler: rename_file: srcFile: " + oldfilepath, level=xbmc.LOGINFO)
-        xbmc.log("SubsMangler: rename_file: dstFile: " + newfilepath, level=xbmc.LOGINFO)
+        Log("rename_file: srcFile: " + oldfilepath, xbmc.LOGINFO)
+        Log("             dstFile: " + newfilepath, xbmc.LOGINFO)
         # check if new file already exists as in this case rename will fail
         if xbmcvfs.exists(newfilepath):
-            xbmc.log("SubsMangler: rename_file: dstFile exists. Trying to remove.", level=xbmc.LOGINFO)
+            Log("rename_file: dstFile exists. Trying to remove.", xbmc.LOGINFO)
             delete_file(newfilepath)
         else:
-            xbmc.log("SubsMangler: rename_file: dstFile does not exist.", level=xbmc.LOGINFO)
+            Log("rename_file: dstFile does not exist.", xbmc.LOGINFO)
         # rename file
         success = xbmcvfs.rename(oldfilepath, newfilepath)
-        xbmc.log("SubsMangler: rename_file: SuccessStatus: " + str(success), level=xbmc.LOGINFO)
+        Log("rename_file: SuccessStatus: " + str(success), xbmc.LOGINFO)
     except Exception as e:
-        xbmc.log("SubsMangler: Can't rename file: " + originalinputfile, level=xbmc.LOGERROR)
-        xbmc.log("SubsMangler: Exception: " + e.errno + " - " + e.message, level=xbmc.LOGERROR)
+        Log("Can't rename file: " + originalinputfile, xbmc.LOGERROR)
+        Log("Exception: " + e.errno + " - " + e.message, xbmc.LOGERROR)
 
 
 
@@ -407,10 +433,10 @@ def rename_file(oldfilepath, newfilepath):
 def delete_file(filepath):
     try:
         xbmcvfs.delete(filepath)
-        xbmc.log("SubsMangler: delete_file: File deleted: " + filepath, level=xbmc.LOGINFO)
+        Log("delete_file: File deleted: " + filepath, xbmc.LOGINFO)
     except Exception as e:
-        xbmc.log("SubsMangler: delete_file: Delete failed: " + filepath, level=xbmc.LOGERROR)
-        xbmc.log("SubsMangler: Exception: " + e.errno + " - " + e.message, level=xbmc.LOGERROR)
+        Log("delete_file: Delete failed: " + filepath, xbmc.LOGERROR)
+        Log("Exception: " + e.errno + " - " + e.message, xbmc.LOGERROR)
     
     wait_for_file(filepath, False)
 
@@ -420,29 +446,29 @@ def delete_file(filepath):
 def wait_for_file(file, exists):
     success = False
     if exists:
-        xbmc.log("SubsMangler: wait_for_file: if file exists: " + file, level=xbmc.LOGINFO)
+        Log("wait_for_file: if file exists: " + file, xbmc.LOGINFO)
     else:
-        xbmc.log("SubsMangler: wait_for_file: if file doesn't exist: " + file, level=xbmc.LOGINFO)
+        Log("wait_for_file: if file doesn't exist: " + file, xbmc.LOGINFO)
 
     count = 20
     while count:
         xbmc.sleep(500)  # this first sleep is intentional
         if exists:
             if xbmcvfs.exists(file):
-                xbmc.log("SubsMangler: wait_for_file: file appeared.", level=xbmc.LOGINFO)
+                Log("wait_for_file: file appeared.", xbmc.LOGINFO)
                 success = True
                 break
         else:
             if not xbmcvfs.exists(file):
-                xbmc.log("SubsMangler: wait_for_file: file vanished.", level=xbmc.LOGINFO)
+                Log("wait_for_file: file vanished.", xbmc.LOGINFO)
                 success = True
                 break
         count -= 1 
     if not success:
         if exists:
-            xbmc.log("SubsMangler: wait_for_file: file DID NOT appear.", level=xbmc.LOGERROR)
+            Log("wait_for_file: file DID NOT appear.", xbmc.LOGERROR)
         else:
-            xbmc.log("SubsMangler: wait_for_file: file DID NOT vanish.", level=xbmc.LOGERROR)
+            Log("wait_for_file: file DID NOT vanish.", xbmc.LOGERROR)
         return False
     else:
         return True
@@ -456,7 +482,7 @@ def DetectNewSubs():
 
     # if function is already running, exit this instance
     if DetectionIsRunning:
-        #xbmc.log("SubsMangler: Duplicate DetectNewSubs call.", level=xbmc.LOGWARNING)
+        #Log("Duplicate DetectNewSubs call.", LogWARNING)
         return
 
     # setting process flag, process starts to run
@@ -488,13 +514,13 @@ def DetectNewSubs():
         pathfile = os.path.join(subtitlePath, f)
         epoch_file = xbmcvfs.Stat(pathfile).st_mtime()
         epoch_now = time.time()
-        #xbmc.log("SubsMangler: filename: " + pathfile)
-        #xbmc.log("SubsMangler: fileepoch: " + str(epoch_file))
-        #xbmc.log("SubsMangler: nowepoch:  " + str(epoch_now))
+        #Log("filename: " + pathfile)
+        #Log("fileepoch: " + str(epoch_file))
+        #Log("nowepoch:  " + str(epoch_now))
 
         if  epoch_file > epoch_now - 6:
             # Video filename matches subtitle filename and it was created/modified no later than 6 secods ago
-            xbmc.log("SubsMangler: New subtitle file detected: " + pathfile, level=xbmc.LOGNOTICE)
+            Log("New subtitle file detected: " + pathfile, xbmc.LOGNOTICE)
 
             # record start time of processing
             RoutineStartTime = time.time()
@@ -504,38 +530,38 @@ def DetectNewSubs():
             xbmc.executebuiltin('ActivateWindow(10138)')  # Busy dialog on
 
             # log time
-            #xbmc.log("SubsMangler: File time:    " + str(epoch_file))
-            #xbmc.log("SubsMangler: Current time: " + str(epoch_now))
+            #Log("File time:    " + str(epoch_file))
+            #Log("Current time: " + str(epoch_now))
 
             # hide subtitles
             xbmc.Player().showSubtitles(False)
             # pause playback
             if not xbmc.getCondVisibility("player.paused"):
                 xbmc.Player().pause()
-                xbmc.log("SubsMangler: Playback PAUSED for subtitles conversion.", level=xbmc.LOGINFO)
+                Log("Playback PAUSED for subtitles conversion.", xbmc.LOGINFO)
             else:    
-                xbmc.log("SubsMangler: Playback already PAUSED.", level=xbmc.LOGINFO)
+                Log("Playback already PAUSED.", xbmc.LOGINFO)
 
             # process subtitles file
             ResultFile = MangleSubtitles(pathfile) 
-            xbmc.log("SubsMangler: Resultfile: " + ResultFile, level=xbmc.LOGNOTICE) 
+            Log("Output subtitles file: " + ResultFile, xbmc.LOGNOTICE) 
 
             # check if destination file exists
             if xbmcvfs.exists(ResultFile):
-                xbmc.log("SubsMangler: Subtitles available.", level=xbmc.LOGNOTICE)
+                Log("Subtitles available.", xbmc.LOGNOTICE)
 
                 # load new subtitles and turn them on
                 xbmc.Player().setSubtitles(ResultFile)
                     
                 # resume playback
                 if xbmc.getCondVisibility("player.paused"):
-                    xbmc.log("SubsMangler: Playback is paused. Resuming.", level=xbmc.LOGINFO)
+                    Log("Playback is paused. Resuming.", xbmc.LOGINFO)
                     xbmc.Player().pause()
-                    xbmc.log("SubsMangler: Playback RESUMED.", level=xbmc.LOGINFO)
+                    Log("Playback RESUMED.", xbmc.LOGINFO)
                 else:
-                    xbmc.log("SubsMangler: Playback not paused. No need to resume.", level=xbmc.LOGINFO)
+                    Log("Playback not paused. No need to resume.", xbmc.LOGINFO)
             else:
-                xbmc.log("SubsMangler: Subtitles NOT available.", level=xbmc.LOGWARNING)
+                Log("Subtitles NOT available.", xbmc.LOGNOTICE)
 
             # hide busy animation
             # https://forum.kodi.tv/showthread.php?tid=280621&pid=2363462#pid2363462
@@ -545,7 +571,7 @@ def DetectNewSubs():
             RoutineEndTime = time.time()
             
             # truncating seconds: https://stackoverflow.com/questions/8595973/truncate-to-3-decimals-in-python/8595991#8595991
-            xbmc.log("SubsMangler: Subtitles processing routine finished. Processing took: " + '%.3f'%(RoutineEndTime - RoutineStartTime) + " seconds.", level=xbmc.LOGNOTICE)
+            Log("Subtitles processing routine finished. Processing took: " + '%.3f'%(RoutineEndTime - RoutineStartTime) + " seconds.", xbmc.LOGNOTICE)
             
             # sleep for 10 seconds to avoid processing newly added subititle file
             xbmc.sleep(10000)
@@ -578,11 +604,10 @@ def GetPlayingInfo():
     filename = xbmc.getInfoLabel('Player.Filename')
     filepathname = xbmc.getInfoLabel('Player.Filenameandpath')
 
-    xbmc.log("SubsMangler: file currently played: " + filepathname, level=xbmc.LOGINFO)
-    xbmc.log("SubsMangler: subtitles download path: " + subspath, level=xbmc.LOGINFO)
+    Log("file currently played: " + filepathname, xbmc.LOGINFO)
+    Log("subtitles download path: " + subspath, xbmc.LOGINFO)
     
     return subspath, filename, filepathname, filefps
-
 
 
 
@@ -662,6 +687,4 @@ if __name__ == '__main__':
         else:
             # use sample file from addon's dir
             deffilename = os.path.join(__addondir__, 'resources', 'regexdef.txt')
-
-        xbmc.log("SubsMangler: regex: " + deffilename, level=xbmc.LOGINFO)
 
