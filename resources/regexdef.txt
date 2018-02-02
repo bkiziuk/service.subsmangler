@@ -15,4 +15,4 @@
 .*napiprojekt.pl.*  # matches any line that includes phrase "napiprojekt.pl"
 .*Project Heaven.*  # matches any line that includes phrase "Project Heaven"
 .*[Tt]łumaczenie.*[Kk]orekta.*  # matches any line that includes phrase "Tłumaczenie" AND "Korekta" with or without first capital letter
-www.[Oo]pen[Ss]ubtitles.org
+.*www.[Oo]pen[Ss]ubtitles.org.*

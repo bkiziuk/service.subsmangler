@@ -72,5 +72,5 @@ msgid "Kodi's kodi.log"
 msgstr "Plik logów Kodi (kodi.log)"
 
 msgctxt "#32032"
-msgid "Separate log file"
-msgstr "Osobny plik z logami"
+msgid "Separate log file (smangler.log)"
+msgstr "Osobny plik z logami (smangler.log)"

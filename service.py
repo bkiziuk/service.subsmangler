@@ -1,8 +1,10 @@
 import os
+import errno
+import logging
 import re
+import stat
 import string
 import time
-import datetime
 import xbmc
 import xbmcgui
 import xbmcaddon
@@ -11,7 +13,9 @@ import xbmcvfs
 import urllib
 import codecs
 
+from datetime import datetime
 from json import loads
+from logging.handlers import RotatingFileHandler
 from threading import Timer
 from resources.lib import pysubs2
 
@@ -144,8 +148,8 @@ def GetSettings():
     setting_RemoveCCmarks = __addon__.getSetting("RemoveCCmarks")
     setting_RemoveAds = __addon__.getSetting("RemoveAdds")
     setting_AutoUpdateDef = __addon__.getSetting("AutoUpdateDef")
-    setting_LogLevel = __addon__.getSetting("LogLevel")
-    setting_SeparateLogFile = __addon__.getSetting("SeparateLogFile")
+    setting_LogLevel = int(__addon__.getSetting("LogLevel"))
+    setting_SeparateLogFile = int(__addon__.getSetting("SeparateLogFile"))
 
     Log("Reading settings.", xbmc.LOGINFO)
     Log("Setting: ServiceEnabled = " + setting_ServiceEnabled, xbmc.LOGINFO)
@@ -153,8 +157,8 @@ def GetSettings():
     Log("          RemoveCCmarks = " + setting_RemoveCCmarks, xbmc.LOGINFO)
     Log("              RemoveAds = " + setting_RemoveAds, xbmc.LOGINFO)
     Log("          AutoUpdateDef = " + setting_AutoUpdateDef, xbmc.LOGINFO)
-    Log("               LogLevel = " + setting_LogLevel, xbmc.LOGINFO)
-    Log("        SeparateLogFile = " + setting_SeparateLogFile, xbmc.LOGINFO)
+    Log("               LogLevel = " + str(setting_LogLevel), xbmc.LOGINFO)
+    Log("        SeparateLogFile = " + str(setting_SeparateLogFile), xbmc.LOGINFO)
 
 
 
@@ -171,50 +175,35 @@ def GetSettings():
 def Log(message, severity=xbmc.LOGDEBUG):
     global setting_LogLevel
 
-    if setting_LogLevel >= severity:
+    if severity >= setting_LogLevel:
         # log the message to Log
-        if setting_SeparateLogFile == "0":
+        if setting_SeparateLogFile == 0:
             # use kodi.log for logging
             xbmc.log("SubsMangler: " + message, level=xbmc.LOGNONE)
         else:
             # use own log file located in addon's datadir
-            # prepare datadir
-            # directory and file is local to the filesystem
-            # no need to use xbmcvfs
-            logfile = os.path.join(__addonworkdir__, 'smangler.log')
-            xbmc.log("SUBSM: " + logfile)
-            if not os.path.isdir(__addonworkdir__):
-                xmbc.log("SubsMangler: profile directory doesn't exist: " + __addonworkdir__ + "   Trying to create.", level=xbmc.LOGNOTICE)
-                try:
-                    os.mkdir(__addonworkdir__)
-                    xbmc.log("SubsMangler: profile directory created: " + __addonworkdir__, level=xbmc.LOGNOTICE)
-                except OSError as e:
-                    xbmc.log("SubsMangler: Log: can't create directory: " +__addonworkdir__, level=xbmc.LOGERROR)
-                    xbmc.Log("Exception: " + e.errno + " - " + e.message, xbmc.LOGERROR)
+
+            # konstruct log text
+            # cut last 3 trailing zero's from timestamp
+            logtext = str(datetime.now())[:-3]
+            if severity == xbmc.LOGDEBUG:
+                logtext += "   DEBUG: "
+            elif severity == xbmc.LOGINFO:
+                logtext += "    INFO: "
+            elif severity == xbmc.LOGNOTICE:
+                logtext += "  NOTICE: "
+            elif severity == xbmc.LOGWARNING:
+                logtext += " WARNING: "
+            elif severity == xbmc.LOGSEVERE:
+                logtext += "  SEVERE: "
+            elif severity == xbmc.LOGFATAL:
+                logtext += "   FATAL: "
             else:
-                # konstruct log text
-                logtext = str(datetime.datetime.now())
-                if severity == xbmc.LOGDEBUG:
-                    logtext += "   DEBUG: "
-                elif severity == xbmc.LOGINFO:
-                    logtext += "    INFO: "
-                elif severity == xbmc.LOGNOTICE:
-                    logtext += "  NOTICE: "
-                elif severity == xbmc.LOGWARNING:
-                    logtext += " WARNING: "
-                elif severity == xbmc.LOGSEVERE:
-                    logtext += "  SEVERE: "
-                elif severity == xbmc.LOGFATAL:
-                    logtext += "   FATAL: "
-                else:
-                    logtext += "    NONE: "
-                logtext += message + "\n"
-
-                # append line to file
-                f = open(logfile, "a") 
-                f.write(logtext) 
-                f.close 
-
+                logtext += "    NONE: "
+            logtext += message
+            xbmc.log("SubsMangler: extlog: " + logtext, level=xbmc.LOGNONE)
+            # append line to external log file, logging via warning level to przevent filtering by default filtering level of ROOT logger
+            logger.warning(logtext)
 
 
 # parse a list of definitions from file
@@ -473,7 +462,7 @@ def rename_file(oldfilepath, newfilepath):
         success = xbmcvfs.rename(oldfilepath, newfilepath)
         Log("rename_file: SuccessStatus: " + str(success), xbmc.LOGINFO)
     except Exception as e:
-        Log("Can't rename file: " + originalinputfile, xbmc.LOGERROR)
+        Log("Can't rename file: " + oldfilepath, xbmc.LOGERROR)
         Log("Exception: " + e.errno + " - " + e.message, xbmc.LOGERROR)
 
 
@@ -693,8 +682,30 @@ if __name__ == '__main__':
     DetectionIsRunning = False
     ClockTick = 0
 
+    # prepare datadir
+    # directory and file is local to the filesystem
+    # no need to use xbmcvfs
+    if not os.path.isdir(__addonworkdir__):
+        xbmc.log("SubsMangler: profile directory doesn't exist: " + __addonworkdir__ + "   Trying to create.", level=xbmc.LOGNOTICE)
+        try:
+            os.mkdir(__addonworkdir__)
+            xbmc.log("SubsMangler: profile directory created: " + __addonworkdir__, level=xbmc.LOGNOTICE)
+        except OSError as e:
+            xbmc.log("SubsMangler: Log: can't create directory: " +__addonworkdir__, level=xbmc.LOGERROR)
+            xbmc.Log("Exception: " + e.errno + " - " + e.message, xbmc.LOGERROR)
+
+    # prepare external log handler
+    # https://docs.python.org/2/library/logging.handlers.html
+    logger = logging.getLogger(__name__)
+    loghandler = logging.handlers.RotatingFileHandler(os.path.join(__addonworkdir__, 'smangler.log',), mode='a', backupCount=2)
+    logger.addHandler(loghandler)
+
     # load settings
     GetSettings()
+
+    # check if external log is configured
+    if setting_SeparateLogFile == 1:
+        xbmc.log("SubsMangler: External log enabled: " + os.path.join(__addonworkdir__, 'smangler.log'), level=xbmc.LOGNOTICE)
 
     # monitor whether Kodi is running
     # http://kodi.wiki/view/Service_add-ons
@@ -730,7 +741,8 @@ if __name__ == '__main__':
             ClockTick -= 1
 
         # set definitions file location
-        if xbmcvfs.exists(os.path.join(__addonworkdir__, 'regexdef.txt')):
+        # dir is local, no need to use xbmcvfs()
+        if os.path.isfile(os.path.join(__addonworkdir__, 'regexdef.txt')):
             # downloaded file is available
             deffilename = os.path.join(__addonworkdir__, 'regexdef.txt')
         else:
