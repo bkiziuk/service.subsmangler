@@ -5,14 +5,20 @@
 # SubsMangler will remove every string in subtitles line that matches below
 # regular expressions. If the line is empty after removing those strings,
 # the entire line will be removed from subtitles file.
-# Matching is case sensitive.
+# Matching is case insensitive. File encoding is UTF-8.
 
+# CCmarks section includes definitions for removing Hearing Impaired texts
 [CCmarks]
 ^\[.*\]$  # matches: <BEGINLINE>[anything]<ENDLINE>
 ^\(.*\)$  # matches: <BEGINLINE>(anything)<ENDLINE>
 
-[Ads]
+# Ads secions include language specific definitions.
+# Only one section is loaded based on subtitles language designation in subtitles file name
+[Ads_pl]
 .*napiprojekt.pl.*  # matches any line that includes phrase "napiprojekt.pl"
-.*Project Heaven.*  # matches any line that includes phrase "Project Heaven"
-.*[Tt]łumaczenie.*[Kk]orekta.*  # matches any line that includes phrase "Tłumaczenie" AND "Korekta" with or without first capital letter
-.*www.[Oo]pen[Ss]ubtitles.org.*
+.*Project Heaven.*
+.*tłumaczenie.*korekta.*  # matches any line that includes phrase "tłumaczenie" AND "korekta"
+.*www.opensubtitles.org.*
+.*podnapisi.net.*
+.*kinomania.*
+.*napisy24.*
