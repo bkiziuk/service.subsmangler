@@ -27,6 +27,10 @@ msgctxt "#32006"
 msgid "Auto-update filtering definitions"
 msgstr ""
 
+msgctxt "#32010"
+msgid "Invoke subtitles search dialog on playback start"
+msgstr ""
+
 msgctxt "#32020"
 msgid "Logging level"
 msgstr ""

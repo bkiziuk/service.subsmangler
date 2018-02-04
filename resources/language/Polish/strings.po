@@ -27,6 +27,10 @@ msgctxt "#32006"
 msgid "Auto-update filtering definitions"
 msgstr "Automatycznie aktualizuj definicje filtrowania"
 
+msgctxt "#32010"
+msgid "Invoke subtitles search dialog on playback start"
+msgstr "Pokaż okno wyszukiwania napisów po uruchomieniu odtwarzania"
+
 msgctxt "#32020"
 msgid "Logging level"
 msgstr "Poziom logowania zdarzeń"
