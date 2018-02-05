@@ -96,16 +96,35 @@ class XBMCPlayer(xbmc.Player):
             # if not, automatically open subtitlesearch dialog
             #FIXME - check if Kodi settings on auto subtitles download infuence the process
             if setting_AutoInvokeSubsDialog:
+                # get all files matching name of file being played and extension '.ass'
+                # also includes 'noautosubs' file and file with '.noautosubs' extensions
                 localsubs = GetSubtitleFiles(subtitlePath, '.ass')
-                # check if list is empty
-                # https://stackoverflow.com/questions/53513/how-do-i-check-if-a-list-is-empty/53522#53522
-                if not localsubs:
-                    Log("No local subtitles matching video being played. Opening search dialog.", xbmc.LOGINFO)
-                    # invoke subtitles search dialog
-                    xbmc.executebuiltin('ActivateWindow(10153)')  # subtitles search
+
+                # check if there is 'noautosubs' file or extension on returned file list
+                noautosubs = False
+                for item in localsubs:
+                    if "noautosubs" in item[-10:]:
+                        noautosubs = True
+                        # delete this item from list to not falsely trigger enabling subtitles below
+                        del localsubs[item]
+                        break
+
+                if not noautosubs:
+                    # noautosubs file or extension not found
+                    # possible to invoke SubsSearch dialog or enable locally found subtitles
+                    #
+                    # check if list is empty
+                    # https://stackoverflow.com/questions/53513/how-do-i-check-if-a-list-is-empty/53522#53522
+                    if not localsubs:
+                        Log("No local subtitles matching video being played. Opening search dialog.", xbmc.LOGINFO)
+                        # invoke subtitles search dialog
+                        xbmc.executebuiltin('ActivateWindow(10153)')  # subtitles search
+                    else:
+                        Log("Local subtitles matching video being played detected. Enabling subtitles.", xbmc.LOGINFO)
+                        xbmc.Player().showSubtitles(True)
                 else:
-                    Log("Local subtitles matching video being played detected. Enabling subtitles.", xbmc.LOGINFO)
-                    xbmc.Player().showSubtitles(True)
+                    Log("'noautosubs' file or extension detected. Neither opening subtitles search dialog nor enabling subtitles.", xbmc.LOGINFO)
+                    
 
             # check periodically if there are any files changed in monitored subdir that match file being played
             if setting_ServiceEnabled:
@@ -151,6 +170,16 @@ class XBMCMonitor(xbmc.Monitor):
 
 
 
+# function parses input value and determines if it should be True or False value
+# this is because Kodi .getSetting function returns string type instead of bool value
+def GetBool(stringvalue):
+    if stringvalue in ["1", "true", "True", "TRUE"]:
+        return True
+    else:
+        return False
+
+
+
 # read settings from configuration file
 # settings are read only during addon's start - so for service type addon we need to re-read them after they are altered
 # https://forum.kodi.tv/showthread.php?tid=201423&pid=1766246#pid1766246
@@ -164,24 +193,25 @@ def GetSettings():
     global setting_AutoUpdateDef
     global setting_SeparateLogFile
 
-    setting_ServiceEnabled = __addon__.getSetting("ServiceEnabled")
+    setting_ServiceEnabled = GetBool(__addon__.getSetting("ServiceEnabled"))
     setting_SubsFontSize = int(float(__addon__.getSetting("SubsFontSize")))
-    setting_RemoveCCmarks = __addon__.getSetting("RemoveCCmarks")
-    setting_RemoveAds = __addon__.getSetting("RemoveAdds")
-    setting_AutoInvokeSubsDialog = __addon__.getSetting("AutoInvokeSubsDialog")
-    setting_AutoUpdateDef = __addon__.getSetting("AutoUpdateDef")
+    setting_RemoveCCmarks = GetBool(__addon__.getSetting("RemoveCCmarks"))
+    setting_RemoveAds = GetBool(__addon__.getSetting("RemoveAdds"))
+    setting_AutoInvokeSubsDialog = GetBool(__addon__.getSetting("AutoInvokeSubsDialog"))
+    setting_AutoUpdateDef = GetBool(__addon__.getSetting("AutoUpdateDef"))
     setting_LogLevel = int(__addon__.getSetting("LogLevel"))
     setting_SeparateLogFile = int(__addon__.getSetting("SeparateLogFile"))
 
     Log("Reading settings.", xbmc.LOGINFO)
-    Log("Setting: ServiceEnabled = " + setting_ServiceEnabled, xbmc.LOGINFO)
+    Log("Setting: ServiceEnabled = " + str(setting_ServiceEnabled), xbmc.LOGINFO)
     Log("           SubsFontSize = " + str(setting_SubsFontSize), xbmc.LOGINFO)
-    Log("          RemoveCCmarks = " + setting_RemoveCCmarks, xbmc.LOGINFO)
-    Log("              RemoveAds = " + setting_RemoveAds, xbmc.LOGINFO)
-    Log("   AutoInvokeSubsDialog = " + setting_AutoInvokeSubsDialog, xbmc.LOGINFO)
-    Log("          AutoUpdateDef = " + setting_AutoUpdateDef, xbmc.LOGINFO)
+    Log("          RemoveCCmarks = " + str(setting_RemoveCCmarks), xbmc.LOGINFO)
+    Log("              RemoveAds = " + str(setting_RemoveAds), xbmc.LOGINFO)
+    Log("   AutoInvokeSubsDialog = " + str(setting_AutoInvokeSubsDialog), xbmc.LOGINFO)
+    Log("          AutoUpdateDef = " + str(setting_AutoUpdateDef), xbmc.LOGINFO)
     Log("               LogLevel = " + str(setting_LogLevel), xbmc.LOGINFO)
     Log("        SeparateLogFile = " + str(setting_SeparateLogFile), xbmc.LOGINFO)
+
 
 
 # parses log events based on internal logging level
@@ -260,8 +290,9 @@ def GetDefinitions(section):
                     pos = line.find("#")
                     # if there is no comment, pos==-1
                     if pos >= 0:
+                        # take only part before comment
                         line = line[:pos]
-                    # strip whitespaces
+                    # strip whitespaces at beginning and end of string
                     line = line.strip()
                     # check if line is not empty, empty line is "falsy"
                     # https://stackoverflow.com/questions/9573244/most-elegant-way-to-check-if-the-string-is-empty-in-python
@@ -288,7 +319,7 @@ def RemoveStrings(line, deflist):
             Log("RemoveStrings: Subtitles line: " + line, xbmc.LOGDEBUG)
             Log("                matches regex: " + pattern, xbmc.LOGDEBUG)
             line = re.sub(pattern, '', line, flags=re.I)
-            Log("          Resulting string is: " + line, xbmc.LOGDEBUG)
+            Log("             Resulting string: " + line, xbmc.LOGDEBUG)
     return line
 
 
@@ -386,7 +417,7 @@ def MangleSubtitles(originalinputfile):
     subs.styles["Default"].shadow = 0
 
     # process subs contents
-    # iterate over every sub and process its text
+    # iterate over every sub line and process its text
     # http://pythonhosted.org/pysubs2/api-reference.html#ssafile-a-subtitle-file
     if setting_RemoveCCmarks or setting_RemoveAds:
         # load definitions from file
@@ -409,7 +440,7 @@ def MangleSubtitles(originalinputfile):
                 # remove Advertisement strings
                 subsline = RemoveStrings(subsline, AdsList)
 
-            # remove orphan whitespaces from beginning and end
+            # remove orphan whitespaces from beginning and end of line
             subsline = subsline.strip()
             # convert double or more whitespaces to single ones
             subsline = re.sub(' {2,}', ' ', subsline)
@@ -543,6 +574,7 @@ def wait_for_file(file, exists):
 
 
 # get all subtitle file names in current directory contents for those matching video being played
+# get 'noautosubs' file or extension in order to match per directory or per file behaviour
 def GetSubtitleFiles(subspath, substypelist):
     # use dictionary solution - load all files to dictionary and remove those not fulfiling criteria
     # Python doesn't support smb:// paths. Use xbmcvfs: https://forum.kodi.tv/showthread.php?tid=211821
@@ -551,9 +583,10 @@ def GetSubtitleFiles(subspath, substypelist):
     # filter dictionary, leaving only subtitle files matching played video
     # https://stackoverflow.com/questions/5384914/how-to-delete-items-from-a-dictionary-while-iterating-over-it
     for item in SubsFiles.keys():
-        if not ((item.lower()[:-7] == playingFilename.lower()[:-4]) and (item.lower()[-4:] in substypelist)):
+        if not (((item.lower()[:-7] == playingFilename.lower()[:-4]) and (item.lower()[-4:] in substypelist)) or (item.lower() == "noautosubs") or (item.lower()[:-11] == playingFilename.lower()[:-4])):
             # subtitle name does not match video name
             # or subtitle does not have supported extension - this is because function is sometimes triggered on converted file copied into that dir
+            # or subtitle is not noautosubs file or extension
             # FIXME - now we assume that .ass subtitle will not be processed
             del SubsFiles[item]
 
@@ -594,7 +627,7 @@ def DetectNewSubs():
 
         if  epoch_file > epoch_now - 6:
             # Video filename matches subtitle filename and it was created/modified no later than 6 secods ago
-            Log("New subtitle file detected: " + pathfile, xbmc.LOGNOTICE)
+            Log("New subtitles file detected: " + pathfile, xbmc.LOGNOTICE)
 
             # record start time of processing
             RoutineStartTime = time.time()
@@ -679,8 +712,8 @@ def GetPlayingInfo():
     filepathname = xbmc.getInfoLabel('Player.Filenameandpath')
     filefps = xbmc.getInfoLabel('Player.Process(VideoFPS)')
 
-    Log("file currently played: " + filepathname, xbmc.LOGINFO)
-    Log("subtitles download path: " + subspath, xbmc.LOGINFO)
+    Log("File currently played: " + filepathname, xbmc.LOGINFO)
+    Log("Subtitles download path: " + subspath, xbmc.LOGINFO)
     
     return subspath, filename, filepathname, filefps
 
@@ -714,7 +747,7 @@ if __name__ == '__main__':
     monitor = XBMCMonitor()
     player = XBMCPlayer()
 
-    xbmc.log("SubsMangler: started. Version is: %s" % (__version__), level=xbmc.LOGNOTICE)
+    xbmc.log("SubsMangler: started. Version: %s" % (__version__), level=xbmc.LOGNOTICE)
 
     # prepare timer to launch
     rt = RepeatedTimer(3.0, DetectNewSubs)
