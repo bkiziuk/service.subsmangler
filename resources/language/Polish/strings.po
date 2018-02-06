@@ -8,8 +8,8 @@ msgid "Settings"
 msgstr "Ustawienia"
 
 msgctxt "#32002"
-msgid "Conversion active"
-msgstr "Konwersja włączona"
+msgid "Convert subtitles"
+msgstr "Konwertuj napisy"
 
 msgctxt "#32003"
 msgid "Font size"

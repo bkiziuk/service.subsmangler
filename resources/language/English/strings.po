@@ -8,7 +8,7 @@ msgid "Settings"
 msgstr ""
 
 msgctxt "#32002"
-msgid "Conversion active"
+msgid "Convert subtitles"
 msgstr ""
 
 msgctxt "#32003"

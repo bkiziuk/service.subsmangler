@@ -127,7 +127,7 @@ class XBMCPlayer(xbmc.Player):
                     
 
             # check periodically if there are any files changed in monitored subdir that match file being played
-            if setting_ServiceEnabled:
+            if setting_ConversionServiceEnabled:
                 rt.start()
 
     def onPlayBackEnded( self ):
@@ -165,7 +165,7 @@ class XBMCMonitor(xbmc.Monitor):
         GetSettings()
 
         # if service is not enabled any more, stop timer
-        if not setting_ServiceEnabled:
+        if not setting_ConversionServiceEnabled:
             rt.stop()
 
 
@@ -186,14 +186,14 @@ def GetBool(stringvalue):
 def GetSettings():
     global setting_LogLevel
     global setting_SubsFontSize
-    global setting_ServiceEnabled
+    global setting_ConversionServiceEnabled
     global setting_RemoveCCmarks
     global setting_RemoveAds
     global setting_AutoInvokeSubsDialog
     global setting_AutoUpdateDef
     global setting_SeparateLogFile
 
-    setting_ServiceEnabled = GetBool(__addon__.getSetting("ServiceEnabled"))
+    setting_ConversionServiceEnabled = GetBool(__addon__.getSetting("ConversionServiceEnabled"))
     setting_SubsFontSize = int(float(__addon__.getSetting("SubsFontSize")))
     setting_RemoveCCmarks = GetBool(__addon__.getSetting("RemoveCCmarks"))
     setting_RemoveAds = GetBool(__addon__.getSetting("RemoveAdds"))
@@ -203,7 +203,7 @@ def GetSettings():
     setting_SeparateLogFile = int(__addon__.getSetting("SeparateLogFile"))
 
     Log("Reading settings.", xbmc.LOGINFO)
-    Log("Setting: ServiceEnabled = " + str(setting_ServiceEnabled), xbmc.LOGINFO)
+    Log("Setting: ConversionServiceEnabled = " + str(setting_ConversionServiceEnabled), xbmc.LOGINFO)
     Log("           SubsFontSize = " + str(setting_SubsFontSize), xbmc.LOGINFO)
     Log("          RemoveCCmarks = " + str(setting_RemoveCCmarks), xbmc.LOGINFO)
     Log("              RemoveAds = " + str(setting_RemoveAds), xbmc.LOGINFO)
