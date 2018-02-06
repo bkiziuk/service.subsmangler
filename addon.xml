@@ -10,10 +10,11 @@
         <description lang="pl">Konwertuje napisy dodając czarne tło. Obsługuje formaty microDVD, SubRip, MPL2 i TMP. Dodatkowo umożliwia automatyczne uruchamianie okna wyszukiwania napisów w sytuacji, gdy nie zostały wykryte lokalne napisy. Pozwala również na usuwanie z napisów podpisów reklamowych oraz znaczników dla niesłyszących. Nie wymaga zależnych wtyczek.</description>
         <disclaimer>Still under development</disclaimer>
         <news>v0.0.7 (2018-02-07)
+- confirmation dialog if subtitles search dialog should be opened the next time
 - unicode fixes
 v0.0.6 (2018-02-05)
 - fixes for handling Boolean values correctly in config file
-- respecting of 'noautosubs' flag file/extension
+- respecting of 'noautosubs' flag file/extension when trying to open subtitles search dialog
 v0.0.5 (2018-02-04)
 - some code clean-up
 - regex auto-update

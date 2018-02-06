@@ -78,3 +78,19 @@ msgstr ""
 msgctxt "#32032"
 msgid "Separate log file (smangler.log)"
 msgstr ""
+
+msgctxt "#32040"
+msgid "Do you want to PREVENT subtitles search dialog opening automatically next time this file is played?"
+msgstr ""
+
+msgctxt "#32043"
+msgid "No new subtitles file has been detected."
+msgstr ""
+
+msgctxt "#32041"
+msgid "No"
+msgstr ""
+
+msgctxt "#32042"
+msgid "Yes"
+msgstr ""
