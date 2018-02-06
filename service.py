@@ -73,6 +73,7 @@ class XBMCPlayer(xbmc.Player):
         global playingFilenamePath
         global playingFps
         global SubExtList
+        global SubsSearchWasOpened
 
         # detect if Player is running by checking xbmc.Player().isPlayingVideo() or xbmc.getCondVisibility('Player.HasVideo')
         # use ConditionalVisibility checks: http://kodi.wiki/view/List_of_boolean_conditions
@@ -95,6 +96,11 @@ class XBMCPlayer(xbmc.Player):
             # check if there are subtitles files already on disk matching video being played
             # if not, automatically open subtitlesearch dialog
             #FIXME - check if Kodi settings on auto subtitles download infuence the process
+
+            # set initial setting for SubsSearchWasOpened flag
+            SubsSearchWasOpened = False
+
+            # check if Subtitles Search window should be opened at player start
             if setting_AutoInvokeSubsDialog:
                 # get all files matching name of file being played and extension '.ass'
                 # also includes 'noautosubs' file and file with '.noautosubs' extensions
@@ -117,14 +123,22 @@ class XBMCPlayer(xbmc.Player):
                     # https://stackoverflow.com/questions/53513/how-do-i-check-if-a-list-is-empty/53522#53522
                     if not localsubs:
                         Log("No local subtitles matching video being played. Opening search dialog.", xbmc.LOGINFO)
+                        # set flag to remember that subtitles search dialog was opened
+                        SubsSearchWasOpened = True
                         # invoke subtitles search dialog
                         xbmc.executebuiltin('ActivateWindow(10153)')  # subtitles search
+                        # hold further execution until window is opened
+                        # wait for window to appear
+                        while not xbmc.getCondVisibility("Window.IsVisible(10153)"):
+                            xbmc.sleep(1000)
+                        # wait for window to disappear
+                        while xbmc.getCondVisibility("Window.IsVisible(10153)"):
+                            xbmc.sleep(1000)
                     else:
                         Log("Local subtitles matching video being played detected. Enabling subtitles.", xbmc.LOGINFO)
                         xbmc.Player().showSubtitles(True)
                 else:
                     Log("'noautosubs' file or extension detected. Neither opening subtitles search dialog nor enabling subtitles.", xbmc.LOGINFO)
-                    
 
             # check periodically if there are any files changed in monitored subdir that match file being played
             if setting_ConversionServiceEnabled:
@@ -548,7 +562,7 @@ def wait_for_file(file, exists):
     else:
         Log("wait_for_file: if file doesn't exist: " + file, xbmc.LOGINFO)
 
-    count = 20
+    count = 10
     while count:
         xbmc.sleep(500)  # this first sleep is intentional
         if exists:
@@ -594,10 +608,34 @@ def GetSubtitleFiles(subspath, substypelist):
 
 
 
+# pause playback
+def PlaybackPause():
+    # pause playback
+    if not xbmc.getCondVisibility("player.paused"):
+        xbmc.Player().pause()
+        Log("Playback PAUSED.", xbmc.LOGINFO)
+    else:    
+        Log("Playback already PAUSED.", xbmc.LOGINFO)
+
+
+
+# resume playback
+def PlaybackResume():
+    # resume playback
+    if xbmc.getCondVisibility("player.paused"):
+        Log("Playback is paused. Resuming.", xbmc.LOGINFO)
+        xbmc.Player().pause()
+        Log("Playback RESUMED.", xbmc.LOGINFO)
+    else:
+        Log("Playback not paused. No need to resume.", xbmc.LOGINFO)
+
+
+
 # check if any files matching video being played are changed
 # http://timgolden.me.uk/python/win32_how_do_i/watch_directory_for_changes.html
 def DetectNewSubs():
     global DetectionIsRunning
+    global SubsSearchWasOpened
 
     # if function is already running, exit this instance
     if DetectionIsRunning:
@@ -644,11 +682,7 @@ def DetectNewSubs():
             # hide subtitles
             xbmc.Player().showSubtitles(False)
             # pause playback
-            if not xbmc.getCondVisibility("player.paused"):
-                xbmc.Player().pause()
-                Log("Playback PAUSED for subtitles conversion.", xbmc.LOGINFO)
-            else:    
-                Log("Playback already PAUSED.", xbmc.LOGINFO)
+            PlaybackPause()
 
             # process subtitles file
             ResultFile = MangleSubtitles(pathfile) 
@@ -662,12 +696,7 @@ def DetectNewSubs():
                 xbmc.Player().setSubtitles(ResultFile)
                     
                 # resume playback
-                if xbmc.getCondVisibility("player.paused"):
-                    Log("Playback is paused. Resuming.", xbmc.LOGINFO)
-                    xbmc.Player().pause()
-                    Log("Playback RESUMED.", xbmc.LOGINFO)
-                else:
-                    Log("Playback not paused. No need to resume.", xbmc.LOGINFO)
+                PlaybackResume()
             else:
                 Log("Subtitles NOT available.", xbmc.LOGNOTICE)
 
@@ -681,8 +710,43 @@ def DetectNewSubs():
             # truncating seconds: https://stackoverflow.com/questions/8595973/truncate-to-3-decimals-in-python/8595991#8595991
             Log("Subtitles processing routine finished. Processing took: " + '%.3f'%(RoutineEndTime - RoutineStartTime) + " seconds.", xbmc.LOGNOTICE)
             
+            # clear subtitles search dialog flag to make sure that YesNo dialog will not be triggered
+            SubsSearchWasOpened = False
+            
             # sleep for 10 seconds to avoid processing newly added subititle file
             xbmc.sleep(10000)
+
+    # check if subtitles search window was opened but there were no new subtitles processed
+    if SubsSearchWasOpened:
+        Log("Subtitles search window was opened but no new subtitles were detected. Opening YesNo dialog.", xbmc.LOGINFO)
+
+        # pause playbcak
+        PlaybackPause()
+
+        # display YesNo dialog
+        YesNoDialog = xbmcgui.Dialog().yesno("Subtitles Mangler", __addonlang__(32043), line2=__addonlang__(32040), nolabel=__addonlang__(32041), yeslabel=__addonlang__(32042))
+        if YesNoDialog:
+            # user does not want the dialog to appear again 
+            Log("Answer is Yes. Setting .noautosubs extension flag for file: " + playingFilenamePath.encode("utf-8"), xbmc.LOGINFO)
+            # set '.noautosubs' extension for file being played
+            try:
+                f = xbmcvfs.File (playingFilenamePath[:-3] + "noautosubs", 'w')
+                result = f.write("# This file was created by Subtitles Mangler. Presence of this file prevents automatical opening of subtitles search dialog.")
+                f.close()
+            except Exception as e:
+                Log("Can not create noautosubs file.", xbmc.LOGERROR)
+                Log("Exception: " + e.message, xbmc.LOGERROR)
+
+        else: 
+            # user wants the dialog to appear again 
+            Log("Answer is No. Doing nothing.", xbmc.LOGINFO)
+
+        # resume playback
+        PlaybackResume()
+
+        # clear the flag to prevent opening dialog on next call of DetectNewSubs() 
+        SubsSearchWasOpened = False
+
 
     # clearing process flag, process is not running any more
     DetectionIsRunning = False
@@ -728,6 +792,7 @@ __addon__ = xbmcaddon.Addon(id='service.subsmangler')
 __addondir__ = xbmc.translatePath(__addon__.getAddonInfo('path').decode("utf-8"))
 __addonworkdir__ = xbmc.translatePath(__addon__.getAddonInfo('profile').decode('utf-8'))
 __version__ = __addon__.getAddonInfo('version')
+__addonlang__ = __addon__.getLocalizedString
 
 
 # path and file name of public definitions
