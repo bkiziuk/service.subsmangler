@@ -8,8 +8,8 @@ msgid "Settings"
 msgstr "Ustawienia"
 
 msgctxt "#32002"
-msgid "Conversion active"
-msgstr "Konwersja włączona"
+msgid "Convert subtitles"
+msgstr "Konwertuj napisy"
 
 msgctxt "#32003"
 msgid "Font size"
@@ -26,3 +26,55 @@ msgstr "Usuń reklamy"
 msgctxt "#32006"
 msgid "Auto-update filtering definitions"
 msgstr "Automatycznie aktualizuj definicje filtrowania"
+
+msgctxt "#32010"
+msgid "Invoke subtitles search dialog on playback start"
+msgstr "Pokaż okno wyszukiwania napisów po uruchomieniu odtwarzania"
+
+msgctxt "#32020"
+msgid "Logging level"
+msgstr "Poziom logowania zdarzeń"
+
+msgctxt "#32022"
+msgid "Debug"
+msgstr "Debug"
+
+msgctxt "#32023"
+msgid "Info"
+msgstr "Info"
+
+msgctxt "#32024"
+msgid "Notice"
+msgstr "Notice"
+
+msgctxt "#32025"
+msgid "Warning"
+msgstr "Warning"
+
+msgctxt "#32026"
+msgid "Error"
+msgstr "Error"
+
+msgctxt "#32027"
+msgid "Severe"
+msgstr "Severe"
+
+msgctxt "#32028"
+msgid "Fatal"
+msgstr "Fatal"
+
+msgctxt "#32029"
+msgid "None"
+msgstr "None"
+
+msgctxt "#32030"
+msgid "Logging destination"
+msgstr "Miejsce składowania logów"
+
+msgctxt "#32031"
+msgid "Kodi's kodi.log"
+msgstr "Plik logów Kodi (kodi.log)"
+
+msgctxt "#32032"
+msgid "Separate log file (smangler.log)"
+msgstr "Osobny plik z logami (smangler.log)"

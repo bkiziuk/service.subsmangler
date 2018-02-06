@@ -8,7 +8,7 @@ msgid "Settings"
 msgstr ""
 
 msgctxt "#32002"
-msgid "Conversion active"
+msgid "Convert subtitles"
 msgstr ""
 
 msgctxt "#32003"
@@ -25,4 +25,56 @@ msgstr ""
 
 msgctxt "#32006"
 msgid "Auto-update filtering definitions"
+msgstr ""
+
+msgctxt "#32010"
+msgid "Invoke subtitles search dialog on playback start"
+msgstr ""
+
+msgctxt "#32020"
+msgid "Logging level"
+msgstr ""
+
+msgctxt "#32022"
+msgid "Debug"
+msgstr ""
+
+msgctxt "#32023"
+msgid "Info"
+msgstr ""
+
+msgctxt "#32024"
+msgid "Notice"
+msgstr ""
+
+msgctxt "#32025"
+msgid "Warning"
+msgstr ""
+
+msgctxt "#32026"
+msgid "Error"
+msgstr ""
+
+msgctxt "#32027"
+msgid "Severe"
+msgstr ""
+
+msgctxt "#32028"
+msgid "Fatal"
+msgstr ""
+
+msgctxt "#32029"
+msgid "None"
+msgstr ""
+
+msgctxt "#32030"
+msgid "Logging destination"
+msgstr ""
+
+msgctxt "#32031"
+msgid "Kodi's kodi.log"
+msgstr ""
+
+msgctxt "#32032"
+msgid "Separate log file (smangler.log)"
 msgstr ""
