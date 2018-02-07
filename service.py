@@ -93,7 +93,7 @@ class XBMCPlayer(xbmc.Player):
                 Log("Empty string detected. Ignoring it.", xbmc.LOGWARNING)
                 return
 
-            # clear temp dir from subtitle files
+            # clear temp dir from subtitles files
             tempfilelist = os.listdir(xbmc.translatePath("special://temp"))
             Log("Clearing temporary files.", xbmc.LOGINFO)
             for item in tempfilelist:
@@ -104,20 +104,19 @@ class XBMCPlayer(xbmc.Player):
             # check if there are subtitles files already on disk matching video being played
             # if not, automatically open subtitlesearch dialog
             #FIXME - check if Kodi settings on auto subtitles download infuence the process
-
             # set initial setting for SubsSearchWasOpened flag
             SubsSearchWasOpened = False
-
             # check if Subtitles Search window should be opened at player start
             if setting_AutoInvokeSubsDialog:
                 # get all files matching name of file being played and extension '.ass'
-                # also includes 'noautosubs' file and file with '.noautosubs' extensions
+                # also includes 'noautosubs' file and file with '.noautosubs' extension
                 localsubs = GetSubtitleFiles(subtitlePath, '.ass')
 
                 # check if there is 'noautosubs' file or extension on returned file list
                 noautosubs = False
                 for item in localsubs:
                     if "noautosubs" in item[-10:]:
+                        # set noautosubs flag informing that subtitles search window should not be invoked
                         noautosubs = True
                         # delete this item from list to not falsely trigger enabling subtitles below
                         del localsubs[item]
@@ -144,11 +143,11 @@ class XBMCPlayer(xbmc.Player):
                             xbmc.sleep(500)
                     else:
                         Log("Local subtitles matching video being played detected. Enabling subtitles.", xbmc.LOGINFO)
-                        xbmc.Player().showSubtitles(True)
                 else:
-                    Log("'noautosubs' file or extension detected. Neither opening subtitles search dialog nor enabling subtitles.", xbmc.LOGINFO)
+                    Log("'noautosubs' file or extension detected. Not opening subtitles search dialog.", xbmc.LOGINFO)
 
-            #FIXME - should subtitles be enabled automatically if they are already available on disk?
+            # enable subtitles if there are any
+            xbmc.Player().showSubtitles(True)
 
             # check periodically if there are any files changed in monitored subdir that match file being played
             if setting_ConversionServiceEnabled:
@@ -255,7 +254,7 @@ def Log(message, severity=xbmc.LOGDEBUG):
         # log the message to Log
         if setting_SeparateLogFile == 0:
             # use kodi.log for logging
-            xbmc.log("SubsMangler: " + message.encode("utf-8"), level=xbmc.LOGNONE)
+            xbmc.log("SubsMangler: " + message, level=xbmc.LOGNONE)
         else:
             # use own log file located in addon's datadir
 
@@ -279,7 +278,7 @@ def Log(message, severity=xbmc.LOGDEBUG):
             logtext += message
             # append line to external log file, logging via warning level to prevent 
             # filtering messages by default filtering level of ROOT logger
-            logger.warning(logtext.encode("utf-8"))
+            logger.warning(logtext)
 
 
 
@@ -289,8 +288,8 @@ def GetDefinitions(section):
     global deffilename
     importedlist = list()
 
-    # check if file exists
-    if xbmcvfs.exists(deffilename):
+    # check if definitions file exists
+    if os.path.isfile(deffilename):
         # open file
         with open(deffilename, "rt") as f:
             thissection = False
@@ -844,13 +843,13 @@ if __name__ == '__main__':
     # directory and file is local to the filesystem
     # no need to use xbmcvfs
     if not os.path.isdir(__addonworkdir__):
-        xbmc.log("SubsMangler: profile directory doesn't exist: " + __addonworkdir__.encode("utf-8") + "   Trying to create.", level=xbmc.LOGNOTICE)
+        xbmc.log("SubsMangler: profile directory doesn't exist: " + __addonworkdir__ + "   Trying to create.", level=xbmc.LOGNOTICE)
         try:
             os.mkdir(__addonworkdir__)
-            xbmc.log("SubsMangler: profile directory created: " + __addonworkdir__.encode("utf-8"), level=xbmc.LOGNOTICE)
+            xbmc.log("SubsMangler: profile directory created: " + __addonworkdir__, level=xbmc.LOGNOTICE)
         except OSError as e:
-            xbmc.log("SubsMangler: Log: can't create directory: " +__addonworkdir__.encode("utf-8"), level=xbmc.LOGERROR)
-            xbmc.Log("Exception: " + e.errno + " - " + e.message.encode("utf-8"), xbmc.LOGERROR)
+            xbmc.log("SubsMangler: Log: can't create directory: " +__addonworkdir__, level=xbmc.LOGERROR)
+            xbmc.Log("Exception: " + e.errno + " - " + e.message, xbmc.LOGERROR)
 
     # prepare external log handler
     # https://docs.python.org/2/library/logging.handlers.html
@@ -863,7 +862,7 @@ if __name__ == '__main__':
 
     # check if external log is configured
     if setting_SeparateLogFile == 1:
-        xbmc.log("SubsMangler: External log enabled: " + os.path.join(__addonworkdir__, 'smangler.log').encode("utf-8"), level=xbmc.LOGNOTICE)
+        xbmc.log("SubsMangler: External log enabled: " + os.path.join(__addonworkdir__, 'smangler.log'), level=xbmc.LOGNOTICE)
 
     # monitor whether Kodi is running
     # http://kodi.wiki/view/Service_add-ons
