@@ -1,0 +1,21 @@
+v0.0.7 (2018-02-07)
+- confirmation dialog if subtitles search dialog should be opened the next time
+- unicode fixes
+- more Windows codepages added
+- online playback will not trigger subtitles window
+v0.0.6 (2018-02-05)
+- fixes for handling Boolean values correctly in config file
+- respecting of 'noautosubs' flag file/extension when trying to open subtitles search dialog
+v0.0.5 (2018-02-04)
+- some code clean-up
+- regex auto-update
+- subtitles search dialog auto invoke
+- minimum xbmc.python: 2.25.0 - due to API availability
+v0.0.4 (2018-02-02)
+- separate log file with logrotation
+v0.0.3 (2018-02-01)
+- custom log filtering
+v0.0.2 (2018-01-31)
+- initial regexp filtering
+v0.0.1  (2018-01-21)
+- initial test version with subtitles conversion mechanism

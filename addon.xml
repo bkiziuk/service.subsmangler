@@ -12,6 +12,8 @@
         <news>v0.0.7 (2018-02-07)
 - confirmation dialog if subtitles search dialog should be opened the next time
 - unicode fixes
+- more Windows codepages added
+- online playback will not trigger subtitles window
 v0.0.6 (2018-02-05)
 - fixes for handling Boolean values correctly in config file
 - respecting of 'noautosubs' flag file/extension when trying to open subtitles search dialog
@@ -27,7 +29,7 @@ v0.0.3 (2018-02-01)
 v0.0.2 (2018-01-31)
 - initial regexp filtering
 v0.0.1  (2018-01-21)
-- initial test version</news>
+- initial test version with subtitles conversion mechanism</news>
         <platform>all</platform>
         <license>GNU General Public License v3.0</license>
         <forum></forum>

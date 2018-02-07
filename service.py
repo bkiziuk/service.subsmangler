@@ -24,13 +24,6 @@ from resources.lib import pysubs2
 
 
 
-# encoding
-# https://forum.kodi.tv/showthread.php?tid=144677
-# https://nedbatchelder.com/text/unipain.html
-# https://www.joelonsoftware.com/2003/10/08/the-absolute-minimum-every-software-developer-absolutely-positively-must-know-about-unicode-and-character-sets-no-excuses/
-
-
-
 # timer class
 # from: https://stackoverflow.com/questions/3393612/run-certain-code-every-n-seconds/13151299
 class RepeatedTimer(object):
@@ -88,6 +81,17 @@ class XBMCPlayer(xbmc.Player):
             Log("VideoPlayer START detected.", xbmc.LOGINFO)
             # get info on file being played
             subtitlePath, playingFilename, playingFilenamePath, playingFps = GetPlayingInfo()
+
+            # ignore all streaming videos
+            # http://xion.io/post/code/python-startswith-tuple.html
+            protocols = ("http", "https", "mms", "rtsp", "pvr")
+            if playingFilenamePath.lower().startswith(tuple(p + '://' for p in protocols)):
+                Log("Video stream detected. Ignoring it.", xbmc.LOGINFO)
+                return
+            elif not playingFilenamePath:
+                # string is empty, may happen when playing buffered streams
+                Log("Empty string detected. Ignoring it.", xbmc.LOGWARNING)
+                return
 
             # clear temp dir from subtitle files
             tempfilelist = os.listdir(xbmc.translatePath("special://temp"))
@@ -398,7 +402,8 @@ def MangleSubtitles(originalinputfile):
 
     # list of encodings to try
     # the last position should be "NO_MATCH" to detect end of list
-    encodings = [ "utf-8", "cp1252", "cp1250", "NO_MATCH" ]
+    # https://msdn.microsoft.com/en-us/library/windows/desktop/dd317756(v=vs.85).aspx
+    encodings = [ "utf-8", "cp1250", "cp1251", "cp1252", "cp1253", "cp1254", "cp1255", "cp1256", "cp1257", "cp1258", "NO_MATCH" ]
 
     # try to detect proper encoding
     # https://stackoverflow.com/questions/436220/determine-the-encoding-of-text-in-python
@@ -799,6 +804,9 @@ def GetPlayingInfo():
 #
 # watch out for encodings
 # https://forum.kodi.tv/showthread.php?tid=144677
+# https://nedbatchelder.com/text/unipain.html
+# https://www.joelonsoftware.com/2003/10/08/the-absolute-minimum-every-software-developer-absolutely-positively-must-know-about-unicode-and-character-sets-no-excuses/
+
 __addon__ = xbmcaddon.Addon(id='service.subsmangler')
 __addondir__ = xbmc.translatePath(__addon__.getAddonInfo('path').decode("utf-8"))
 __addonworkdir__ = xbmc.translatePath(__addon__.getAddonInfo('profile').decode('utf-8'))
