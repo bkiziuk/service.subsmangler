@@ -24,6 +24,10 @@ from resources.lib import pysubs2
 
 
 
+# encoding
+# https://forum.kodi.tv/showthread.php?tid=144677
+# https://nedbatchelder.com/text/unipain.html
+# https://www.joelonsoftware.com/2003/10/08/the-absolute-minimum-every-software-developer-absolutely-positively-must-know-about-unicode-and-character-sets-no-excuses/
 
 
 
@@ -127,18 +131,20 @@ class XBMCPlayer(xbmc.Player):
                         SubsSearchWasOpened = True
                         # invoke subtitles search dialog
                         xbmc.executebuiltin('ActivateWindow(10153)')  # subtitles search
-                        # hold further execution until window is opened
+                        # hold further execution until window is closed
                         # wait for window to appear
                         while not xbmc.getCondVisibility("Window.IsVisible(10153)"):
                             xbmc.sleep(1000)
                         # wait for window to disappear
                         while xbmc.getCondVisibility("Window.IsVisible(10153)"):
-                            xbmc.sleep(1000)
+                            xbmc.sleep(500)
                     else:
                         Log("Local subtitles matching video being played detected. Enabling subtitles.", xbmc.LOGINFO)
                         xbmc.Player().showSubtitles(True)
                 else:
                     Log("'noautosubs' file or extension detected. Neither opening subtitles search dialog nor enabling subtitles.", xbmc.LOGINFO)
+
+            #FIXME - should subtitles be enabled automatically if they are already available on disk?
 
             # check periodically if there are any files changed in monitored subdir that match file being played
             if setting_ConversionServiceEnabled:
@@ -656,6 +662,10 @@ def DetectNewSubs():
     
     # check all remaining subtitle files for changed timestamp
     for f in RecentSubsFiles:
+        # ignore 'noautosubs' file/extension to not trigger detection of subtitles
+        if f[-10:].lower() == "noautosubs":
+            continue
+
         pathfile = os.path.join(subtitlePath, f)
         epoch_file = xbmcvfs.Stat(pathfile).st_mtime()
         epoch_now = time.time()
@@ -724,14 +734,15 @@ def DetectNewSubs():
         PlaybackPause()
 
         # display YesNo dialog
-        YesNoDialog = xbmcgui.Dialog().yesno("Subtitles Mangler", __addonlang__(32043), line2=__addonlang__(32040), nolabel=__addonlang__(32041), yeslabel=__addonlang__(32042))
+        # http://mirrors.xbmc.org/docs/python-docs/13.0-gotham/xbmcgui.html#Dialog-yesno
+        YesNoDialog = xbmcgui.Dialog().yesno("Subtitles Mangler", __addonlang__(32040).encode("utf-8"), line2=__addonlang__(32041).encode("utf-8"), nolabel=__addonlang__(32042).encode("utf-8"), yeslabel=__addonlang__(32043).encode("utf-8"))
         if YesNoDialog:
             # user does not want the dialog to appear again 
             Log("Answer is Yes. Setting .noautosubs extension flag for file: " + playingFilenamePath.encode("utf-8"), xbmc.LOGINFO)
             # set '.noautosubs' extension for file being played
             try:
                 f = xbmcvfs.File (playingFilenamePath[:-3] + "noautosubs", 'w')
-                result = f.write("# This file was created by Subtitles Mangler. Presence of this file prevents automatical opening of subtitles search dialog.")
+                result = f.write("# This file was created by Subtitles Mangler.\n# Presence of this file prevents automatical opening of subtitles search dialog.")
                 f.close()
             except Exception as e:
                 Log("Can not create noautosubs file.", xbmc.LOGERROR)
