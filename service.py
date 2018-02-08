@@ -79,7 +79,9 @@ class XBMCPlayer(xbmc.Player):
             # player has just been started, check what contents does it play and from
             Log("VideoPlayer START detected.", xbmc.LOGINFO)
             # get info on file being played
-            subtitlePath, playingFilename, playingFilenamePath, playingFps = GetPlayingInfo()
+            subtitlePath, playingFilename, playingFilenamePath, playingFps, playingSubs = GetPlayingInfo()
+
+            #FIXME - compare languages with internal forced subtitles to check if search dialog should be opened
 
             # ignore all streaming videos
             # http://xion.io/post/code/python-startswith-tuple.html
@@ -96,6 +98,7 @@ class XBMCPlayer(xbmc.Player):
             tempfilelist = os.listdir(xbmc.translatePath("special://temp"))
             Log("Clearing temporary files.", xbmc.LOGINFO)
             for item in tempfilelist:
+                #FIXME - search for dot instead of cutting fixed number of chars
                 if (item[-4:].lower() in SubExtList) or item.lower().endswith(".ass"):
                     os.remove(os.path.join(tempfilelist, item))
                     Log("       File: " + os.path.join(tempfilelist, item) + "  removed.", xbmc.LOGINFO)
@@ -356,14 +359,14 @@ def RemoveStrings(line, deflist):
 
 # get subtitle location setting
 # https://forum.kodi.tv/showthread.php?tid=209587&pid=1844182#pid1844182
-def GetSubtitleSetting(name):
+def GetKodiSetting(name):
     # Uses XBMC/Kodi JSON-RPC API to retrieve subtitles location settings values.
     command = '''{
     "jsonrpc": "2.0",
     "id": 1,
     "method": "Settings.GetSettingValue",
     "params": {
-        "setting": "subtitles.%s"
+        "setting": "%s"
     }
 }'''
     result = xbmc.executeJSONRPC(command % name)
@@ -606,6 +609,7 @@ def MangleSubtitles(originalinputfile):
         Log("Exception: " + str(e.message), xbmc.LOGERROR)
 
     # copy new file back to its original location changing only its extension
+    #FIXME - search for last dot instead of cutting fixed number of chars
     originaloutputfile = originalinputfile[:-4] + '.ass'
     copy_file(tempoutputfile, originaloutputfile)
 
@@ -712,6 +716,7 @@ def GetSubtitleFiles(subspath, substypelist):
     SubsFiles = dict ([(f, None) for f in files])
     # filter dictionary, leaving only subtitle files matching played video
     # https://stackoverflow.com/questions/5384914/how-to-delete-items-from-a-dictionary-while-iterating-over-it
+    #FIXME - search for last dot instead of cutting fixed number of chars
     for item in SubsFiles.keys():
         if not (((item.lower()[:-7] == playingFilename.lower()[:-4]) and (item.lower()[-4:] in substypelist)) or (item.lower() == "noautosubs") or (item.lower()[:-11] == playingFilename.lower()[:-4])):
             # subtitle name does not match video name
@@ -852,6 +857,7 @@ def DetectNewSubs():
             Log("Answer is Yes. Setting .noautosubs extension flag for file: " + playingFilenamePath.encode("utf-8"), xbmc.LOGINFO)
             # set '.noautosubs' extension for file being played
             try:
+                #FIXME - search for last dot instead of cutting fixed number of chars
                 f = xbmcvfs.File (playingFilenamePath[:-3] + "noautosubs", 'w')
                 result = f.write("# This file was created by Subtitles Mangler.\n# Presence of this file prevents automatical opening of subtitles search dialog.")
                 f.close()
@@ -883,8 +889,8 @@ def DetectNewSubs():
 def GetPlayingInfo():
 
     # get settings from Kodi configuration on assumed subtitles location
-    storagemode = GetSubtitleSetting("storagemode") # 1=location defined by custompath; 0=location in movie dir
-    custompath = GetSubtitleSetting("custompath")   # path to non-standard dir with subtitles
+    storagemode = GetKodiSetting("subtitles.storagemode") # 1=location defined by custompath; 0=location in movie dir
+    custompath = GetKodiSetting("subtitles.custompath")   # path to non-standard dir with subtitles
 
     if storagemode == 1:    # location == custompath
         if xbmcvfs.exists(custompath):
@@ -897,11 +903,13 @@ def GetPlayingInfo():
     filename = xbmc.getInfoLabel('Player.Filename')
     filepathname = xbmc.getInfoLabel('Player.Filenameandpath')
     filefps = xbmc.getInfoLabel('Player.Process(VideoFPS)')
+    filelang = xbmc.getInfoLabel('VideoPlayer.SubtitlesLanguage')
 
     Log("File currently played: " + filepathname, xbmc.LOGINFO)
     Log("Subtitles download path: " + subspath, xbmc.LOGINFO)
+    Log("Subtitles language: " + filelang, xbmc.LOGINFO)
     
-    return subspath, filename, filepathname, filefps
+    return subspath, filename, filepathname, filefps, filelang
 
 
 
