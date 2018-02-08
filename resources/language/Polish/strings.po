@@ -27,6 +27,10 @@ msgctxt "#32006"
 msgid "Auto-update filtering definitions"
 msgstr "Automatycznie aktualizuj definicje filtrowania"
 
+msgctxt "#32007"
+msgid "Background transparency"
+msgstr "Przezroczystość tła"
+
 msgctxt "#32010"
 msgid "Invoke subtitles search dialog on playback start"
 msgstr "Pokaż okno wyszukiwania napisów po uruchomieniu odtwarzania"
@@ -94,3 +98,51 @@ msgstr "Nie"
 msgctxt "#32043"
 msgid "Yes"
 msgstr "Tak"
+
+msgctxt "#32048"
+msgid "Styles"
+msgstr "Style"
+
+msgctxt "#32049"
+msgid "Foreground color"
+msgstr "Kolor czcionki"
+
+msgctxt "#32050"
+msgid "Background color"
+msgstr "Kolor tła"
+
+msgctxt "#32051"
+msgid "Black"
+msgstr "Czarny"
+
+msgctxt "#32052"
+msgid "Grey"
+msgstr "Szary"
+
+msgctxt "#32053"
+msgid "Purple"
+msgstr "Purpurowy"
+
+msgctxt "#32054"
+msgid "Blue"
+msgstr "Niebieski"
+
+msgctxt "#32055"
+msgid "Green"
+msgstr "Zielony"
+
+msgctxt "#32056"
+msgid "Red"
+msgstr "Czerwony"
+
+msgctxt "#32057"
+msgid "Light blue"
+msgstr "Jasno-niebieski"
+
+msgctxt "#32058"
+msgid "Yellow"
+msgstr "Żółty"
+
+msgctxt "#32059"
+msgid "White"
+msgstr "Biały"

@@ -12,13 +12,20 @@
 ^\[.*\]$  # matches: <BEGINLINE>[anything]<ENDLINE>
 ^\(.*\)$  # matches: <BEGINLINE>(anything)<ENDLINE>
 
-# Ads secions include language specific definitions.
+# General Ads section includes generic definitions applicable to any language
+[Ads]
+.*www.opensubtitles.org.*
+
+# Language specific Ads secions include language specific definitions.
 # Only one section is loaded based on subtitles language designation in subtitles file name
+[Ads_en]
+.*sync.*corrections.*by.*
+
 [Ads_pl]
 .*napiprojekt.pl.*  # matches any line that includes phrase "napiprojekt.pl"
 .*Project Heaven.*
 .*tłumaczenie.*korekta.*  # matches any line that includes phrase "tłumaczenie" AND "korekta"
-.*www.opensubtitles.org.*
 .*podnapisi.net.*
 .*kinomania.*
 .*napisy24.*
+.*napisy:.*

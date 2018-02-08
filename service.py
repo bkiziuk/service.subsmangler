@@ -1,3 +1,4 @@
+import codecs
 import os
 import errno
 import filecmp
@@ -12,8 +13,6 @@ import xbmcgui
 import xbmcaddon
 import xbmcplugin
 import xbmcvfs
-import urllib
-import codecs
 
 from datetime import datetime
 from json import loads
@@ -180,6 +179,7 @@ class XBMCMonitor(xbmc.Monitor):
 
     def onAbortRequested(self):
         # Will be called when XBMC requests Abort
+        rt.stop()
         Log("Abort requested in Monitor class.")
 
     def onSettingsChanged(self):
@@ -208,8 +208,11 @@ def GetBool(stringvalue):
 # https://forum.kodi.tv/showthread.php?tid=201423&pid=1766246#pid1766246
 def GetSettings():
     global setting_LogLevel
-    global setting_SubsFontSize
     global setting_ConversionServiceEnabled
+    global setting_SubsFontSize
+    global setting_ForegroundColor
+    global setting_BackgroundColor
+    global setting_BackgroundTransparency
     global setting_RemoveCCmarks
     global setting_RemoveAds
     global setting_AutoInvokeSubsDialog
@@ -217,7 +220,10 @@ def GetSettings():
     global setting_SeparateLogFile
 
     setting_ConversionServiceEnabled = GetBool(__addon__.getSetting("ConversionServiceEnabled"))
-    setting_SubsFontSize = int(float(__addon__.getSetting("SubsFontSize")))
+    setting_SubsFontSize = int(__addon__.getSetting("SubsFontSize"))
+    setting_ForegroundColor = int(__addon__.getSetting("ForegroundColor"))
+    setting_BackgroundColor = int(__addon__.getSetting("BackgroundColor"))
+    setting_BackgroundTransparency = int(__addon__.getSetting("BackgroundTransparency"))
     setting_RemoveCCmarks = GetBool(__addon__.getSetting("RemoveCCmarks"))
     setting_RemoveAds = GetBool(__addon__.getSetting("RemoveAdds"))
     setting_AutoInvokeSubsDialog = GetBool(__addon__.getSetting("AutoInvokeSubsDialog"))
@@ -228,6 +234,7 @@ def GetSettings():
     Log("Reading settings.", xbmc.LOGINFO)
     Log("Setting: ConversionServiceEnabled = " + str(setting_ConversionServiceEnabled), xbmc.LOGINFO)
     Log("           SubsFontSize = " + str(setting_SubsFontSize), xbmc.LOGINFO)
+    Log(" BackgroundTransparency = " + str(setting_BackgroundTransparency), xbmc.LOGINFO)
     Log("          RemoveCCmarks = " + str(setting_RemoveCCmarks), xbmc.LOGINFO)
     Log("              RemoveAds = " + str(setting_RemoveAds), xbmc.LOGINFO)
     Log("   AutoInvokeSubsDialog = " + str(setting_AutoInvokeSubsDialog), xbmc.LOGINFO)
@@ -430,10 +437,108 @@ def MangleSubtitles(originalinputfile):
     # load input_file into pysubs2 library
     subs = pysubs2.load(tempinputfile, encoding=enc, fps=float(playingFps))
 
+    # translate foreground color to RGB
+    if setting_ForegroundColor == 0:
+        # black
+        Foreground_R = 0
+        Foreground_G = 0
+        Foreground_B = 0
+    elif setting_ForegroundColor == 1:
+        # grey
+        Foreground_R = 128
+        Foreground_G = 128
+        Foreground_B = 128
+    elif setting_ForegroundColor == 2:
+        # purple
+        Foreground_R = 255
+        Foreground_G = 0
+        Foreground_B = 255
+    elif setting_ForegroundColor == 3:
+        # blue
+        Foreground_R = 0
+        Foreground_G = 0
+        Foreground_B = 255
+    elif setting_ForegroundColor == 4:
+        # green
+        Foreground_R = 0
+        Foreground_G = 255
+        Foreground_B = 0
+    elif setting_ForegroundColor == 5:
+        # red
+        Foreground_R = 255
+        Foreground_G = 0
+        Foreground_B = 0
+    elif setting_ForegroundColor == 6:
+        # light blue
+        Foreground_R = 0
+        Foreground_G = 255
+        Foreground_B = 255
+    elif setting_ForegroundColor == 7:
+        # yellow
+        Foreground_R = 255
+        Foreground_G = 255
+        Foreground_B = 0
+    elif setting_ForegroundColor == 8:
+        # white
+        Foreground_R = 255
+        Foreground_G = 255
+        Foreground_B = 255
+
+    # translate background color to RGB
+    if setting_BackgroundColor == 0:
+        # black
+        Background_R = 0
+        Background_G = 0
+        Background_B = 0
+    elif setting_BackgroundColor == 1:
+        # grey
+        Background_R = 128
+        Background_G = 128
+        Background_B = 128
+    elif setting_BackgroundColor == 2:
+        # purple
+        Background_R = 255
+        Background_G = 0
+        Background_B = 255
+    elif setting_BackgroundColor == 3:
+        # blue
+        Background_R = 0
+        Background_G = 0
+        Background_B = 255
+    elif setting_BackgroundColor == 4:
+        # green
+        Background_R = 0
+        Background_G = 255
+        Background_B = 0
+    elif setting_BackgroundColor == 5:
+        # red
+        Background_R = 255
+        Background_G = 0
+        Background_B = 0
+    elif setting_BackgroundColor == 6:
+        # light blue
+        Background_R = 0
+        Background_G = 255
+        Background_B = 255
+    elif setting_BackgroundColor == 7:
+        # yellow
+        Background_R = 255
+        Background_G = 255
+        Background_B = 0
+    elif setting_BackgroundColor == 8:
+        # white
+        Background_R = 255
+        Background_G = 255
+        Background_B = 255
+
+    # calculate transparency
+    # division of integers always gives integer
+    Background_T = int((setting_BackgroundTransparency * 255) / 100)
+
     # change subs style
-    subs.styles["Default"].primarycolor = pysubs2.Color(255, 255, 255, 0)
-    subs.styles["Default"].secondarycolor = pysubs2.Color(255, 255, 255, 0)
-    subs.styles["Default"].outlinecolor = pysubs2.Color(0, 0, 0, 0)
+    subs.styles["Default"].primarycolor = pysubs2.Color(Foreground_R, Foreground_G, Foreground_B, 0)
+    subs.styles["Default"].secondarycolor = pysubs2.Color(Foreground_R, Foreground_G, Foreground_B, 0)
+    subs.styles["Default"].outlinecolor = pysubs2.Color(Background_R, Background_G, Background_B, Background_T)
     subs.styles["Default"].backcolor = pysubs2.Color(0, 0, 0, 0)
     subs.styles["Default"].fontsize = setting_SubsFontSize
     subs.styles["Default"].bold = -1
@@ -447,7 +552,8 @@ def MangleSubtitles(originalinputfile):
         # load definitions from file
         Log("Definitions file used: " + deffilename, xbmc.LOGINFO)
         CCmarksList = GetDefinitions("CCmarks")
-        AdsList = GetDefinitions("Ads_" + subslang)
+        AdsList = GetDefinitions("Ads")
+        AdsList += GetDefinitions("Ads_" + subslang)
 
         # iterate over every line of subtitles and try to match Regular Expressions filters
         Log("Applying filtering lists.", xbmc.LOGINFO)
@@ -497,7 +603,7 @@ def MangleSubtitles(originalinputfile):
         fp.close()
     except Exception as e:
         Log("tempoutputfile NOT released.", xbmc.LOGERROR)
-        Log("Exception: " + e.message, xbmc.LOGERROR)
+        Log("Exception: " + str(e.message), xbmc.LOGERROR)
 
     # copy new file back to its original location changing only its extension
     originaloutputfile = originalinputfile[:-4] + '.ass'
@@ -525,7 +631,7 @@ def copy_file(srcFile, dstFile):
         Log("copy_file: SuccessStatus: " + str(success), xbmc.LOGINFO)
     except Exception as e:
         Log("copy_file: Copy failed.", xbmc.LOGERROR)
-        Log("Exception: " + e.message, xbmc.LOGERROR)
+        Log("Exception: " + str(e.message), xbmc.LOGERROR)
 
     wait_for_file(dstFile, True)
 
@@ -547,7 +653,7 @@ def rename_file(oldfilepath, newfilepath):
         Log("rename_file: SuccessStatus: " + str(success), xbmc.LOGINFO)
     except Exception as e:
         Log("Can't rename file: " + oldfilepath, xbmc.LOGERROR)
-        Log("Exception: " + e.message, xbmc.LOGERROR)
+        Log("Exception: " + str(e.message), xbmc.LOGERROR)
 
 
 
@@ -558,7 +664,7 @@ def delete_file(filepath):
         Log("delete_file: File deleted: " + filepath, xbmc.LOGINFO)
     except Exception as e:
         Log("delete_file: Delete failed: " + filepath, xbmc.LOGERROR)
-        Log("Exception: " + e.message, xbmc.LOGERROR)
+        Log("Exception: " + str(e.message), xbmc.LOGERROR)
     
     wait_for_file(filepath, False)
 
@@ -728,7 +834,8 @@ def DetectNewSubs():
             SubsSearchWasOpened = False
             
             # sleep for 10 seconds to avoid processing newly added subititle file
-            xbmc.sleep(10000)
+            #this should not be needed since we do not support .ass as input file at the moment
+            #xbmc.sleep(10000)
 
     # check if subtitles search window was opened but there were no new subtitles processed
     if SubsSearchWasOpened:
@@ -750,7 +857,7 @@ def DetectNewSubs():
                 f.close()
             except Exception as e:
                 Log("Can not create noautosubs file.", xbmc.LOGERROR)
-                Log("Exception: " + e.message, xbmc.LOGERROR)
+                Log("Exception: " + str(e.message), xbmc.LOGERROR)
 
         else: 
             # user wants the dialog to appear again 
@@ -849,7 +956,7 @@ if __name__ == '__main__':
             xbmc.log("SubsMangler: profile directory created: " + __addonworkdir__, level=xbmc.LOGNOTICE)
         except OSError as e:
             xbmc.log("SubsMangler: Log: can't create directory: " +__addonworkdir__, level=xbmc.LOGERROR)
-            xbmc.Log("Exception: " + e.errno + " - " + e.message, xbmc.LOGERROR)
+            xbmc.Log("Exception: " + str(e.message), xbmc.LOGERROR)
 
     # prepare external log handler
     # https://docs.python.org/2/library/logging.handlers.html
@@ -873,6 +980,7 @@ if __name__ == '__main__':
             rt.stop()
             xbmc.log("SubsMangler: Abort requested. Exiting.", level=xbmc.LOGNOTICE)
             break
+
 
 
         #
@@ -922,7 +1030,7 @@ if __name__ == '__main__':
 
                 except urllib2.URLError as e:
                     Log("Can not download definitions: " + deffileurl, xbmc.LOGERROR)
-                    Log("Exception: " + e.reason, xbmc.LOGERROR)
+                    Log("Exception: " + str(e.reason), xbmc.LOGERROR)
                 except IOError as e:
                     Log("Can not copy definitions file to: " + localdeffilename, xbmc.LOGERROR)
                 except OSError as e:
