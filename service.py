@@ -98,8 +98,8 @@ class XBMCPlayer(xbmc.Player):
             tempfilelist = os.listdir(xbmc.translatePath("special://temp"))
             Log("Clearing temporary files.", xbmc.LOGINFO)
             for item in tempfilelist:
-                #FIXME - search for dot instead of cutting fixed number of chars
-                if (item[-4:].lower() in SubExtList) or item.lower().endswith(".ass"):
+                filebase, fileext = os.path.splitext(item)
+                if (fileext.lower() in SubExtList) or fileext.lower().endswith("ass"):
                     os.remove(os.path.join(tempfilelist, item))
                     Log("       File: " + os.path.join(tempfilelist, item) + "  removed.", xbmc.LOGINFO)
 
@@ -609,8 +609,8 @@ def MangleSubtitles(originalinputfile):
         Log("Exception: " + str(e.message), xbmc.LOGERROR)
 
     # copy new file back to its original location changing only its extension
-    #FIXME - search for last dot instead of cutting fixed number of chars
-    originaloutputfile = originalinputfile[:-4] + '.ass'
+    filebase, fileext = os.path.splitext(originalinputfile)
+    originaloutputfile = filebase + '.ass'
     copy_file(tempoutputfile, originaloutputfile)
 
     # rename old file to file_ for further debugging
@@ -716,12 +716,19 @@ def GetSubtitleFiles(subspath, substypelist):
     SubsFiles = dict ([(f, None) for f in files])
     # filter dictionary, leaving only subtitle files matching played video
     # https://stackoverflow.com/questions/5384914/how-to-delete-items-from-a-dictionary-while-iterating-over-it
-    #FIXME - search for last dot instead of cutting fixed number of chars
+    playingFilenameBase, playingFilenameExt = os.path.splitext(playingFilename)
+
     for item in SubsFiles.keys():
-        if not (((item.lower()[:-7] == playingFilename.lower()[:-4]) and (item.lower()[-4:] in substypelist)) or (item.lower() == "noautosubs") or (item.lower()[:-11] == playingFilename.lower()[:-4])):
-            # subtitle name does not match video name
-            # or subtitle does not have supported extension - this is because function is sometimes triggered on converted file copied into that dir
-            # or subtitle is not noautosubs file or extension
+        # split file and extension
+        subfilebase, subfileext = os.path.splitext(item)
+        # from filename split language designation
+        subfilecore, subfilelang = os.path.splitext(subfilebase)
+        # remove files that do not meet criteria
+        if not (((subfilecore.lower() == playingFilenameBase.lower()) and (subfileext.lower() in substypelist)) or (subfilebase.lower() == "noautosubs") or (subfileext.lower() == ".noautosubs")):
+            # NOT
+            # filename matches video name AND fileext is on the list of supported extensions
+            # OR filename matches 'noautosubs'
+            # OR fileext matches '.noautosubs'
             # FIXME - now we assume that .ass subtitle will not be processed
             del SubsFiles[item]
 
@@ -784,9 +791,6 @@ def DetectNewSubs():
         pathfile = os.path.join(subtitlePath, f)
         epoch_file = xbmcvfs.Stat(pathfile).st_mtime()
         epoch_now = time.time()
-        #Log("filename: " + pathfile)
-        #Log("fileepoch: " + str(epoch_file))
-        #Log("nowepoch:  " + str(epoch_now))
 
         if  epoch_file > epoch_now - 6:
             # Video filename matches subtitle filename and it was created/modified no later than 6 secods ago
@@ -857,8 +861,8 @@ def DetectNewSubs():
             Log("Answer is Yes. Setting .noautosubs extension flag for file: " + playingFilenamePath.encode("utf-8"), xbmc.LOGINFO)
             # set '.noautosubs' extension for file being played
             try:
-                #FIXME - search for last dot instead of cutting fixed number of chars
-                f = xbmcvfs.File (playingFilenamePath[:-3] + "noautosubs", 'w')
+                filebase, fileext = os.path.splitext(playingFilenamePath)
+                f = xbmcvfs.File (filebase + ".noautosubs", 'w')
                 result = f.write("# This file was created by Subtitles Mangler.\n# Presence of this file prevents automatical opening of subtitles search dialog.")
                 f.close()
             except Exception as e:
@@ -938,7 +942,7 @@ tempdeffilename = os.path.join(xbmc.translatePath("special://temp"), 'deffile.tx
 # list of input file extensions
 # extensions in lowercase with leading dot
 # FIXME - we do not include output extension .ass as conversion routine is sometimes wrongly triggered on converted subtitle file
-SubExtList = [ '.txt', '.srt', '.sub' ]
+SubExtList = [ '.txt', '.srt', '.sub', '.subrip', '.microdvd', '.mpl' ]
 
 
 if __name__ == '__main__':
