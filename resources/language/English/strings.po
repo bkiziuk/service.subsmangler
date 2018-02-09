@@ -35,6 +35,10 @@ msgctxt "#32010"
 msgid "Invoke subtitles search dialog on playback start"
 msgstr ""
 
+msgctxt "#32011"
+msgid "Pause Playback during conversion"
+msgstr ""
+
 msgctxt "#32020"
 msgid "Logging level"
 msgstr ""

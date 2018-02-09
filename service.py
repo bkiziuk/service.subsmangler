@@ -218,6 +218,7 @@ def GetSettings():
     global setting_BackgroundTransparency
     global setting_RemoveCCmarks
     global setting_RemoveAds
+    global setting_PauseOnConversion
     global setting_AutoInvokeSubsDialog
     global setting_AutoUpdateDef
     global setting_SeparateLogFile
@@ -229,6 +230,7 @@ def GetSettings():
     setting_BackgroundTransparency = int(__addon__.getSetting("BackgroundTransparency"))
     setting_RemoveCCmarks = GetBool(__addon__.getSetting("RemoveCCmarks"))
     setting_RemoveAds = GetBool(__addon__.getSetting("RemoveAdds"))
+    setting_PauseOnConversion = GetBool(__addon__.getSetting("PauseOnConversion"))
     setting_AutoInvokeSubsDialog = GetBool(__addon__.getSetting("AutoInvokeSubsDialog"))
     setting_AutoUpdateDef = GetBool(__addon__.getSetting("AutoUpdateDef"))
     setting_LogLevel = int(__addon__.getSetting("LogLevel"))
@@ -799,19 +801,16 @@ def DetectNewSubs():
             # record start time of processing
             RoutineStartTime = time.time()
 
-            # show busy animation
-            # https://forum.kodi.tv/showthread.php?tid=280621&pid=2363462#pid2363462
-            # https://kodi.wiki/view/Window_IDs
-            xbmc.executebuiltin('ActivateWindow(10138)')  # Busy dialog on
-
-            # log time
-            #Log("File time:    " + str(epoch_file))
-            #Log("Current time: " + str(epoch_now))
-
             # hide subtitles
             xbmc.Player().showSubtitles(False)
-            # pause playback
-            PlaybackPause()
+
+            if setting_PauseOnConversion:
+                # show busy animation
+                # https://forum.kodi.tv/showthread.php?tid=280621&pid=2363462#pid2363462
+                # https://kodi.wiki/view/Window_IDs
+                xbmc.executebuiltin('ActivateWindow(10138)')  # Busy dialog on
+                # pause playback
+                PlaybackPause()
 
             # process subtitles file
             ResultFile = MangleSubtitles(pathfile) 
