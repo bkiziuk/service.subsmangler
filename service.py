@@ -306,10 +306,18 @@ def GetDefinitions(section):
         with open(deffilename, "rt") as f:
             thissection = False
             for line in f:
+                # truncate any comment at the end of line
+                # https://stackoverflow.com/questions/509211/understanding-pythons-slice-notation
+                pos = line.find("#")
+                # if there is no comment, pos==-1
+                if pos >= 0:
+                    # take only part before comment
+                    line = line[:pos]
                 # remove whitespaces at the beginning and end
-                line = string.strip(line)
+                line = line.strip()
+
                 # patterns for finding sections
-                thissectionpattern = "^\[" + section + "\]"    # matches: <BEGINLINE>[SeCtIoNnAmE]
+                thissectionpattern = "\[" + section + "\]"    # matches: [SeCtIoNnAmE]
                 othersectionpattern = "^\[.*?\]"    # matches: <BEGINLINE>[anything]
                 if re.search(thissectionpattern, line, re.IGNORECASE):   
                     # beginning of our section
@@ -318,17 +326,7 @@ def GetDefinitions(section):
                     # beginning of other section
                     thissection = False
                 elif thissection:
-                    # contents of our section
-                    # import to list
-                    # truncate any comment at the end of line
-                    # https://stackoverflow.com/questions/509211/understanding-pythons-slice-notation
-                    pos = line.find("#")
-                    # if there is no comment, pos==-1
-                    if pos >= 0:
-                        # take only part before comment
-                        line = line[:pos]
-                    # strip whitespaces at beginning and end of string
-                    line = line.strip()
+                    # contents of our section - import to list
                     # check if line is not empty, empty line is "falsy"
                     # https://stackoverflow.com/questions/9573244/most-elegant-way-to-check-if-the-string-is-empty-in-python
                     if line:

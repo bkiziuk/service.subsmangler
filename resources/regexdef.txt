@@ -6,11 +6,15 @@
 # regular expressions. If the line is empty after removing those strings,
 # the entire line will be removed from subtitles file.
 # Matching is case insensitive. File encoding is UTF-8.
+#
+# section heading lines support multiple sections in the same line:
+# [secion1][section2]   # will be loaded if either section1 or section2 is called
+
 
 # CCmarks section includes definitions for removing Hearing Impaired texts
 [CCmarks]
-^\[.*\]$  # matches: <BEGINLINE>[anything]<ENDLINE>
-^\(.*\)$  # matches: <BEGINLINE>(anything)<ENDLINE>
+^\[.*\]$   # matches: <BEGINLINE>[anything]<ENDLINE>
+^\(.*\)$   # matches: <BEGINLINE>(anything)<ENDLINE>
 
 # General Ads section includes generic definitions applicable to any language
 [Ads]
@@ -18,13 +22,13 @@
 
 # Language specific Ads secions include language specific definitions.
 # Only one section is loaded based on subtitles language designation in subtitles file name
-[Ads_en]
+[Ads_en]   # English
 .*sync.*corrections.*by.*
 
-[Ads_pl]
-.*napiprojekt.pl.*  # matches any line that includes phrase "napiprojekt.pl"
+[Ads_pl]   # Polish
+.*napiprojekt.pl.*   # matches any line that includes phrase "napiprojekt.pl"
 .*Project Heaven.*
-.*tłumaczenie.*korekta.*  # matches any line that includes phrase "tłumaczenie" AND "korekta"
+.*tłumaczenie.*korekta.*   # matches any line that includes phrase "tłumaczenie" AND "korekta"
 .*podnapisi.net.*
 .*kinomania.*
 .*napisy24.*
