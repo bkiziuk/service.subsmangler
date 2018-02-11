@@ -94,7 +94,7 @@ class XBMCPlayer(xbmc.Player):
                 Log("Empty string detected. Ignoring it.", xbmc.LOGWARNING)
                 return
 
-            # clear temp dir from subtitles files
+            # clear temp dir from subtitle files
             tempfilelist = os.listdir(xbmc.translatePath("special://temp"))
             Log("Clearing temporary files.", xbmc.LOGINFO)
             for item in tempfilelist:
@@ -103,7 +103,7 @@ class XBMCPlayer(xbmc.Player):
                     os.remove(os.path.join(tempfilelist, item))
                     Log("       File: " + os.path.join(tempfilelist, item) + "  removed.", xbmc.LOGINFO)
 
-            # check if there are subtitles files already on disk matching video being played
+            # check if there are subtitle files already on disk matching video being played
             # if not, automatically open subtitlesearch dialog
             #FIXME - check if Kodi settings on auto subtitles download infuence the process
             # set initial setting for SubsSearchWasOpened flag
@@ -222,6 +222,7 @@ def GetSettings():
     global setting_AutoInvokeSubsDialog
     global setting_AutoUpdateDef
     global setting_SeparateLogFile
+    global setting_AutoRemoveOldSubs
 
     setting_ConversionServiceEnabled = GetBool(__addon__.getSetting("ConversionServiceEnabled"))
     setting_SubsFontSize = int(__addon__.getSetting("SubsFontSize"))
@@ -232,6 +233,7 @@ def GetSettings():
     setting_RemoveAds = GetBool(__addon__.getSetting("RemoveAdds"))
     setting_PauseOnConversion = GetBool(__addon__.getSetting("PauseOnConversion"))
     setting_AutoInvokeSubsDialog = GetBool(__addon__.getSetting("AutoInvokeSubsDialog"))
+    setting_AutoRemoveOldSubs = GetBool(__addon__.getSetting("AutoRemoveOldSubs"))
     setting_AutoUpdateDef = GetBool(__addon__.getSetting("AutoUpdateDef"))
     setting_LogLevel = int(__addon__.getSetting("LogLevel"))
     setting_SeparateLogFile = int(__addon__.getSetting("SeparateLogFile"))
@@ -243,6 +245,7 @@ def GetSettings():
     Log("          RemoveCCmarks = " + str(setting_RemoveCCmarks), xbmc.LOGINFO)
     Log("              RemoveAds = " + str(setting_RemoveAds), xbmc.LOGINFO)
     Log("   AutoInvokeSubsDialog = " + str(setting_AutoInvokeSubsDialog), xbmc.LOGINFO)
+    Log("      AutoRemoveOldSubs = " + str(setting_AutoRemoveOldSubs), xbmc.LOGINFO)
     Log("          AutoUpdateDef = " + str(setting_AutoUpdateDef), xbmc.LOGINFO)
     Log("               LogLevel = " + str(setting_LogLevel), xbmc.LOGINFO)
     Log("        SeparateLogFile = " + str(setting_SeparateLogFile), xbmc.LOGINFO)
@@ -404,7 +407,7 @@ def MangleSubtitles(originalinputfile):
     # copy file to temp
     copy_file(originalinputfile, tempinputfile)
 
-    Log("Subtitles file processing started.", xbmc.LOGNOTICE)
+    Log("subtitle file processing started.", xbmc.LOGNOTICE)
 
     # record start time of processing
     MangleStartTime = time.time()
@@ -570,7 +573,7 @@ def MangleSubtitles(originalinputfile):
                 subsline = RemoveStrings(subsline, CCmarksList)
 
             if setting_RemoveAds:
-                # remove Advertisement strings
+                # remove Advertisement strings from subsline
                 subsline = RemoveStrings(subsline, AdsList)
 
             # remove orphan whitespaces from beginning and end of line
@@ -598,7 +601,7 @@ def MangleSubtitles(originalinputfile):
     MangleEndTime = time.time()
     
     # truncating seconds: https://stackoverflow.com/questions/8595973/truncate-to-3-decimals-in-python/8595991#8595991
-    Log("Subtitles file processing finished. Processing took: " + '%.3f'%(MangleEndTime - MangleStartTime) + " seconds.", xbmc.LOGNOTICE)
+    Log("subtitle file processing finished. Processing took: " + '%.3f'%(MangleEndTime - MangleStartTime) + " seconds.", xbmc.LOGNOTICE)
 
     # fixme - debug check if file is already released
     try:
@@ -794,7 +797,7 @@ def DetectNewSubs():
 
         if  epoch_file > epoch_now - 6:
             # Video filename matches subtitle filename and it was created/modified no later than 6 secods ago
-            Log("New subtitles file detected: " + pathfile, xbmc.LOGNOTICE)
+            Log("New subtitle file detected: " + pathfile, xbmc.LOGNOTICE)
 
             # record start time of processing
             RoutineStartTime = time.time()
@@ -810,9 +813,9 @@ def DetectNewSubs():
                 # pause playback
                 PlaybackPause()
 
-            # process subtitles file
+            # process subtitle file
             ResultFile = MangleSubtitles(pathfile) 
-            Log("Output subtitles file: " + ResultFile, xbmc.LOGNOTICE) 
+            Log("Output subtitle file: " + ResultFile, xbmc.LOGNOTICE) 
 
             # check if destination file exists
             if xbmcvfs.exists(ResultFile):
@@ -914,6 +917,181 @@ def GetPlayingInfo():
 
 
 
+# updates regexdef file from server
+def UpdateDefFile():
+    Log("Trying to update regexp definitions from: " + deffileurl, xbmc.LOGINFO)
+    # download file from server
+    #http://stackabuse.com/download-files-with-python/
+    try:
+        filedata = urllib2.urlopen(deffileurl)  
+        datatowrite = filedata.read()
+        with open(tempdeffilename, 'wb') as f:  
+            f.write(datatowrite)
+
+        # check if target file path exists
+        if os.path.isfile(localdeffilename):
+            # compare if downloaded temp file and current local file are identical
+            if filecmp.cmp(tempdeffilename, localdeffilename, shallow=0):
+                Log("Definitions file is up-to-date. Skipping update.", xbmc.LOGINFO)
+            else:
+                # remove current target file
+                Log("Removing current file: " + localdeffilename)
+                os.remove(localdeffilename)
+                # copy temp file to target file
+                copyfile(tempdeffilename, localdeffilename)
+                Log("Regex definitions updated.", xbmc.LOGINFO)
+        else:
+            # copy temp file to target file
+            copyfile(tempdeffilename, localdeffilename)
+            Log("Regex definitions updated.", xbmc.LOGINFO)
+
+        # remove temp file
+        os.remove(tempdeffilename)
+
+    except urllib2.URLError as e:
+        Log("Can not download definitions: " + deffileurl, xbmc.LOGERROR)
+        Log("Exception: " + str(e.reason), xbmc.LOGERROR)
+    except IOError as e:
+        Log("Can not copy definitions file to: " + localdeffilename, xbmc.LOGERROR)
+    except OSError as e:
+        Log("Can not remove temporary definitions file: " + tempdeffilename, xbmc.LOGERROR)
+
+
+
+# walks through video sources and removes any subtitle files that do not acompany its own video any more
+# also removes '.noautosubs' files
+def RemoveOldSubs():
+    # Uses XBMC/Kodi JSON-RPC API to retrieve video sources location
+    # https://kodi.wiki/view/JSON-RPC_API/v8#Files.GetSources
+    command = '''{
+    "jsonrpc": "2.0",
+    "id": 1,
+    "method": "Files.GetSources",
+    "params": {
+        "media": "video"
+    }
+}'''
+    result = xbmc.executeJSONRPC(command)
+    sources = loads(result).get('result').get('sources')
+
+    Log("Scanning video sources for orphaned subtitle files.", xbmc.LOGNOTICE)
+    # record start time
+    ClearStartTime = time.time()
+
+    # create background dialog
+    #http://mirrors.kodi.tv/docs/python-docs/13.0-gotham/xbmcgui.html#DialogProgressBG
+    pDialog = xbmcgui.DialogProgressBG()
+    pDialog.create('Subtitles Mangler', 'Scanning orphaned subtitle files')
+    
+    # initiate empty lists
+    videofiles = list()
+    subfiles = list()
+
+    # process every source path
+    for source in sources:
+        startdir = source.get('file')               
+        Log("Processing source path: " + startdir, xbmc.LOGINFO)
+
+        # http://code.activestate.com/recipes/435875-a-simple-non-recursive-directory-walker/
+        directories = [startdir]
+        while len(directories)>0:
+            # take one element from directories list and process it
+            directory = directories.pop()
+            dirs, files = xbmcvfs.listdir(directory)
+            # add every subdir to the list for checking
+            for subdir in dirs:
+                Log("Adding subpath: " + os.path.join(directory, subdir.decode('utf-8')), xbmc.LOGDEBUG)
+                directories.append(os.path.join(directory, subdir.decode('utf-8')))
+            # check every file in the current subdir and add it to appropriate list
+            for thisfile in files:
+                fullfilepath = os.path.join(directory, thisfile.decode('utf-8'))
+                filebase, fileext = os.path.splitext(fullfilepath)
+                if fileext in VideoExtList:
+                    # this file is video - add to video list
+                    Log("Adding to video list: " + fullfilepath,xbmc.LOGDEBUG)
+                    videofiles.append(fullfilepath)
+                elif fileext in [ '.ass', '.noautosubs' ]:
+#                elif fileext in SubExtList:
+                    # this file is subs related - add to subs list
+                    Log("Adding to subs list: " + fullfilepath,xbmc.LOGDEBUG)
+                    subfiles.append(fullfilepath)
+
+    # process custom subtitle path if it is set in Kodi configuration
+    # get settings from Kodi configuration on assumed subtitles location
+    storagemode = GetKodiSetting("subtitles.storagemode") # 1=location defined by custompath; 0=location in movie dir
+    custompath = GetKodiSetting("subtitles.custompath")   # path to non-standard dir with subtitles
+
+    if storagemode == 1:    # location == custompath
+        if xbmcvfs.exists(custompath):
+            subspath = custompath
+        else:
+            subspath = ""
+    else:   
+        subspath = ""
+
+    if subspath:
+        Log("Scanning for orphaned subtitle files on custom path: " + subspath, xbmc.LOGNOTICE)
+        dirs, files = xbmcvfs.listdir(subspath)
+        for thisfile in files:
+            fullfilepath = os.path.join(subspath, thisfile.decode('utf-8'))
+            filebase, fileext = os.path.splitext(fullfilepath)
+            if fileext in [ '.ass', '.noautosubs' ]:
+#            if fileext in SubExtList:
+                # this file is subs related - add to subs list
+                Log("Adding to subs list: " + fullfilepath,xbmc.LOGDEBUG)
+                subfiles.append(fullfilepath)
+        
+
+    # record scan time
+    ClearScanTime = time.time()
+    Log("Scanning for orphaned subtitle files finished. Processing took: " + '%.3f'%(ClearScanTime - ClearStartTime) + " seconds.", xbmc.LOGNOTICE)
+
+    Log("Clearing orphaned subtitle files.", xbmc.LOGNOTICE)
+    # update background dialog
+    pDialog.update(50, message='Clearing orphaned subtitle files')
+
+    # lists filled, compare subs list with video list
+    for subfile in subfiles:
+        # split filename from full path
+        subfilename = os.path.basename(subfile)
+        # split filename and extension
+        subfilebase, subfileext = os.path.splitext(subfilename)
+        # from filename split language designation
+        subfilecore, subfilelang = os.path.splitext(subfilebase)
+
+        # check if there is a video matching subfile
+        videoexists = False
+        for videofile in videofiles:
+            # split filename from full path
+            videofilename = os.path.basename(videofile)
+            # split filename and extension
+            videofilebase, videofileext = os.path.splitext(videofilename)
+
+            # check if subfile corename equals videofile basename
+            if subfilecore.lower() == videofilebase.lower():
+                videoexists = True
+                break
+
+        if not videoexists:
+            Log("There is no video file matching: " + subfile + "  Deleting it.", xbmc.LOGDEBUG)
+#            delete_file(subfile)
+        else:
+            Log("Video file matching: " + subfile, xbmc.LOGDEBUG)
+            Log("              found: " + videofile, xbmc.LOGDEBUG)
+
+    # record end time
+    ClearEndTime = time.time()
+    Log("Clearing orphaned subtitle files finished. Processing took: " + '%.3f'%(ClearEndTime - ClearScanTime) + " seconds.", xbmc.LOGNOTICE)
+    
+    # close background dialog
+    pDialog.close()
+        
+
+                    
+
+
+
+
 #
 # execution starts here
 #
@@ -939,7 +1117,11 @@ tempdeffilename = os.path.join(xbmc.translatePath("special://temp"), 'deffile.tx
 # list of input file extensions
 # extensions in lowercase with leading dot
 # FIXME - we do not include output extension .ass as conversion routine is sometimes wrongly triggered on converted subtitle file
-SubExtList = [ '.txt', '.srt', '.sub', '.subrip', '.microdvd', '.mpl' ]
+SubExtList = [ '.txt', '.srt', '.sub', '.subrip', '.microdvd', '.mpl', '.tmp' ]
+
+# list of video file extensions
+# extensions in lowercase with leading dot
+VideoExtList = [ '.mkv', '.avi', '.mp4', '.mpg', '.mpeg' ]
 
 
 if __name__ == '__main__':
@@ -991,7 +1173,6 @@ if __name__ == '__main__':
             break
 
 
-
         #
         # any code that must be executed periodically
         #
@@ -1004,50 +1185,22 @@ if __name__ == '__main__':
             # use sample file from addon's dir
             deffilename = os.path.join(__addondir__, 'resources', 'regexdef.txt')
 
-        # check if auto-update is enabled and player does not play any content
-        if setting_AutoUpdateDef and not xbmc.getCondVisibility('Player.HasMedia'):
-            # autoupdate regexp definitions every 6 hours
-            if ClockTick <=0:
-                Log("Trying to update regexp definitions from: " + deffileurl, xbmc.LOGINFO)
-                # download file from server
-                #http://stackabuse.com/download-files-with-python/
-                try:
-                    filedata = urllib2.urlopen(deffileurl)  
-                    datatowrite = filedata.read()
-                    with open(tempdeffilename, 'wb') as f:  
-                        f.write(datatowrite)
+        # housekeeping services
+        if ClockTick <=0 and not xbmc.getCondVisibility('Player.HasMedia'):
+            # check if auto-update is enabled and player does not play any content
+            if setting_AutoUpdateDef:
+                # update regexdef file
+                UpdateDefFile()
 
-                    # check if target file path exists
-                    if os.path.isfile(localdeffilename):
-                        # compare if downloaded temp file and current local file are identical
-                        if filecmp.cmp(tempdeffilename, localdeffilename, shallow=0):
-                            Log("Definitions file is up-to-date. Skipping update.", xbmc.LOGINFO)
-                        else:
-                            # remove current target file
-                            Log("Removing current file: " + localdeffilename)
-                            os.remove(localdeffilename)
-                            # copy temp file to target file
-                            copyfile(tempdeffilename, localdeffilename)
-                            Log("Regex definitions updated.", xbmc.LOGINFO)
-                    else:
-                        # copy temp file to target file
-                        copyfile(tempdeffilename, localdeffilename)
-                        Log("Regex definitions updated.", xbmc.LOGINFO)
+            # check if auto-update is enabled and player does not play any content
+            if setting_AutoRemoveOldSubs:
+                # clear old subtitle files
+                RemoveOldSubs()
 
-                    # remove temp file
-                    os.remove(tempdeffilename)
+            # reset timer to 6 hours
+            # 1 tick per 5 sec * 60 min * 6 hrs = 4320 ticks
+            ClockTick = 4320
 
-                except urllib2.URLError as e:
-                    Log("Can not download definitions: " + deffileurl, xbmc.LOGERROR)
-                    Log("Exception: " + str(e.reason), xbmc.LOGERROR)
-                except IOError as e:
-                    Log("Can not copy definitions file to: " + localdeffilename, xbmc.LOGERROR)
-                except OSError as e:
-                    Log("Can not remove temporary definitions file: " + tempdeffilename, xbmc.LOGERROR)
-
-                # reset timer to 6 hours
-                # 1 tick per 5 sec * 60 min * 6 hrs = 4320 ticks
-                ClockTick = 4320
         # decrease timer
         # avoid decreasing the timer to infinity
         if ClockTick > 0:

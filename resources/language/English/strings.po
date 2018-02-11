@@ -150,3 +150,7 @@ msgstr ""
 msgctxt "#32059"
 msgid "White"
 msgstr ""
+
+msgctxt "#32070"
+msgid "Automatically remove orphaned subtitle files"
+msgstr ""
