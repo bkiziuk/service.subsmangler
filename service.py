@@ -196,6 +196,36 @@ class XBMCMonitor(xbmc.Monitor):
 
 
 
+# function matches input string for language designation
+# and outputs ISO 639-2 equivalent
+# https://stackoverflow.com/questions/2879856/get-system-language-in-iso-639-3-letter-codes-in-python
+# http://www.loc.gov/standards/iso639-2/ISO-639-2_utf-8.txt
+def GetIsoCode(lang):
+    # "bibliographic" iso codes are derived from English word for the language
+    # "terminologic" iso codes are derived from the pronunciation in the target
+    # language (if different to the bibliographic code)
+
+    Log("Looking for language code for: " + lang)
+    f = codecs.open(os.path.join(__addondir__, 'resources', 'ISO-639-2_utf-8.txt'), 'rb', 'utf-8')
+    outlang = ''
+    for line in f:
+        iD = {}
+        iD['bibliographic'], iD['terminologic'], iD['alpha2'], iD['english'], iD['french'] = line.strip().split('|')
+
+        if iD['bibliographic'].lower() == lang.lower() or iD['alpha2'].lower() == lang.lower() or iD['english'].lower() == lang.lower():
+            outlang = iD['bibliographic']
+            break
+    f.close()
+
+    if outlang:
+        Log("Language code found: " + outlang, xbmc.LOGINFO)
+    else:
+        Log("Language code not found.", xbmc.LOGINFO)
+
+    return outlang
+
+
+
 # function parses input value and determines if it should be True or False value
 # this is because Kodi .getSetting function returns string type instead of bool value
 def GetBool(stringvalue):
@@ -400,9 +430,20 @@ def MangleSubtitles(originalinputfile):
         Log("File does not exist: " + originalinputfile)
         return
 
-    # get subtitles language by reading filename right before its extension
-    subslang = originalinputfile[-6:-4].lower()
-    Log("Subtitles language is: " + subslang,xbmc.LOGINFO)
+
+    #FIXME - parse file language designation
+
+
+    # get subtitles language by splitting it from filename
+    # split file and extension
+    subfilebase, subfileext = os.path.splitext(originalinputfile)
+    # from filename split language designation
+    subfilecore, subfilelang = os.path.splitext(subfilebase)
+
+    Log("Read subtitle language designation: " + subfilelang,xbmc.LOGINFO)
+    # try to find ISO639-2 designation
+    # remove dot from language code ('.en')
+    subslang = GetIsoCode(subfilelang.lower()[1:]).lower()
 
     # as pysubs2 library doesn't support Kodi's virtual file system and file can not be processed remotely on smb:// share,
     # file must be copied to temp folder for local processing
@@ -736,11 +777,13 @@ def GetSubtitleFiles(subspath, substypelist):
         # from filename split language designation
         subfilecore, subfilelang = os.path.splitext(subfilebase)
         # remove files that do not meet criteria
-        if not (((subfilecore.lower() == playingFilenameBase.lower()) and (subfileext.lower() in substypelist)) or (subfilebase.lower() == "noautosubs") or (subfileext.lower() == ".noautosubs")):
+        if not (((subfilecore.lower() == playingFilenameBase.lower()) and (subfileext.lower() in substypelist)) \
+            or ((subfilecore.lower() == playingFilenameBase.lower()) and (subfileext.lower() == ".noautosubs"))) \
+            or (subfilebase.lower() == "noautosubs"):
             # NOT
             # filename matches video name AND fileext is on the list of supported extensions
+            # OR filename matches video name AND fileext matches '.noautosubs'
             # OR filename matches 'noautosubs'
-            # OR fileext matches '.noautosubs'
             # FIXME - now we assume that .ass subtitle will not be processed
             del SubsFiles[item]
 
@@ -1075,6 +1118,9 @@ def RemoveOldSubs():
         # from filename split language designation
         subfilecore, subfilelang = os.path.splitext(subfilebase)
 
+        #FIXME - noautosubs extension is not recognized as it is not preceded by language code
+
+
         # check if there is a video matching subfile
         videoexists = False
         for videofile in videofiles:
@@ -1147,7 +1193,7 @@ if __name__ == '__main__':
     xbmc.log("SubsMangler: started. Version: %s" % (__version__), level=xbmc.LOGNOTICE)
 
     # prepare timer to launch
-    rt = RepeatedTimer(3.0, DetectNewSubs)
+    rt = RepeatedTimer(2.0, DetectNewSubs)
 
     # set initial values
     DetectionIsRunning = False

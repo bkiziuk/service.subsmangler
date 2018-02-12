@@ -22,10 +22,11 @@
 
 # Language specific Ads secions include language specific definitions.
 # Only one section is loaded based on subtitles language designation in subtitles file name
-[Ads_en]   # English
+# Language codes musy confirm to ISO 639-2
+[Ads_eng]   # English
 .*sync.*corrections.*by.*
 
-[Ads_pl]   # Polish
+[Ads_pol]   # Polish
 .*napiprojekt.pl.*   # matches any line that includes phrase "napiprojekt.pl"
 .*Project Heaven.*
 .*tłumaczenie.*korekta.*   # matches any line that includes phrase "tłumaczenie" AND "korekta"
