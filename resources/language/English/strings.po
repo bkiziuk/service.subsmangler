@@ -4,7 +4,7 @@ msgstr ""
 #English
 
 msgctxt "#32001"
-msgid "Settings"
+msgid "Main"
 msgstr ""
 
 msgctxt "#32002"
@@ -104,7 +104,7 @@ msgid "Yes"
 msgstr ""
 
 msgctxt "#32048"
-msgid "Style"
+msgid "Housekeeping"
 msgstr ""
 
 msgctxt "#32049"
@@ -162,3 +162,12 @@ msgstr ""
 msgctxt "#32072"
 msgid "Remove backed-up copy of orphaned subtitle file"
 msgstr ""
+
+msgctxt "#32073"
+msgid "Simulate file removal only"
+msgstr ""
+
+msgctxt "#32080"
+msgid "Conversion"
+msgstr ""
+

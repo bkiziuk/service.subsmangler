@@ -4,8 +4,8 @@ msgstr ""
 #Polish
 
 msgctxt "#32001"
-msgid "Settings"
-msgstr "Ustawienia"
+msgid "Main"
+msgstr "Główne"
 
 msgctxt "#32002"
 msgid "Convert subtitles"
@@ -104,8 +104,8 @@ msgid "Yes"
 msgstr "Tak"
 
 msgctxt "#32048"
-msgid "Style"
-msgstr "Styl"
+msgid "Housekeeping"
+msgstr "Sprzątanie"
 
 msgctxt "#32049"
 msgid "Foreground color"
@@ -162,3 +162,12 @@ msgstr "Utwórz kopię konwertowanego pliku z napisami"
 msgctxt "#32072"
 msgid "Remove backed-up copy of orphaned subtitle file"
 msgstr "Usuń kopię osieroconego pliku z napisami"
+
+msgctxt "#32073"
+msgid "Simulate file removal only"
+msgstr "Dokonaj tylko symulacji usuwania pliku"
+
+msgctxt "#32080"
+msgid "Conversion"
+msgstr "Konwersja"
+

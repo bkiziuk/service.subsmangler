@@ -255,6 +255,7 @@ def GetSettings():
     global setting_AutoRemoveOldSubs
     global setting_BackupOldSubs
     global setting_RemoveSubsBackup
+    global setting_SimulateRemovalOnly
 
     setting_ConversionServiceEnabled = GetBool(__addon__.getSetting("ConversionServiceEnabled"))
     setting_SubsFontSize = int(__addon__.getSetting("SubsFontSize"))
@@ -268,6 +269,7 @@ def GetSettings():
     setting_AutoRemoveOldSubs = GetBool(__addon__.getSetting("AutoRemoveOldSubs"))
     setting_BackupOldSubs = GetBool(__addon__.getSetting("BackupOldSubs"))
     setting_RemoveSubsBackup = GetBool(__addon__.getSetting("RemoveSubsBackup"))
+    setting_SimulateRemovalOnly = GetBool(__addon__.getSetting("SimulateRemovalOnly"))
     setting_AutoUpdateDef = GetBool(__addon__.getSetting("AutoUpdateDef"))
     setting_LogLevel = int(__addon__.getSetting("LogLevel"))
     setting_SeparateLogFile = int(__addon__.getSetting("SeparateLogFile"))
@@ -282,6 +284,7 @@ def GetSettings():
     Log("                    BackupOldSubs = " + str(setting_BackupOldSubs), xbmc.LOGINFO)
     Log("                AutoRemoveOldSubs = " + str(setting_AutoRemoveOldSubs), xbmc.LOGINFO)
     Log("                 RemoveSubsBackup = " + str(setting_RemoveSubsBackup), xbmc.LOGINFO)
+    Log("              SimulateRemovalOnly = " + str(setting_SimulateRemovalOnly), xbmc.LOGINFO)
     Log("                    AutoUpdateDef = " + str(setting_AutoUpdateDef), xbmc.LOGINFO)
     Log("                         LogLevel = " + str(setting_LogLevel), xbmc.LOGINFO)
     Log("                  SeparateLogFile = " + str(setting_SeparateLogFile), xbmc.LOGINFO)
@@ -372,7 +375,7 @@ def GetDefinitions(section):
                         # add to list
                         importedlist.append(line)
 
-        Log("Definitions imported. Section: " + section + " :", xbmc.LOGINFO)
+        Log("Definitions imported. Section: " + section, xbmc.LOGINFO)
         # dump imported list
         for entry in importedlist:
             Log("       " + entry, xbmc.LOGDEBUG)
@@ -429,10 +432,6 @@ def MangleSubtitles(originalinputfile):
     if not xbmcvfs.exists(originalinputfile):
         Log("File does not exist: " + originalinputfile)
         return
-
-
-    #FIXME - parse file language designation
-
 
     # get subtitles language by splitting it from filename
     # split file and extension
@@ -606,7 +605,9 @@ def MangleSubtitles(originalinputfile):
         Log("Definitions file used: " + deffilename, xbmc.LOGINFO)
         CCmarksList = GetDefinitions("CCmarks")
         AdsList = GetDefinitions("Ads")
-        AdsList += GetDefinitions("Ads_" + subslang)
+        # load country specific definitions only if language was detected
+        if subslang:
+            AdsList += GetDefinitions("Ads_" + subslang)
 
         # iterate over every line of subtitles and try to match Regular Expressions filters
         Log("Applying filtering lists.", xbmc.LOGINFO)
@@ -634,6 +635,9 @@ def MangleSubtitles(originalinputfile):
                 subs.remove(line)
                 Log("Resulting line is empty. Removing from file.", xbmc.LOGDEBUG)
             else:
+
+                #FIXME routine for correcting display time of subtitle - if calculated time is longer than actual time and if it does not overlap next sub time
+
                 # save changed line
                 line.plaintext = subsline.decode('utf-8')
         Log("Filtering lists applied.", xbmc.LOGINFO)
@@ -1135,8 +1139,11 @@ def RemoveOldSubs():
                 break
 
         if not videoexists:
-            Log("There is no video file matching: " + subfile + "  Deleting it.", xbmc.LOGDEBUG)
-#            delete_file(subfile)
+            if setting_SimulateRemovalOnly:
+                Log("There is no video file matching: " + subfile + "  File would have been deleted if Simulate option was turned off.", xbmc.LOGDEBUG)
+            else:
+                Log("There is no video file matching: " + subfile + "  Deleting it.", xbmc.LOGDEBUG)
+                delete_file(subfile)
         else:
             Log("Video file matching: " + subfile, xbmc.LOGDEBUG)
             Log("              found: " + videofile, xbmc.LOGDEBUG)
