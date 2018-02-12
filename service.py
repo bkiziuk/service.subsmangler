@@ -223,6 +223,8 @@ def GetSettings():
     global setting_AutoUpdateDef
     global setting_SeparateLogFile
     global setting_AutoRemoveOldSubs
+    global setting_BackupOldSubs
+    global setting_RemoveSubsBackup
 
     setting_ConversionServiceEnabled = GetBool(__addon__.getSetting("ConversionServiceEnabled"))
     setting_SubsFontSize = int(__addon__.getSetting("SubsFontSize"))
@@ -234,21 +236,25 @@ def GetSettings():
     setting_PauseOnConversion = GetBool(__addon__.getSetting("PauseOnConversion"))
     setting_AutoInvokeSubsDialog = GetBool(__addon__.getSetting("AutoInvokeSubsDialog"))
     setting_AutoRemoveOldSubs = GetBool(__addon__.getSetting("AutoRemoveOldSubs"))
+    setting_BackupOldSubs = GetBool(__addon__.getSetting("BackupOldSubs"))
+    setting_RemoveSubsBackup = GetBool(__addon__.getSetting("RemoveSubsBackup"))
     setting_AutoUpdateDef = GetBool(__addon__.getSetting("AutoUpdateDef"))
     setting_LogLevel = int(__addon__.getSetting("LogLevel"))
     setting_SeparateLogFile = int(__addon__.getSetting("SeparateLogFile"))
 
     Log("Reading settings.", xbmc.LOGINFO)
     Log("Setting: ConversionServiceEnabled = " + str(setting_ConversionServiceEnabled), xbmc.LOGINFO)
-    Log("           SubsFontSize = " + str(setting_SubsFontSize), xbmc.LOGINFO)
-    Log(" BackgroundTransparency = " + str(setting_BackgroundTransparency), xbmc.LOGINFO)
-    Log("          RemoveCCmarks = " + str(setting_RemoveCCmarks), xbmc.LOGINFO)
-    Log("              RemoveAds = " + str(setting_RemoveAds), xbmc.LOGINFO)
-    Log("   AutoInvokeSubsDialog = " + str(setting_AutoInvokeSubsDialog), xbmc.LOGINFO)
-    Log("      AutoRemoveOldSubs = " + str(setting_AutoRemoveOldSubs), xbmc.LOGINFO)
-    Log("          AutoUpdateDef = " + str(setting_AutoUpdateDef), xbmc.LOGINFO)
-    Log("               LogLevel = " + str(setting_LogLevel), xbmc.LOGINFO)
-    Log("        SeparateLogFile = " + str(setting_SeparateLogFile), xbmc.LOGINFO)
+    Log("                     SubsFontSize = " + str(setting_SubsFontSize), xbmc.LOGINFO)
+    Log("           BackgroundTransparency = " + str(setting_BackgroundTransparency), xbmc.LOGINFO)
+    Log("                    RemoveCCmarks = " + str(setting_RemoveCCmarks), xbmc.LOGINFO)
+    Log("                        RemoveAds = " + str(setting_RemoveAds), xbmc.LOGINFO)
+    Log("             AutoInvokeSubsDialog = " + str(setting_AutoInvokeSubsDialog), xbmc.LOGINFO)
+    Log("                    BackupOldSubs = " + str(setting_BackupOldSubs), xbmc.LOGINFO)
+    Log("                AutoRemoveOldSubs = " + str(setting_AutoRemoveOldSubs), xbmc.LOGINFO)
+    Log("                 RemoveSubsBackup = " + str(setting_RemoveSubsBackup), xbmc.LOGINFO)
+    Log("                    AutoUpdateDef = " + str(setting_AutoUpdateDef), xbmc.LOGINFO)
+    Log("                         LogLevel = " + str(setting_LogLevel), xbmc.LOGINFO)
+    Log("                  SeparateLogFile = " + str(setting_SeparateLogFile), xbmc.LOGINFO)
 
 
 
@@ -291,7 +297,7 @@ def Log(message, severity=xbmc.LOGDEBUG):
             else:
                 logtext += "    NONE: "
             logtext += message
-            # append line to external log file, logging via warning level to prevent 
+            # append line to external log file, logging via warning level to prevent
             # filtering messages by default filtering level of ROOT logger
             logger.warning(logtext)
 
@@ -322,7 +328,7 @@ def GetDefinitions(section):
                 # patterns for finding sections
                 thissectionpattern = "\[" + section + "\]"    # matches: [SeCtIoNnAmE]
                 othersectionpattern = "^\[.*?\]"    # matches: <BEGINLINE>[anything]
-                if re.search(thissectionpattern, line, re.IGNORECASE):   
+                if re.search(thissectionpattern, line, re.IGNORECASE):
                     # beginning of our section
                     thissection = True
                 elif re.search(othersectionpattern, line):   # matches: <BEGINLINE>[anything]
@@ -342,13 +348,13 @@ def GetDefinitions(section):
             Log("       " + entry, xbmc.LOGDEBUG)
     else:
         Log("Definitions file does not exist: " + deffilename, xbmc.LOGINFO)
-    
+
     return importedlist
 
 
 
 # remove all strings from line that match regex deflist
-def RemoveStrings(line, deflist):    
+def RemoveStrings(line, deflist):
     # iterate over every entry on the list
     for pattern in deflist:
         if re.search(pattern, line, re.IGNORECASE):
@@ -384,9 +390,9 @@ def GetKodiSetting(name):
 # converts subtitles using pysubs2 library
 # pysubs2 code is written by Tomas Karabela - https://github.com/tkarabela/pysubs2
 def MangleSubtitles(originalinputfile):
-    
+
     global playingFps
-    
+
     # tempfilename
     tempfile = "processed_subtitles"
 
@@ -569,7 +575,7 @@ def MangleSubtitles(originalinputfile):
             # process subtitle line
 
             if setting_RemoveCCmarks:
-                # remove CC texts from subsline 
+                # remove CC texts from subsline
                 subsline = RemoveStrings(subsline, CCmarksList)
 
             if setting_RemoveAds:
@@ -599,7 +605,7 @@ def MangleSubtitles(originalinputfile):
 
     # record end time of processing
     MangleEndTime = time.time()
-    
+
     # truncating seconds: https://stackoverflow.com/questions/8595973/truncate-to-3-decimals-in-python/8595991#8595991
     Log("subtitle file processing finished. Processing took: " + '%.3f'%(MangleEndTime - MangleStartTime) + " seconds.", xbmc.LOGNOTICE)
 
@@ -616,8 +622,11 @@ def MangleSubtitles(originalinputfile):
     originaloutputfile = filebase + '.ass'
     copy_file(tempoutputfile, originaloutputfile)
 
-    # rename old file to file_ for further debugging
-    rename_file(originalinputfile, originalinputfile + '_')
+    # make a backup copy of subtitle file or remove file
+    if setting_BackupOldSubs:
+        rename_file(originalinputfile, originalinputfile + '_backup')
+    else:
+        delete_file(originalinputfile)
 
     return originaloutputfile
 
@@ -672,7 +681,7 @@ def delete_file(filepath):
     except Exception as e:
         Log("delete_file: Delete failed: " + filepath, xbmc.LOGERROR)
         Log("Exception: " + str(e.message), xbmc.LOGERROR)
-    
+
     wait_for_file(filepath, False)
 
 
@@ -698,7 +707,7 @@ def wait_for_file(file, exists):
                 Log("wait_for_file: file vanished.", xbmc.LOGINFO)
                 success = True
                 break
-        count -= 1 
+        count -= 1
     if not success:
         if exists:
             Log("wait_for_file: file DID NOT appear.", xbmc.LOGERROR)
@@ -745,7 +754,7 @@ def PlaybackPause():
     if not xbmc.getCondVisibility("player.paused"):
         xbmc.Player().pause()
         Log("Playback PAUSED.", xbmc.LOGINFO)
-    else:    
+    else:
         Log("Playback already PAUSED.", xbmc.LOGINFO)
 
 
@@ -775,16 +784,16 @@ def DetectNewSubs():
 
     # setting process flag, process starts to run
     DetectionIsRunning = True
-    
+
     global subtitlePath
-    
+
     # stop timer in order to not duplicate threads
     #rt.stop()
-    
+
     # check current directory contents for files touched no later than a few seconds ago
     # load all subtitle files matching video being played
     RecentSubsFiles = GetSubtitleFiles(subtitlePath, SubExtList)
-    
+
     # check all remaining subtitle files for changed timestamp
     for f in RecentSubsFiles:
         # ignore 'noautosubs' file/extension to not trigger detection of subtitles
@@ -814,8 +823,8 @@ def DetectNewSubs():
                 PlaybackPause()
 
             # process subtitle file
-            ResultFile = MangleSubtitles(pathfile) 
-            Log("Output subtitle file: " + ResultFile, xbmc.LOGNOTICE) 
+            ResultFile = MangleSubtitles(pathfile)
+            Log("Output subtitle file: " + ResultFile, xbmc.LOGNOTICE)
 
             # check if destination file exists
             if xbmcvfs.exists(ResultFile):
@@ -823,7 +832,7 @@ def DetectNewSubs():
 
                 # load new subtitles and turn them on
                 xbmc.Player().setSubtitles(ResultFile)
-                    
+
                 # resume playback
                 PlaybackResume()
             else:
@@ -835,13 +844,13 @@ def DetectNewSubs():
 
             # record end time of processing
             RoutineEndTime = time.time()
-            
+
             # truncating seconds: https://stackoverflow.com/questions/8595973/truncate-to-3-decimals-in-python/8595991#8595991
             Log("Subtitles processing routine finished. Processing took: " + '%.3f'%(RoutineEndTime - RoutineStartTime) + " seconds.", xbmc.LOGNOTICE)
-            
+
             # clear subtitles search dialog flag to make sure that YesNo dialog will not be triggered
             SubsSearchWasOpened = False
-            
+
             # sleep for 10 seconds to avoid processing newly added subititle file
             #this should not be needed since we do not support .ass as input file at the moment
             #xbmc.sleep(10000)
@@ -857,7 +866,7 @@ def DetectNewSubs():
         # http://mirrors.xbmc.org/docs/python-docs/13.0-gotham/xbmcgui.html#Dialog-yesno
         YesNoDialog = xbmcgui.Dialog().yesno("Subtitles Mangler", __addonlang__(32040).encode("utf-8"), line2=__addonlang__(32041).encode("utf-8"), nolabel=__addonlang__(32042).encode("utf-8"), yeslabel=__addonlang__(32043).encode("utf-8"))
         if YesNoDialog:
-            # user does not want the dialog to appear again 
+            # user does not want the dialog to appear again
             Log("Answer is Yes. Setting .noautosubs extension flag for file: " + playingFilenamePath.encode("utf-8"), xbmc.LOGINFO)
             # set '.noautosubs' extension for file being played
             try:
@@ -869,14 +878,14 @@ def DetectNewSubs():
                 Log("Can not create noautosubs file.", xbmc.LOGERROR)
                 Log("Exception: " + str(e.message), xbmc.LOGERROR)
 
-        else: 
-            # user wants the dialog to appear again 
+        else:
+            # user wants the dialog to appear again
             Log("Answer is No. Doing nothing.", xbmc.LOGINFO)
 
         # resume playback
         PlaybackResume()
 
-        # clear the flag to prevent opening dialog on next call of DetectNewSubs() 
+        # clear the flag to prevent opening dialog on next call of DetectNewSubs()
         SubsSearchWasOpened = False
 
 
@@ -901,7 +910,7 @@ def GetPlayingInfo():
             subspath = custompath
         else:    # location == movie dir
             subspath = xbmc.translatePath("special://temp")
-    else:   
+    else:
         subspath = xbmc.getInfoLabel('Player.Folderpath')
 
     filename = xbmc.getInfoLabel('Player.Filename')
@@ -912,7 +921,7 @@ def GetPlayingInfo():
     Log("File currently played: " + filepathname, xbmc.LOGINFO)
     Log("Subtitles download path: " + subspath, xbmc.LOGINFO)
     Log("Subtitles language: " + filelang, xbmc.LOGINFO)
-    
+
     return subspath, filename, filepathname, filefps, filelang
 
 
@@ -923,9 +932,9 @@ def UpdateDefFile():
     # download file from server
     #http://stackabuse.com/download-files-with-python/
     try:
-        filedata = urllib2.urlopen(deffileurl)  
+        filedata = urllib2.urlopen(deffileurl)
         datatowrite = filedata.read()
-        with open(tempdeffilename, 'wb') as f:  
+        with open(tempdeffilename, 'wb') as f:
             f.write(datatowrite)
 
         # check if target file path exists
@@ -961,6 +970,9 @@ def UpdateDefFile():
 # walks through video sources and removes any subtitle files that do not acompany its own video any more
 # also removes '.noautosubs' files
 def RemoveOldSubs():
+
+    global SubExtList
+
     # Uses XBMC/Kodi JSON-RPC API to retrieve video sources location
     # https://kodi.wiki/view/JSON-RPC_API/v8#Files.GetSources
     command = '''{
@@ -981,15 +993,21 @@ def RemoveOldSubs():
     # create background dialog
     #http://mirrors.kodi.tv/docs/python-docs/13.0-gotham/xbmcgui.html#DialogProgressBG
     pDialog = xbmcgui.DialogProgressBG()
-    pDialog.create('Subtitles Mangler', 'Scanning orphaned subtitle files')
-    
+    pDialog.create('Subtitles Mangler', 'Scanning for subtitle files')
+
     # initiate empty lists
     videofiles = list()
     subfiles = list()
 
+    # construct target list for file candidate extensions to be removed
+    extRemovalList = [ '.ass', '.noautosubs' ]
+    if setting_RemoveSubsBackup:
+        for ext in SubExtList:
+            extRemovalList.append(ext + '_backup')
+
     # process every source path
     for source in sources:
-        startdir = source.get('file')               
+        startdir = source.get('file')
         Log("Processing source path: " + startdir, xbmc.LOGINFO)
 
         # http://code.activestate.com/recipes/435875-a-simple-non-recursive-directory-walker/
@@ -1010,8 +1028,7 @@ def RemoveOldSubs():
                     # this file is video - add to video list
                     Log("Adding to video list: " + fullfilepath,xbmc.LOGDEBUG)
                     videofiles.append(fullfilepath)
-                elif fileext in [ '.ass', '.noautosubs' ]:
-#                elif fileext in SubExtList:
+                elif fileext in extRemovalList:
                     # this file is subs related - add to subs list
                     Log("Adding to subs list: " + fullfilepath,xbmc.LOGDEBUG)
                     subfiles.append(fullfilepath)
@@ -1026,7 +1043,7 @@ def RemoveOldSubs():
             subspath = custompath
         else:
             subspath = ""
-    else:   
+    else:
         subspath = ""
 
     if subspath:
@@ -1035,12 +1052,11 @@ def RemoveOldSubs():
         for thisfile in files:
             fullfilepath = os.path.join(subspath, thisfile.decode('utf-8'))
             filebase, fileext = os.path.splitext(fullfilepath)
-            if fileext in [ '.ass', '.noautosubs' ]:
-#            if fileext in SubExtList:
+            if fileext in extRemovalList:
                 # this file is subs related - add to subs list
                 Log("Adding to subs list: " + fullfilepath,xbmc.LOGDEBUG)
                 subfiles.append(fullfilepath)
-        
+
 
     # record scan time
     ClearScanTime = time.time()
@@ -1082,12 +1098,12 @@ def RemoveOldSubs():
     # record end time
     ClearEndTime = time.time()
     Log("Clearing orphaned subtitle files finished. Processing took: " + '%.3f'%(ClearEndTime - ClearScanTime) + " seconds.", xbmc.LOGNOTICE)
-    
+
     # close background dialog
     pDialog.close()
-        
 
-                    
+
+
 
 
 
