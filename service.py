@@ -70,6 +70,7 @@ class XBMCPlayer(xbmc.Player):
         global playingFps
         global SubExtList
         global SubsSearchWasOpened
+        global setting_AutoInvokeSubsDialog
 
         # detect if Player is running by checking xbmc.Player().isPlayingVideo() or xbmc.getCondVisibility('Player.HasVideo')
         # use ConditionalVisibility checks: http://kodi.wiki/view/List_of_boolean_conditions
@@ -80,8 +81,6 @@ class XBMCPlayer(xbmc.Player):
             Log("VideoPlayer START detected.", xbmc.LOGINFO)
             # get info on file being played
             subtitlePath, playingFilename, playingFilenamePath, playingFps, playingSubs = GetPlayingInfo()
-
-            #FIXME - compare languages with internal forced subtitles to check if search dialog should be opened
 
             # ignore all streaming videos
             # http://xion.io/post/code/python-startswith-tuple.html
@@ -102,6 +101,9 @@ class XBMCPlayer(xbmc.Player):
                 if (fileext.lower() in SubExtList) or fileext.lower().endswith("ass"):
                     os.remove(os.path.join(tempfilelist, item))
                     Log("       File: " + os.path.join(tempfilelist, item) + "  removed.", xbmc.LOGINFO)
+
+
+            #FIXME - compare languages with internal forced subtitles to check if search dialog should be opened
 
             # check if there are subtitle files already on disk matching video being played
             # if not, automatically open subtitlesearch dialog
@@ -308,7 +310,7 @@ def Log(message, severity=xbmc.LOGDEBUG):
         # log the message to Log
         if setting_SeparateLogFile == 0:
             # use kodi.log for logging
-            xbmc.log("SubsMangler: " + message, level=xbmc.LOGNONE)
+            xbmc.log("SubsMangler: " + message.encode('utf-8'), level=xbmc.LOGNONE)
         else:
             # use own log file located in addon's datadir
 
@@ -781,13 +783,13 @@ def GetSubtitleFiles(subspath, substypelist):
         # from filename split language designation
         subfilecore, subfilelang = os.path.splitext(subfilebase)
         # remove files that do not meet criteria
-        if not (((subfilecore.lower() == playingFilenameBase.lower()) and (subfileext.lower() in substypelist)) \
-            or ((subfilecore.lower() == playingFilenameBase.lower()) and (subfileext.lower() == ".noautosubs"))) \
-            or (subfilebase.lower() == "noautosubs"):
+        if not ((((subfilebase.lower() == playingFilenameBase.lower() or subfilecore.lower() == playingFilenameBase.lower()) and (subfileext.lower() in substypelist)) \
+            or ((subfilebase.lower() == playingFilenameBase.lower()) and (subfileext.lower() == ".noautosubs"))) \
+            or (subfilebase.lower() == "noautosubs")):
             # NOT
-            # filename matches video name AND fileext is on the list of supported extensions
-            # OR filename matches video name AND fileext matches '.noautosubs'
-            # OR filename matches 'noautosubs'
+            # subfilename matches video name AND fileext is on the list of supported extensions
+            # OR subfilename matches video name AND fileext matches '.noautosubs'
+            # OR subfilename matches 'noautosubs'
             # FIXME - now we assume that .ass subtitle will not be processed
             del SubsFiles[item]
 
@@ -1014,8 +1016,8 @@ def UpdateDefFile():
 
 
 
-# walks through video sources and removes any subtitle files that do not acompany its own video any more
-# also removes '.noautosubs' files
+# walk through video sources and remove any subtitle files that do not acompany its own video any more
+# also remove '.noautosubs' files
 def RemoveOldSubs():
 
     global SubExtList
@@ -1122,9 +1124,6 @@ def RemoveOldSubs():
         # from filename split language designation
         subfilecore, subfilelang = os.path.splitext(subfilebase)
 
-        #FIXME - noautosubs extension is not recognized as it is not preceded by language code
-
-
         # check if there is a video matching subfile
         videoexists = False
         for videofile in videofiles:
@@ -1133,14 +1132,14 @@ def RemoveOldSubs():
             # split filename and extension
             videofilebase, videofileext = os.path.splitext(videofilename)
 
-            # check if subfile corename equals videofile basename
-            if subfilecore.lower() == videofilebase.lower():
+            # check if subfile basename or corename equals videofile basename
+            if subfilebase.lower() == videofilebase.lower() or subfilecore.lower() == videofilebase.lower():
                 videoexists = True
                 break
 
         if not videoexists:
             if setting_SimulateRemovalOnly:
-                Log("There is no video file matching: " + subfile + "  File would have been deleted if Simulate option was turned off.", xbmc.LOGDEBUG)
+                Log("There is no video file matching: " + subfile + "  File would have been deleted if Simulate option had been off.", xbmc.LOGDEBUG)
             else:
                 Log("There is no video file matching: " + subfile + "  Deleting it.", xbmc.LOGDEBUG)
                 delete_file(subfile)
@@ -1210,13 +1209,13 @@ if __name__ == '__main__':
     # directory and file is local to the filesystem
     # no need to use xbmcvfs
     if not os.path.isdir(__addonworkdir__):
-        xbmc.log("SubsMangler: profile directory doesn't exist: " + __addonworkdir__ + "   Trying to create.", level=xbmc.LOGNOTICE)
+        xbmc.log("SubsMangler: profile directory doesn't exist: " + __addonworkdir__.encode('utf-8') + "   Trying to create.", level=xbmc.LOGNOTICE)
         try:
             os.mkdir(__addonworkdir__)
-            xbmc.log("SubsMangler: profile directory created: " + __addonworkdir__, level=xbmc.LOGNOTICE)
+            xbmc.log("SubsMangler: profile directory created: " + __addonworkdir__.encode('utf-8'), level=xbmc.LOGNOTICE)
         except OSError as e:
-            xbmc.log("SubsMangler: Log: can't create directory: " +__addonworkdir__, level=xbmc.LOGERROR)
-            xbmc.Log("Exception: " + str(e.message), xbmc.LOGERROR)
+            xbmc.log("SubsMangler: Log: can't create directory: " +__addonworkdir__.encode('utf-8'), level=xbmc.LOGERROR)
+            xbmc.Log("Exception: " + str(e.message).encode('utf-8'), xbmc.LOGERROR)
 
     # prepare external log handler
     # https://docs.python.org/2/library/logging.handlers.html
@@ -1229,7 +1228,7 @@ if __name__ == '__main__':
 
     # check if external log is configured
     if setting_SeparateLogFile == 1:
-        xbmc.log("SubsMangler: External log enabled: " + os.path.join(__addonworkdir__, 'smangler.log'), level=xbmc.LOGNOTICE)
+        xbmc.log("SubsMangler: External log enabled: " + os.path.join(__addonworkdir__, 'smangler.log').encode('utf-8'), level=xbmc.LOGNOTICE)
 
     # monitor whether Kodi is running
     # http://kodi.wiki/view/Service_add-ons
