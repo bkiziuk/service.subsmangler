@@ -171,3 +171,6 @@ msgctxt "#32080"
 msgid "Conversion"
 msgstr ""
 
+msgctxt "#32081"
+msgid "Adjust subtitle display time"
+msgstr ""

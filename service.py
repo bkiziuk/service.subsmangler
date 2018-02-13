@@ -258,6 +258,7 @@ def GetSettings():
     global setting_BackupOldSubs
     global setting_RemoveSubsBackup
     global setting_SimulateRemovalOnly
+    global setting_AdjustSubDisplayTime
 
     setting_ConversionServiceEnabled = GetBool(__addon__.getSetting("ConversionServiceEnabled"))
     setting_SubsFontSize = int(__addon__.getSetting("SubsFontSize"))
@@ -272,6 +273,7 @@ def GetSettings():
     setting_BackupOldSubs = GetBool(__addon__.getSetting("BackupOldSubs"))
     setting_RemoveSubsBackup = GetBool(__addon__.getSetting("RemoveSubsBackup"))
     setting_SimulateRemovalOnly = GetBool(__addon__.getSetting("SimulateRemovalOnly"))
+    setting_AdjustSubDisplayTime = GetBool(__addon__.getSetting("AdjustSubDisplayTime"))
     setting_AutoUpdateDef = GetBool(__addon__.getSetting("AutoUpdateDef"))
     setting_LogLevel = int(__addon__.getSetting("LogLevel"))
     setting_SeparateLogFile = int(__addon__.getSetting("SeparateLogFile"))
@@ -282,6 +284,7 @@ def GetSettings():
     Log("           BackgroundTransparency = " + str(setting_BackgroundTransparency), xbmc.LOGINFO)
     Log("                    RemoveCCmarks = " + str(setting_RemoveCCmarks), xbmc.LOGINFO)
     Log("                        RemoveAds = " + str(setting_RemoveAds), xbmc.LOGINFO)
+    Log("             AdjustSubDisplayTime = " + str(setting_AdjustSubDisplayTime), xbmc.LOGINFO)
     Log("             AutoInvokeSubsDialog = " + str(setting_AutoInvokeSubsDialog), xbmc.LOGINFO)
     Log("                    BackupOldSubs = " + str(setting_BackupOldSubs), xbmc.LOGINFO)
     Log("                AutoRemoveOldSubs = " + str(setting_AutoRemoveOldSubs), xbmc.LOGINFO)
@@ -310,7 +313,7 @@ def Log(message, severity=xbmc.LOGDEBUG):
         # log the message to Log
         if setting_SeparateLogFile == 0:
             # use kodi.log for logging
-            xbmc.log("SubsMangler: " + message.encode('utf-8'), level=xbmc.LOGNONE)
+            xbmc.log("SubsMangler: " + message, level=xbmc.LOGNONE)
         else:
             # use own log file located in addon's datadir
 
@@ -425,8 +428,6 @@ def GetKodiSetting(name):
 # converts subtitles using pysubs2 library
 # pysubs2 code is written by Tomas Karabela - https://github.com/tkarabela/pysubs2
 def MangleSubtitles(originalinputfile):
-
-    global playingFps
 
     # tempfilename
     tempfile = "processed_subtitles"
@@ -611,9 +612,11 @@ def MangleSubtitles(originalinputfile):
         if subslang:
             AdsList += GetDefinitions("Ads_" + subslang)
 
-        # iterate over every line of subtitles and try to match Regular Expressions filters
+        # iterate over every line of subtitles and process each subtitle line
         Log("Applying filtering lists.", xbmc.LOGINFO)
-        for line in subs:
+        # get number of subs objects to not try to check beyond last item
+        subslength = len(subs)
+        for index, line in enumerate(subs):
             # load single line to temp variable for processing
             subsline = line.text.encode('utf-8')
             # process subtitle line
@@ -637,8 +640,29 @@ def MangleSubtitles(originalinputfile):
                 subs.remove(line)
                 Log("Resulting line is empty. Removing from file.", xbmc.LOGDEBUG)
             else:
+                # adjust minimum subtitle display time
+                # if calculated time is longer than actual time and if it does not overlap next sub time
+                if setting_AdjustSubDisplayTime:
+                    # minimum calculated length
+                    # 500 ms for line + 400 ms per each word
+                    minCalcLength = 500 + int(subsline.count(' ')) * 400
 
-                #FIXME routine for correcting display time of subtitle - if calculated time is longer than actual time and if it does not overlap next sub time
+                    Log("Subtitle line " + str(index) + ": " + subsline, xbmc.LOGDEBUG)
+                    Log("  Min. calculated length: " + str(minCalcLength) + " ms")
+                    Log("  Actual length: " + str(line.duration) + " ms")
+
+                    # check next subtitle start time
+                    # https://stackoverflow.com/questions/1011938/python-previous-and-next-values-inside-a-loop
+                    if index < (subslength - 1):
+                        nextline = subs[index + 1]
+                        # get next line start time and compare it to this subtitle end time
+                        Log(  "  Clearance to next sub: " + str(nextline.start - line.end) + " ms")
+                        if nextline.start - line.end > 10 and minCalcLength > line.duration:
+                            # adjust line.duration as much as possible towards minCalcLength
+                            #FIXME
+                            pass  # not implemented
+
+
 
                 # save changed line
                 line.plaintext = subsline.decode('utf-8')
@@ -1075,11 +1099,11 @@ def RemoveOldSubs():
                 filebase, fileext = os.path.splitext(fullfilepath)
                 if fileext in VideoExtList:
                     # this file is video - add to video list
-                    Log("Adding to video list: " + fullfilepath,xbmc.LOGDEBUG)
+                    Log("Adding to video list: " + fullfilepath.encode('utf-8'),xbmc.LOGDEBUG)
                     videofiles.append(fullfilepath)
                 elif fileext in extRemovalList:
                     # this file is subs related - add to subs list
-                    Log("Adding to subs list: " + fullfilepath,xbmc.LOGDEBUG)
+                    Log("Adding to subs list: " + fullfilepath.encode('utf-8'),xbmc.LOGDEBUG)
                     subfiles.append(fullfilepath)
 
     # process custom subtitle path if it is set in Kodi configuration
@@ -1139,13 +1163,13 @@ def RemoveOldSubs():
 
         if not videoexists:
             if setting_SimulateRemovalOnly:
-                Log("There is no video file matching: " + subfile + "  File would have been deleted if Simulate option had been off.", xbmc.LOGDEBUG)
+                Log("There is no video file matching: " + subfile.encode('utf-8') + "  File would have been deleted if Simulate option had been off.", xbmc.LOGDEBUG)
             else:
-                Log("There is no video file matching: " + subfile + "  Deleting it.", xbmc.LOGDEBUG)
+                Log("There is no video file matching: " + subfile.encode('utf-8') + "  Deleting it.", xbmc.LOGDEBUG)
                 delete_file(subfile)
         else:
-            Log("Video file matching: " + subfile, xbmc.LOGDEBUG)
-            Log("              found: " + videofile, xbmc.LOGDEBUG)
+            Log("Video file matching: " + subfile.encode('utf-8'), xbmc.LOGDEBUG)
+            Log("              found: " + videofile.encode('utf-8'), xbmc.LOGDEBUG)
 
     # record end time
     ClearEndTime = time.time()
