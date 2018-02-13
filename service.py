@@ -644,24 +644,35 @@ def MangleSubtitles(originalinputfile):
                 # if calculated time is longer than actual time and if it does not overlap next sub time
                 if setting_AdjustSubDisplayTime:
                     # minimum calculated length
+                    # http://bbc.github.io/subtitle-guidelines/#Timing
                     # 500 ms for line + 400 ms per each word
-                    minCalcLength = 500 + int(subsline.count(' ')) * 400
+                    minCalcLength = 500 + (int(subsline.count(' ')) * 400)
 
                     Log("Subtitle line " + str(index) + ": " + subsline, xbmc.LOGDEBUG)
-                    Log("  Min. calculated length: " + str(minCalcLength) + " ms")
-                    Log("  Actual length: " + str(line.duration) + " ms")
+                    Log("    Min. calculated length: " + str(minCalcLength) + " ms")
+                    Log("    Actual length: " + str(line.duration) + " ms")
 
                     # check next subtitle start time
                     # https://stackoverflow.com/questions/1011938/python-previous-and-next-values-inside-a-loop
                     if index < (subslength - 1):
+                        # if it is not the last subtitle, assign next subtitle object
                         nextline = subs[index + 1]
                         # get next line start time and compare it to this subtitle end time
-                        Log(  "  Clearance to next sub: " + str(nextline.start - line.end) + " ms")
-                        if nextline.start - line.end > 10 and minCalcLength > line.duration:
-                            # adjust line.duration as much as possible towards minCalcLength
-                            #FIXME
-                            pass  # not implemented
+                        nextlineclearance = nextline.start - line.end
+                        Log(  "    Clearance to next sub: " + str(nextlineclearance) + " ms")
 
+                        if minCalcLength > line.duration:
+                            # adjust line.duration as much as possible towards minCalcLength
+                            # calculate amount of time to increase visibility of subtitle to reach minimum time
+                            expectedincrease = minCalcLength - line.duration
+                            # find amound of time to safely increase subtitle display length
+                            timetoincrease = min(nextlineclearance, expectedincrease) - 2
+                            # timetoincrease should be positive as negative line.duration will raise ValueError in pysubs2 library
+                            if timetoincrease < 0:
+                                timetoincrease = 0
+                            # modify subtitle object
+                            line.duration = line.duration + timetoincrease
+                            Log("    Time added to subtitle duration: " + str(timetoincrease) + " ms")
 
 
                 # save changed line

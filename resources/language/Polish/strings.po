@@ -161,7 +161,7 @@ msgstr "Utwórz kopię konwertowanego pliku z napisami"
 
 msgctxt "#32072"
 msgid "Remove backed-up copy of orphaned subtitle file"
-msgstr "Usuń kopię osieroconego pliku z napisami"
+msgstr "Usuń kopię zapasową osieroconego pliku z napisami"
 
 msgctxt "#32073"
 msgid "Simulate file removal only"
