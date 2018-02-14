@@ -418,6 +418,7 @@ def GetKodiSetting(name):
 }'''
     result = xbmc.executeJSONRPC(command % name)
     py = loads(result)
+    Log("JSON-RPC: Settings.GetSettingValue: " + str(py), xbmc.LOGDEBUG)
     if 'result' in py and 'value' in py['result']:
         return py['result']['value']
     else:
@@ -1069,6 +1070,7 @@ def RemoveOldSubs():
 }'''
     result = xbmc.executeJSONRPC(command)
     sources = loads(result).get('result').get('sources')
+    Log("JSON-RPC: Files.GetSources: " + str(sources), xbmc.LOGDEBUG)
 
     Log("Scanning video sources for orphaned subtitle files.", xbmc.LOGNOTICE)
     # record start time
@@ -1089,10 +1091,19 @@ def RemoveOldSubs():
         for ext in SubExtList:
             extRemovalList.append(ext + '_backup')
 
+    # count number of sources
+    # calculate progressbar increase per source
+    progress = 0
+    pIncrease = 80 / len(sources)
+
     # process every source path
     for source in sources:
         startdir = source.get('file')
         Log("Processing source path: " + startdir, xbmc.LOGINFO)
+
+        # update background dialog
+        progress += pIncrease
+        pDialog.update(progress, message='Scanning for subtitle files: ' + source.get('label'))
 
         # http://code.activestate.com/recipes/435875-a-simple-non-recursive-directory-walker/
         directories = [startdir]
@@ -1148,7 +1159,7 @@ def RemoveOldSubs():
 
     Log("Clearing orphaned subtitle files.", xbmc.LOGNOTICE)
     # update background dialog
-    pDialog.update(50, message='Clearing orphaned subtitle files')
+    pDialog.update(85, message='Clearing orphaned subtitle files')
 
     # lists filled, compare subs list with video list
     for subfile in subfiles:
