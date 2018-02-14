@@ -1313,7 +1313,7 @@ if __name__ == '__main__':
     # prepare external log handler
     # https://docs.python.org/2/library/logging.handlers.html
     logger = logging.getLogger(__name__)
-    loghandler = logging.handlers.TimedRotatingFileHandler(os.path.join(__addonworkdir__, 'smangler.log',), when="midnight", interval=1, backupCount=7)
+    loghandler = logging.handlers.TimedRotatingFileHandler(os.path.join(__addonworkdir__, 'smangler.log',), when="midnight", interval=1, backupCount=2)
     logger.addHandler(loghandler)
 
     # load settings
