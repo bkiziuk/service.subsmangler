@@ -1,3 +1,6 @@
+v0.0.12 (2018-02-14)
+- improved progress bar calculation
+- detection of forced internal subtitles and audio tracks matching preferred language
 v0.0.11 (2018-02-13)
 - unicode fixes
 - subtitle file matching against video files fixes

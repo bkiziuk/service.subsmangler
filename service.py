@@ -80,7 +80,7 @@ class XBMCPlayer(xbmc.Player):
             # player has just been started, check what contents does it play and from
             Log("VideoPlayer START detected.", xbmc.LOGINFO)
             # get info on file being played
-            subtitlePath, playingFilename, playingFilenamePath, playingFps, playingSubs = GetPlayingInfo()
+            subtitlePath, playingFilename, playingFilenamePath, playingFps, playingLang, playingSubs = GetPlayingInfo()
 
             # ignore all streaming videos
             # http://xion.io/post/code/python-startswith-tuple.html
@@ -103,9 +103,46 @@ class XBMCPlayer(xbmc.Player):
                     Log("       File: " + os.path.join(tempfilelist, item) + "  removed.", xbmc.LOGINFO)
 
 
-            #FIXME - compare languages with internal forced subtitles to check if search dialog should be opened
+            # get jnformation on Kodi language settings
+            # GUI language:
+            #   resource.language.en_gb == en, resource.language.pl_pl == pl, etc.
+            # audio & subtitles languages:
+            #   original == Original video language
+            #   default == GUI interface language
+            #   forced_only == (only for subtitles) only forced subtitles
+            #   none == (only for subtitles) no subtitles
+            #   English == English, Polish == Polish, etc.
+            # GUI language
+            guilanguage = GetKodiSetting('locale.language')
+            # preferred audio language
+            prefaudiolanguage = GetKodiSetting('locale.audiolanguage')
+            # preferred subtitle language
+            prefsubtitlelanguage = GetKodiSetting('locale.subtitlelanguage')
 
-            # check if there are subtitle files already on disk matching video being played
+            # map values to ISO 639-2
+            guilanguage = guilanguage.replace('resource.language.', '')
+            guilanguage = GetIsoCode(guilanguage[:2])
+
+            if prefaudiolanguage == 'default':
+                prefaudiolanguage = guilanguage
+            elif prefaudiolanguage == 'original':
+                pass
+            else:
+                prefaudiolanguage = GetIsoCode(prefaudiolanguage)
+
+            if prefsubtitlelanguage == 'default':
+                prefsubtitlelanguage = guilanguage
+            elif prefsubtitlelanguage == 'original' or prefsubtitlelanguage == 'none' or prefsubtitlelanguage == 'forced_only':
+                prefsubtitlelanguage = 'none'
+            else:
+                prefsubtitlelanguage = GetIsoCode(prefsubtitlelanguage)
+
+            Log("Kodi's GUI language: " + guilanguage, xbmc.LOGINFO)
+            Log("Kodi's preferred audio language: " + prefaudiolanguage, xbmc.LOGINFO)
+            Log("Kodi's preferred subtitles language: " + prefsubtitlelanguage, xbmc.LOGINFO)
+
+
+            # check if there are .ass subtitle files already on disk matching video being played
             # if not, automatically open subtitlesearch dialog
             #FIXME - check if Kodi settings on auto subtitles download infuence the process
             # set initial setting for SubsSearchWasOpened flag
@@ -130,25 +167,33 @@ class XBMCPlayer(xbmc.Player):
                     # noautosubs file or extension not found
                     # possible to invoke SubsSearch dialog or enable locally found subtitles
                     #
-                    # check if list is empty
+                    # check if local subtitles exist (list should not be empty)
                     # https://stackoverflow.com/questions/53513/how-do-i-check-if-a-list-is-empty/53522#53522
                     if not localsubs:
-                        Log("No local subtitles matching video being played. Opening search dialog.", xbmc.LOGINFO)
-                        # set flag to remember that subtitles search dialog was opened
-                        SubsSearchWasOpened = True
-                        # invoke subtitles search dialog
-                        xbmc.executebuiltin('ActivateWindow(10153)')  # subtitles search
-                        # hold further execution until window is closed
-                        # wait for window to appear
-                        while not xbmc.getCondVisibility("Window.IsVisible(10153)"):
-                            xbmc.sleep(1000)
-                        # wait for window to disappear
-                        while xbmc.getCondVisibility("Window.IsVisible(10153)"):
-                            xbmc.sleep(500)
+                        # check Kodi preferences on subtitles and compare with currently played video to see if search dialog should be opened
+                        #
+                        # do not open search dialog if:
+                        # - Kodi preferred audio language match audio language
+                        # - Kodi preferred subtitle language match loaded subtitle language
+                        if not ((prefaudiolanguage == playingLang) or (prefsubtitlelanguage == playingSubs)):
+                            Log("No local subtitles matching video being played. Opening search dialog.", xbmc.LOGINFO)
+                            # set flag to remember that subtitles search dialog was opened
+                            SubsSearchWasOpened = True
+                            # invoke subtitles search dialog
+                            xbmc.executebuiltin('ActivateWindow(10153)')  # subtitles search
+                            # hold further execution until window is closed
+                            # wait for window to appear
+                            while not xbmc.getCondVisibility("Window.IsVisible(10153)"):
+                                xbmc.sleep(1000)
+                            # wait for window to disappear
+                            while xbmc.getCondVisibility("Window.IsVisible(10153)"):
+                                xbmc.sleep(500)
+                        else:
+                            Log("Video or subtitle language match Kodi's preferred settings. Not opening subtitle search dialog.")
                     else:
                         Log("Local subtitles matching video being played detected. Enabling subtitles.", xbmc.LOGINFO)
                 else:
-                    Log("'noautosubs' file or extension detected. Not opening subtitles search dialog.", xbmc.LOGINFO)
+                    Log("'noautosubs' file or extension detected. Not opening subtitle search dialog.", xbmc.LOGINFO)
 
             # enable subtitles if there are any
             xbmc.Player().showSubtitles(True)
@@ -207,7 +252,7 @@ def GetIsoCode(lang):
     # "terminologic" iso codes are derived from the pronunciation in the target
     # language (if different to the bibliographic code)
 
-    Log("Looking for language code for: " + lang)
+    Log("Looking for language code for: " + lang, xbmc.LOGDEBUG)
     f = codecs.open(os.path.join(__addondir__, 'resources', 'ISO-639-2_utf-8.txt'), 'rb', 'utf-8')
     outlang = ''
     for line in f:
@@ -220,9 +265,9 @@ def GetIsoCode(lang):
     f.close()
 
     if outlang:
-        Log("Language code found: " + outlang, xbmc.LOGINFO)
+        Log("Language code found: " + outlang, xbmc.LOGDEBUG)
     else:
-        Log("Language code not found.", xbmc.LOGINFO)
+        Log("Language code not found.", xbmc.LOGDEBUG)
 
     return outlang
 
@@ -1001,13 +1046,15 @@ def GetPlayingInfo():
     filename = xbmc.getInfoLabel('Player.Filename')
     filepathname = xbmc.getInfoLabel('Player.Filenameandpath')
     filefps = xbmc.getInfoLabel('Player.Process(VideoFPS)')
+    audiolang = xbmc.getInfoLabel('VideoPlayer.AudioLanguage')
     filelang = xbmc.getInfoLabel('VideoPlayer.SubtitlesLanguage')
 
     Log("File currently played: " + filepathname, xbmc.LOGINFO)
     Log("Subtitles download path: " + subspath, xbmc.LOGINFO)
-    Log("Subtitles language: " + filelang, xbmc.LOGINFO)
+    Log("Audio language: " + audiolang, xbmc.LOGINFO)
+    Log("Subtitles language: " + filelang + " (either internal or external)", xbmc.LOGINFO)
 
-    return subspath, filename, filepathname, filefps, filelang
+    return subspath, filename, filepathname, filefps, audiolang, filelang
 
 
 
