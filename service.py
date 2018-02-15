@@ -70,6 +70,7 @@ class XBMCPlayer(xbmc.Player):
         global playingFps
         global SubExtList
         global SubsSearchWasOpened
+        global setting_AutoInvokeSubsDialog
 
         # detect if Player is running by checking xbmc.Player().isPlayingVideo() or xbmc.getCondVisibility('Player.HasVideo')
         # use ConditionalVisibility checks: http://kodi.wiki/view/List_of_boolean_conditions
@@ -79,9 +80,7 @@ class XBMCPlayer(xbmc.Player):
             # player has just been started, check what contents does it play and from
             Log("VideoPlayer START detected.", xbmc.LOGINFO)
             # get info on file being played
-            subtitlePath, playingFilename, playingFilenamePath, playingFps, playingSubs = GetPlayingInfo()
-
-            #FIXME - compare languages with internal forced subtitles to check if search dialog should be opened
+            subtitlePath, playingFilename, playingFilenamePath, playingFps, playingLang, playingSubs = GetPlayingInfo()
 
             # ignore all streaming videos
             # http://xion.io/post/code/python-startswith-tuple.html
@@ -94,7 +93,7 @@ class XBMCPlayer(xbmc.Player):
                 Log("Empty string detected. Ignoring it.", xbmc.LOGWARNING)
                 return
 
-            # clear temp dir from subtitles files
+            # clear temp dir from subtitle files
             tempfilelist = os.listdir(xbmc.translatePath("special://temp"))
             Log("Clearing temporary files.", xbmc.LOGINFO)
             for item in tempfilelist:
@@ -103,7 +102,47 @@ class XBMCPlayer(xbmc.Player):
                     os.remove(os.path.join(tempfilelist, item))
                     Log("       File: " + os.path.join(tempfilelist, item) + "  removed.", xbmc.LOGINFO)
 
-            # check if there are subtitles files already on disk matching video being played
+
+            # get jnformation on Kodi language settings
+            # GUI language:
+            #   resource.language.en_gb == en, resource.language.pl_pl == pl, etc.
+            # audio & subtitles languages:
+            #   original == Original video language
+            #   default == GUI interface language
+            #   forced_only == (only for subtitles) only forced subtitles
+            #   none == (only for subtitles) no subtitles
+            #   English == English, Polish == Polish, etc.
+            # GUI language
+            guilanguage = GetKodiSetting('locale.language')
+            # preferred audio language
+            prefaudiolanguage = GetKodiSetting('locale.audiolanguage')
+            # preferred subtitle language
+            prefsubtitlelanguage = GetKodiSetting('locale.subtitlelanguage')
+
+            # map values to ISO 639-2
+            guilanguage = guilanguage.replace('resource.language.', '')
+            guilanguage = GetIsoCode(guilanguage[:2])
+
+            if prefaudiolanguage == 'default':
+                prefaudiolanguage = guilanguage
+            elif prefaudiolanguage == 'original':
+                pass
+            else:
+                prefaudiolanguage = GetIsoCode(prefaudiolanguage)
+
+            if prefsubtitlelanguage == 'default':
+                prefsubtitlelanguage = guilanguage
+            elif prefsubtitlelanguage == 'original' or prefsubtitlelanguage == 'none' or prefsubtitlelanguage == 'forced_only':
+                prefsubtitlelanguage = 'none'
+            else:
+                prefsubtitlelanguage = GetIsoCode(prefsubtitlelanguage)
+
+            Log("Kodi's GUI language: " + guilanguage, xbmc.LOGINFO)
+            Log("Kodi's preferred audio language: " + prefaudiolanguage, xbmc.LOGINFO)
+            Log("Kodi's preferred subtitles language: " + prefsubtitlelanguage, xbmc.LOGINFO)
+
+
+            # check if there are .ass subtitle files already on disk matching video being played
             # if not, automatically open subtitlesearch dialog
             #FIXME - check if Kodi settings on auto subtitles download infuence the process
             # set initial setting for SubsSearchWasOpened flag
@@ -128,25 +167,33 @@ class XBMCPlayer(xbmc.Player):
                     # noautosubs file or extension not found
                     # possible to invoke SubsSearch dialog or enable locally found subtitles
                     #
-                    # check if list is empty
+                    # check if local subtitles exist (list should not be empty)
                     # https://stackoverflow.com/questions/53513/how-do-i-check-if-a-list-is-empty/53522#53522
                     if not localsubs:
-                        Log("No local subtitles matching video being played. Opening search dialog.", xbmc.LOGINFO)
-                        # set flag to remember that subtitles search dialog was opened
-                        SubsSearchWasOpened = True
-                        # invoke subtitles search dialog
-                        xbmc.executebuiltin('ActivateWindow(10153)')  # subtitles search
-                        # hold further execution until window is closed
-                        # wait for window to appear
-                        while not xbmc.getCondVisibility("Window.IsVisible(10153)"):
-                            xbmc.sleep(1000)
-                        # wait for window to disappear
-                        while xbmc.getCondVisibility("Window.IsVisible(10153)"):
-                            xbmc.sleep(500)
+                        # check Kodi preferences on subtitles and compare with currently played video to see if search dialog should be opened
+                        #
+                        # do not open search dialog if:
+                        # - Kodi preferred audio language match audio language
+                        # - Kodi preferred subtitle language match loaded subtitle language
+                        if not ((prefaudiolanguage == playingLang) or (prefsubtitlelanguage == playingSubs)):
+                            Log("No local subtitles matching video being played. Opening search dialog.", xbmc.LOGINFO)
+                            # set flag to remember that subtitles search dialog was opened
+                            SubsSearchWasOpened = True
+                            # invoke subtitles search dialog
+                            xbmc.executebuiltin('ActivateWindow(10153)')  # subtitles search
+                            # hold further execution until window is closed
+                            # wait for window to appear
+                            while not xbmc.getCondVisibility("Window.IsVisible(10153)"):
+                                xbmc.sleep(1000)
+                            # wait for window to disappear
+                            while xbmc.getCondVisibility("Window.IsVisible(10153)"):
+                                xbmc.sleep(500)
+                        else:
+                            Log("Video or subtitle language match Kodi's preferred settings. Not opening subtitle search dialog.")
                     else:
                         Log("Local subtitles matching video being played detected. Enabling subtitles.", xbmc.LOGINFO)
                 else:
-                    Log("'noautosubs' file or extension detected. Not opening subtitles search dialog.", xbmc.LOGINFO)
+                    Log("'noautosubs' file or extension detected. Not opening subtitle search dialog.", xbmc.LOGINFO)
 
             # enable subtitles if there are any
             xbmc.Player().showSubtitles(True)
@@ -196,6 +243,36 @@ class XBMCMonitor(xbmc.Monitor):
 
 
 
+# function matches input string for language designation
+# and outputs ISO 639-2 equivalent
+# https://stackoverflow.com/questions/2879856/get-system-language-in-iso-639-3-letter-codes-in-python
+# http://www.loc.gov/standards/iso639-2/ISO-639-2_utf-8.txt
+def GetIsoCode(lang):
+    # "bibliographic" iso codes are derived from English word for the language
+    # "terminologic" iso codes are derived from the pronunciation in the target
+    # language (if different to the bibliographic code)
+
+    Log("Looking for language code for: " + lang, xbmc.LOGDEBUG)
+    f = codecs.open(os.path.join(__addondir__, 'resources', 'ISO-639-2_utf-8.txt'), 'rb', 'utf-8')
+    outlang = ''
+    for line in f:
+        iD = {}
+        iD['bibliographic'], iD['terminologic'], iD['alpha2'], iD['english'], iD['french'] = line.strip().split('|')
+
+        if iD['bibliographic'].lower() == lang.lower() or iD['alpha2'].lower() == lang.lower() or iD['english'].lower() == lang.lower():
+            outlang = iD['bibliographic']
+            break
+    f.close()
+
+    if outlang:
+        Log("Language code found: " + outlang, xbmc.LOGDEBUG)
+    else:
+        Log("Language code not found.", xbmc.LOGDEBUG)
+
+    return outlang
+
+
+
 # function parses input value and determines if it should be True or False value
 # this is because Kodi .getSetting function returns string type instead of bool value
 def GetBool(stringvalue):
@@ -222,6 +299,11 @@ def GetSettings():
     global setting_AutoInvokeSubsDialog
     global setting_AutoUpdateDef
     global setting_SeparateLogFile
+    global setting_AutoRemoveOldSubs
+    global setting_BackupOldSubs
+    global setting_RemoveSubsBackup
+    global setting_SimulateRemovalOnly
+    global setting_AdjustSubDisplayTime
 
     setting_ConversionServiceEnabled = GetBool(__addon__.getSetting("ConversionServiceEnabled"))
     setting_SubsFontSize = int(__addon__.getSetting("SubsFontSize"))
@@ -232,20 +314,30 @@ def GetSettings():
     setting_RemoveAds = GetBool(__addon__.getSetting("RemoveAdds"))
     setting_PauseOnConversion = GetBool(__addon__.getSetting("PauseOnConversion"))
     setting_AutoInvokeSubsDialog = GetBool(__addon__.getSetting("AutoInvokeSubsDialog"))
+    setting_AutoRemoveOldSubs = GetBool(__addon__.getSetting("AutoRemoveOldSubs"))
+    setting_BackupOldSubs = GetBool(__addon__.getSetting("BackupOldSubs"))
+    setting_RemoveSubsBackup = GetBool(__addon__.getSetting("RemoveSubsBackup"))
+    setting_SimulateRemovalOnly = GetBool(__addon__.getSetting("SimulateRemovalOnly"))
+    setting_AdjustSubDisplayTime = GetBool(__addon__.getSetting("AdjustSubDisplayTime"))
     setting_AutoUpdateDef = GetBool(__addon__.getSetting("AutoUpdateDef"))
     setting_LogLevel = int(__addon__.getSetting("LogLevel"))
     setting_SeparateLogFile = int(__addon__.getSetting("SeparateLogFile"))
 
     Log("Reading settings.", xbmc.LOGINFO)
     Log("Setting: ConversionServiceEnabled = " + str(setting_ConversionServiceEnabled), xbmc.LOGINFO)
-    Log("           SubsFontSize = " + str(setting_SubsFontSize), xbmc.LOGINFO)
-    Log(" BackgroundTransparency = " + str(setting_BackgroundTransparency), xbmc.LOGINFO)
-    Log("          RemoveCCmarks = " + str(setting_RemoveCCmarks), xbmc.LOGINFO)
-    Log("              RemoveAds = " + str(setting_RemoveAds), xbmc.LOGINFO)
-    Log("   AutoInvokeSubsDialog = " + str(setting_AutoInvokeSubsDialog), xbmc.LOGINFO)
-    Log("          AutoUpdateDef = " + str(setting_AutoUpdateDef), xbmc.LOGINFO)
-    Log("               LogLevel = " + str(setting_LogLevel), xbmc.LOGINFO)
-    Log("        SeparateLogFile = " + str(setting_SeparateLogFile), xbmc.LOGINFO)
+    Log("                     SubsFontSize = " + str(setting_SubsFontSize), xbmc.LOGINFO)
+    Log("           BackgroundTransparency = " + str(setting_BackgroundTransparency), xbmc.LOGINFO)
+    Log("                    RemoveCCmarks = " + str(setting_RemoveCCmarks), xbmc.LOGINFO)
+    Log("                        RemoveAds = " + str(setting_RemoveAds), xbmc.LOGINFO)
+    Log("             AdjustSubDisplayTime = " + str(setting_AdjustSubDisplayTime), xbmc.LOGINFO)
+    Log("             AutoInvokeSubsDialog = " + str(setting_AutoInvokeSubsDialog), xbmc.LOGINFO)
+    Log("                    BackupOldSubs = " + str(setting_BackupOldSubs), xbmc.LOGINFO)
+    Log("                AutoRemoveOldSubs = " + str(setting_AutoRemoveOldSubs), xbmc.LOGINFO)
+    Log("                 RemoveSubsBackup = " + str(setting_RemoveSubsBackup), xbmc.LOGINFO)
+    Log("              SimulateRemovalOnly = " + str(setting_SimulateRemovalOnly), xbmc.LOGINFO)
+    Log("                    AutoUpdateDef = " + str(setting_AutoUpdateDef), xbmc.LOGINFO)
+    Log("                         LogLevel = " + str(setting_LogLevel), xbmc.LOGINFO)
+    Log("                  SeparateLogFile = " + str(setting_SeparateLogFile), xbmc.LOGINFO)
 
 
 
@@ -288,7 +380,7 @@ def Log(message, severity=xbmc.LOGDEBUG):
             else:
                 logtext += "    NONE: "
             logtext += message
-            # append line to external log file, logging via warning level to prevent 
+            # append line to external log file, logging via warning level to prevent
             # filtering messages by default filtering level of ROOT logger
             logger.warning(logtext)
 
@@ -319,7 +411,7 @@ def GetDefinitions(section):
                 # patterns for finding sections
                 thissectionpattern = "\[" + section + "\]"    # matches: [SeCtIoNnAmE]
                 othersectionpattern = "^\[.*?\]"    # matches: <BEGINLINE>[anything]
-                if re.search(thissectionpattern, line, re.IGNORECASE):   
+                if re.search(thissectionpattern, line, re.IGNORECASE):
                     # beginning of our section
                     thissection = True
                 elif re.search(othersectionpattern, line):   # matches: <BEGINLINE>[anything]
@@ -333,26 +425,25 @@ def GetDefinitions(section):
                         # add to list
                         importedlist.append(line)
 
-        Log("Definitions imported. Section: " + section + " :", xbmc.LOGINFO)
+        Log("Definitions imported. Section: " + section, xbmc.LOGINFO)
         # dump imported list
         for entry in importedlist:
             Log("       " + entry, xbmc.LOGDEBUG)
     else:
         Log("Definitions file does not exist: " + deffilename, xbmc.LOGINFO)
-    
+
     return importedlist
 
 
 
 # remove all strings from line that match regex deflist
-def RemoveStrings(line, deflist):    
+def RemoveStrings(line, deflist):
     # iterate over every entry on the list
     for pattern in deflist:
         if re.search(pattern, line, re.IGNORECASE):
-            Log("RemoveStrings: Subtitles line: " + line, xbmc.LOGDEBUG)
-            Log("                matches regex: " + pattern, xbmc.LOGDEBUG)
+            Log("    matches regex: " + pattern, xbmc.LOGDEBUG)
             line = re.sub(pattern, '', line, flags=re.I)
-            Log("             Resulting string: " + line, xbmc.LOGDEBUG)
+            Log("    Resulting string: " + line, xbmc.LOGDEBUG)
     return line
 
 
@@ -371,6 +462,7 @@ def GetKodiSetting(name):
 }'''
     result = xbmc.executeJSONRPC(command % name)
     py = loads(result)
+    Log("JSON-RPC: Settings.GetSettingValue: " + str(py), xbmc.LOGDEBUG)
     if 'result' in py and 'value' in py['result']:
         return py['result']['value']
     else:
@@ -381,9 +473,7 @@ def GetKodiSetting(name):
 # converts subtitles using pysubs2 library
 # pysubs2 code is written by Tomas Karabela - https://github.com/tkarabela/pysubs2
 def MangleSubtitles(originalinputfile):
-    
-    global playingFps
-    
+
     # tempfilename
     tempfile = "processed_subtitles"
 
@@ -391,9 +481,16 @@ def MangleSubtitles(originalinputfile):
         Log("File does not exist: " + originalinputfile)
         return
 
-    # get subtitles language by reading filename right before its extension
-    subslang = originalinputfile[-6:-4].lower()
-    Log("Subtitles language is: " + subslang,xbmc.LOGINFO)
+    # get subtitles language by splitting it from filename
+    # split file and extension
+    subfilebase, subfileext = os.path.splitext(originalinputfile)
+    # from filename split language designation
+    subfilecore, subfilelang = os.path.splitext(subfilebase)
+
+    Log("Read subtitle language designation: " + subfilelang[1:],xbmc.LOGINFO)
+    # try to find ISO639-2 designation
+    # remove dot from language code ('.en')
+    subslang = GetIsoCode(subfilelang.lower()[1:]).lower()
 
     # as pysubs2 library doesn't support Kodi's virtual file system and file can not be processed remotely on smb:// share,
     # file must be copied to temp folder for local processing
@@ -404,7 +501,7 @@ def MangleSubtitles(originalinputfile):
     # copy file to temp
     copy_file(originalinputfile, tempinputfile)
 
-    Log("Subtitles file processing started.", xbmc.LOGNOTICE)
+    Log("subtitle file processing started.", xbmc.LOGNOTICE)
 
     # record start time of processing
     MangleStartTime = time.time()
@@ -551,42 +648,100 @@ def MangleSubtitles(originalinputfile):
     # process subs contents
     # iterate over every sub line and process its text
     # http://pythonhosted.org/pysubs2/api-reference.html#ssafile-a-subtitle-file
-    if setting_RemoveCCmarks or setting_RemoveAds:
-        # load definitions from file
-        Log("Definitions file used: " + deffilename, xbmc.LOGINFO)
+
+    # load regexp definitions from file
+    Log("Definitions file used: " + deffilename, xbmc.LOGINFO)
+    if setting_RemoveCCmarks:
+        # load CCmarks definitions
         CCmarksList = GetDefinitions("CCmarks")
+
+    if setting_RemoveAds:
+        # load Ads definitions
         AdsList = GetDefinitions("Ads")
-        AdsList += GetDefinitions("Ads_" + subslang)
+        # load country specific definitions only if language was detected
+        if subslang:
+            AdsList += GetDefinitions("Ads_" + subslang)
 
-        # iterate over every line of subtitles and try to match Regular Expressions filters
-        Log("Applying filtering lists.", xbmc.LOGINFO)
-        for line in subs:
-            # load single line to temp variable for processing
-            subsline = line.text.encode('utf-8')
-            # process subtitle line
+    # iterate over every line of subtitles and process each subtitle line
+    Log("Applying filtering lists.", xbmc.LOGINFO)
 
-            if setting_RemoveCCmarks:
-                # remove CC texts from subsline 
-                subsline = RemoveStrings(subsline, CCmarksList)
+    # if nextlinestart == 0 then we are on the beginning of the list (last subtitle as list is reversed)
+    nextlinestart = 0
+    # iterate from last to first element to avoid skipping elements if current element was removed
+    # https://stackoverflow.com/questions/14267722/python-list-remove-skips-next-element-in-list/14283447#14283447
+    for line in reversed(subs):
+        # load single line to temp variable for processing
+        subsline = line.text.encode('utf-8')
 
-            if setting_RemoveAds:
-                # remove Advertisement strings
-                subsline = RemoveStrings(subsline, AdsList)
+        # process subtitle line
+        Log("Subtitle line: " + subsline, xbmc.LOGDEBUG)
+        if setting_RemoveCCmarks:
+            # remove CC texts from subsline
+            subsline = RemoveStrings(subsline, CCmarksList)
+        if setting_RemoveAds:
+            # remove Advertisement strings from subsline
+            subsline = RemoveStrings(subsline, AdsList)
 
-            # remove orphan whitespaces from beginning and end of line
-            subsline = subsline.strip()
-            # convert double or more whitespaces to single ones
-            subsline = re.sub(' {2,}', ' ', subsline)
-            # if line is empty after processing, remove line from subtitles file
-            # https://stackoverflow.com/questions/9573244/most-elegant-way-to-check-if-the-string-is-empty-in-python
-            if not subsline:
-                # remove empty line
-                subs.remove(line)
-                Log("Resulting line is empty. Removing from file.", xbmc.LOGDEBUG)
-            else:
-                # save changed line
-                line.plaintext = subsline.decode('utf-8')
-        Log("Filtering lists applied.", xbmc.LOGINFO)
+        # remove orphan whitespaces from beginning and end of line
+        subsline = subsline.strip()
+        # convert double or more whitespaces to single ones
+        subsline = re.sub(' {2,}', ' ', subsline)
+
+        # if line is empty after processing, remove line from subtitles file
+        # https://stackoverflow.com/questions/9573244/most-elegant-way-to-check-if-the-string-is-empty-in-python
+        if not subsline:
+            # remove empty line
+            subs.remove(line)
+            Log("    Resulting line is empty. Removing from file.", xbmc.LOGDEBUG)
+        else:
+            # adjust minimum subtitle display time
+            # if calculated time is longer than actual time and if it does not overlap next sub time
+            if setting_AdjustSubDisplayTime:
+                # minimum calculated length
+                # http://bbc.github.io/subtitle-guidelines/#Timing
+                # 500 ms for line + 400 ms per each word (including line breaks)
+                minCalcLength = 500 + (int(sum(subsline.count(x) for x in (' ', '\n', '\N', '|'))) * 400)
+
+                Log("    Min. calculated length: " + str(minCalcLength) + " ms")
+                Log("    Actual length: " + str(line.duration) + " ms")
+
+                # check next subtitle start time and compare it to this subtitle end time
+                ## https://stackoverflow.com/questions/1011938/python-previous-and-next-values-inside-a-loop
+                if nextlinestart != 0:
+                    # if it is not the last subtitle (first on indexed list), calculate gap to next subtitle (previous on indexed list) object
+                    #
+                    # compare the next subtitle's start time with this subtitle's end time
+                    nextlineclearance = nextlinestart - line.end
+                    Log("    Clearance to next sub: " + str(nextlineclearance) + " ms")
+
+                if minCalcLength > line.duration:
+                    # calculate amount of time to increase visibility of subtitle to reach minimum time
+                    expectedincrease = minCalcLength - line.duration
+
+                    # find amount of time to safely increase subtitle display length
+                    if nextlinestart != 0:
+                        # calculate time increase that will satisfy expectedincrease but still does not overlap next subtitle
+                        timetoincrease = min(nextlineclearance, expectedincrease) - 2
+                    else:
+                        # for the last subtitle, there is no limitation of next subtitle start time, so increase to minimum calculated time
+                        timetoincrease = expectedincrease
+
+                    # timetoincrease should be positive as negative line.duration will raise ValueError in pysubs2 library
+                    if timetoincrease < 0:
+                        timetoincrease = 0
+
+                    # modify subtitle object
+                    line.duration = line.duration + timetoincrease
+                    Log("    Time added to subtitle duration: " + str(timetoincrease) + " ms")
+
+                # remember start time of subtitle
+                nextlinestart = line.start
+
+
+            # save changed line
+            line.plaintext = subsline.decode('utf-8')
+
+    Log("Filtering lists applied.", xbmc.LOGINFO)
 
     #save subs
     subs.save(tempoutputfile)
@@ -596,9 +751,9 @@ def MangleSubtitles(originalinputfile):
 
     # record end time of processing
     MangleEndTime = time.time()
-    
+
     # truncating seconds: https://stackoverflow.com/questions/8595973/truncate-to-3-decimals-in-python/8595991#8595991
-    Log("Subtitles file processing finished. Processing took: " + '%.3f'%(MangleEndTime - MangleStartTime) + " seconds.", xbmc.LOGNOTICE)
+    Log("Subtitle file processing finished. Processing took: " + '%.3f'%(MangleEndTime - MangleStartTime) + " seconds.", xbmc.LOGNOTICE)
 
     # fixme - debug check if file is already released
     try:
@@ -613,8 +768,11 @@ def MangleSubtitles(originalinputfile):
     originaloutputfile = filebase + '.ass'
     copy_file(tempoutputfile, originaloutputfile)
 
-    # rename old file to file_ for further debugging
-    rename_file(originalinputfile, originalinputfile + '_')
+    # make a backup copy of subtitle file or remove file
+    if setting_BackupOldSubs:
+        rename_file(originalinputfile, originalinputfile + '_backup')
+    else:
+        delete_file(originalinputfile)
 
     return originaloutputfile
 
@@ -669,7 +827,7 @@ def delete_file(filepath):
     except Exception as e:
         Log("delete_file: Delete failed: " + filepath, xbmc.LOGERROR)
         Log("Exception: " + str(e.message), xbmc.LOGERROR)
-    
+
     wait_for_file(filepath, False)
 
 
@@ -695,7 +853,7 @@ def wait_for_file(file, exists):
                 Log("wait_for_file: file vanished.", xbmc.LOGINFO)
                 success = True
                 break
-        count -= 1 
+        count -= 1
     if not success:
         if exists:
             Log("wait_for_file: file DID NOT appear.", xbmc.LOGERROR)
@@ -724,11 +882,13 @@ def GetSubtitleFiles(subspath, substypelist):
         # from filename split language designation
         subfilecore, subfilelang = os.path.splitext(subfilebase)
         # remove files that do not meet criteria
-        if not (((subfilecore.lower() == playingFilenameBase.lower()) and (subfileext.lower() in substypelist)) or (subfilebase.lower() == "noautosubs") or (subfileext.lower() == ".noautosubs")):
+        if not ((((subfilebase.lower() == playingFilenameBase.lower() or subfilecore.lower() == playingFilenameBase.lower()) and (subfileext.lower() in substypelist)) \
+            or ((subfilebase.lower() == playingFilenameBase.lower()) and (subfileext.lower() == ".noautosubs"))) \
+            or (subfilebase.lower() == "noautosubs")):
             # NOT
-            # filename matches video name AND fileext is on the list of supported extensions
-            # OR filename matches 'noautosubs'
-            # OR fileext matches '.noautosubs'
+            # subfilename matches video name AND fileext is on the list of supported extensions
+            # OR subfilename matches video name AND fileext matches '.noautosubs'
+            # OR subfilename matches 'noautosubs'
             # FIXME - now we assume that .ass subtitle will not be processed
             del SubsFiles[item]
 
@@ -742,7 +902,7 @@ def PlaybackPause():
     if not xbmc.getCondVisibility("player.paused"):
         xbmc.Player().pause()
         Log("Playback PAUSED.", xbmc.LOGINFO)
-    else:    
+    else:
         Log("Playback already PAUSED.", xbmc.LOGINFO)
 
 
@@ -772,16 +932,16 @@ def DetectNewSubs():
 
     # setting process flag, process starts to run
     DetectionIsRunning = True
-    
+
     global subtitlePath
-    
+
     # stop timer in order to not duplicate threads
     #rt.stop()
-    
+
     # check current directory contents for files touched no later than a few seconds ago
     # load all subtitle files matching video being played
     RecentSubsFiles = GetSubtitleFiles(subtitlePath, SubExtList)
-    
+
     # check all remaining subtitle files for changed timestamp
     for f in RecentSubsFiles:
         # ignore 'noautosubs' file/extension to not trigger detection of subtitles
@@ -794,7 +954,7 @@ def DetectNewSubs():
 
         if  epoch_file > epoch_now - 6:
             # Video filename matches subtitle filename and it was created/modified no later than 6 secods ago
-            Log("New subtitles file detected: " + pathfile, xbmc.LOGNOTICE)
+            Log("New subtitle file detected: " + pathfile, xbmc.LOGNOTICE)
 
             # record start time of processing
             RoutineStartTime = time.time()
@@ -810,9 +970,9 @@ def DetectNewSubs():
                 # pause playback
                 PlaybackPause()
 
-            # process subtitles file
-            ResultFile = MangleSubtitles(pathfile) 
-            Log("Output subtitles file: " + ResultFile, xbmc.LOGNOTICE) 
+            # process subtitle file
+            ResultFile = MangleSubtitles(pathfile)
+            Log("Output subtitle file: " + ResultFile, xbmc.LOGNOTICE)
 
             # check if destination file exists
             if xbmcvfs.exists(ResultFile):
@@ -820,7 +980,7 @@ def DetectNewSubs():
 
                 # load new subtitles and turn them on
                 xbmc.Player().setSubtitles(ResultFile)
-                    
+
                 # resume playback
                 PlaybackResume()
             else:
@@ -832,13 +992,13 @@ def DetectNewSubs():
 
             # record end time of processing
             RoutineEndTime = time.time()
-            
+
             # truncating seconds: https://stackoverflow.com/questions/8595973/truncate-to-3-decimals-in-python/8595991#8595991
             Log("Subtitles processing routine finished. Processing took: " + '%.3f'%(RoutineEndTime - RoutineStartTime) + " seconds.", xbmc.LOGNOTICE)
-            
+
             # clear subtitles search dialog flag to make sure that YesNo dialog will not be triggered
             SubsSearchWasOpened = False
-            
+
             # sleep for 10 seconds to avoid processing newly added subititle file
             #this should not be needed since we do not support .ass as input file at the moment
             #xbmc.sleep(10000)
@@ -854,7 +1014,7 @@ def DetectNewSubs():
         # http://mirrors.xbmc.org/docs/python-docs/13.0-gotham/xbmcgui.html#Dialog-yesno
         YesNoDialog = xbmcgui.Dialog().yesno("Subtitles Mangler", __addonlang__(32040).encode("utf-8"), line2=__addonlang__(32041).encode("utf-8"), nolabel=__addonlang__(32042).encode("utf-8"), yeslabel=__addonlang__(32043).encode("utf-8"))
         if YesNoDialog:
-            # user does not want the dialog to appear again 
+            # user does not want the dialog to appear again
             Log("Answer is Yes. Setting .noautosubs extension flag for file: " + playingFilenamePath.encode("utf-8"), xbmc.LOGINFO)
             # set '.noautosubs' extension for file being played
             try:
@@ -866,14 +1026,14 @@ def DetectNewSubs():
                 Log("Can not create noautosubs file.", xbmc.LOGERROR)
                 Log("Exception: " + str(e.message), xbmc.LOGERROR)
 
-        else: 
-            # user wants the dialog to appear again 
+        else:
+            # user wants the dialog to appear again
             Log("Answer is No. Doing nothing.", xbmc.LOGINFO)
 
         # resume playback
         PlaybackResume()
 
-        # clear the flag to prevent opening dialog on next call of DetectNewSubs() 
+        # clear the flag to prevent opening dialog on next call of DetectNewSubs()
         SubsSearchWasOpened = False
 
 
@@ -898,19 +1058,216 @@ def GetPlayingInfo():
             subspath = custompath
         else:    # location == movie dir
             subspath = xbmc.translatePath("special://temp")
-    else:   
+    else:
         subspath = xbmc.getInfoLabel('Player.Folderpath')
 
     filename = xbmc.getInfoLabel('Player.Filename')
     filepathname = xbmc.getInfoLabel('Player.Filenameandpath')
     filefps = xbmc.getInfoLabel('Player.Process(VideoFPS)')
+    audiolang = xbmc.getInfoLabel('VideoPlayer.AudioLanguage')
     filelang = xbmc.getInfoLabel('VideoPlayer.SubtitlesLanguage')
 
     Log("File currently played: " + filepathname, xbmc.LOGINFO)
     Log("Subtitles download path: " + subspath, xbmc.LOGINFO)
-    Log("Subtitles language: " + filelang, xbmc.LOGINFO)
-    
-    return subspath, filename, filepathname, filefps, filelang
+    Log("Audio language: " + audiolang, xbmc.LOGINFO)
+    Log("Subtitles language: " + filelang + " (either internal or external)", xbmc.LOGINFO)
+
+    return subspath, filename, filepathname, filefps, audiolang, filelang
+
+
+
+# updates regexdef file from server
+def UpdateDefFile():
+    Log("Trying to update regexp definitions from: " + deffileurl, xbmc.LOGINFO)
+    # download file from server
+    #http://stackabuse.com/download-files-with-python/
+    try:
+        filedata = urllib2.urlopen(deffileurl)
+        datatowrite = filedata.read()
+        with open(tempdeffilename, 'wb') as f:
+            f.write(datatowrite)
+
+        # check if target file path exists
+        if os.path.isfile(localdeffilename):
+            # compare if downloaded temp file and current local file are identical
+            if filecmp.cmp(tempdeffilename, localdeffilename, shallow=0):
+                Log("Definitions file is up-to-date. Skipping update.", xbmc.LOGINFO)
+            else:
+                # remove current target file
+                Log("Removing current file: " + localdeffilename)
+                os.remove(localdeffilename)
+                # copy temp file to target file
+                copyfile(tempdeffilename, localdeffilename)
+                Log("Regex definitions updated.", xbmc.LOGINFO)
+        else:
+            # copy temp file to target file
+            copyfile(tempdeffilename, localdeffilename)
+            Log("Regex definitions updated.", xbmc.LOGINFO)
+
+        # remove temp file
+        os.remove(tempdeffilename)
+
+    except urllib2.URLError as e:
+        Log("Can not download definitions: " + deffileurl, xbmc.LOGERROR)
+        Log("Exception: " + str(e.reason), xbmc.LOGERROR)
+    except IOError as e:
+        Log("Can not copy definitions file to: " + localdeffilename, xbmc.LOGERROR)
+    except OSError as e:
+        Log("Can not remove temporary definitions file: " + tempdeffilename, xbmc.LOGERROR)
+
+
+
+# walk through video sources and remove any subtitle files that do not acompany its own video any more
+# also remove '.noautosubs' files
+def RemoveOldSubs():
+
+    global SubExtList
+
+    # Uses XBMC/Kodi JSON-RPC API to retrieve video sources location
+    # https://kodi.wiki/view/JSON-RPC_API/v8#Files.GetSources
+    command = '''{
+    "jsonrpc": "2.0",
+    "id": 1,
+    "method": "Files.GetSources",
+    "params": {
+        "media": "video"
+    }
+}'''
+    result = xbmc.executeJSONRPC(command)
+    sources = loads(result).get('result').get('sources')
+    Log("JSON-RPC: Files.GetSources: " + str(sources), xbmc.LOGDEBUG)
+
+    Log("Scanning video sources for orphaned subtitle files.", xbmc.LOGNOTICE)
+    # record start time
+    ClearStartTime = time.time()
+
+    # create background dialog
+    #http://mirrors.kodi.tv/docs/python-docs/13.0-gotham/xbmcgui.html#DialogProgressBG
+    pDialog = xbmcgui.DialogProgressBG()
+    pDialog.create('Subtitles Mangler', 'Scanning for subtitle files')
+
+    # initiate empty lists
+    videofiles = list()
+    subfiles = list()
+
+    # construct target list for file candidate extensions to be removed
+    extRemovalList = [ '.ass', '.noautosubs' ]
+    if setting_RemoveSubsBackup:
+        for ext in SubExtList:
+            extRemovalList.append(ext + '_backup')
+
+    # count number of sources
+    # calculate progressbar increase per source
+    progress = 0
+    pIncrease = 80 / len(sources)
+
+    # process every source path
+    for source in sources:
+        startdir = source.get('file')
+        Log("Processing source path: " + startdir, xbmc.LOGINFO)
+
+        # update background dialog
+        progress += pIncrease
+        pDialog.update(progress, message='Scanning for subtitle files: ' + source.get('label'))
+
+        # http://code.activestate.com/recipes/435875-a-simple-non-recursive-directory-walker/
+        directories = [startdir]
+        while len(directories)>0:
+            # take one element from directories list and process it
+            directory = directories.pop()
+            dirs, files = xbmcvfs.listdir(directory)
+            # add every subdir to the list for checking
+            for subdir in dirs:
+                Log("Adding subpath: " + os.path.join(directory, subdir.decode('utf-8')), xbmc.LOGDEBUG)
+                directories.append(os.path.join(directory, subdir.decode('utf-8')))
+            # check every file in the current subdir and add it to appropriate list
+            for thisfile in files:
+                fullfilepath = os.path.join(directory, thisfile.decode('utf-8'))
+                filebase, fileext = os.path.splitext(fullfilepath)
+                if fileext in VideoExtList:
+                    # this file is video - add to video list
+                    Log("Adding to video list: " + fullfilepath.encode('utf-8'),xbmc.LOGDEBUG)
+                    videofiles.append(fullfilepath)
+                elif fileext in extRemovalList:
+                    # this file is subs related - add to subs list
+                    Log("Adding to subs list: " + fullfilepath.encode('utf-8'),xbmc.LOGDEBUG)
+                    subfiles.append(fullfilepath)
+
+    # process custom subtitle path if it is set in Kodi configuration
+    # get settings from Kodi configuration on assumed subtitles location
+    storagemode = GetKodiSetting("subtitles.storagemode") # 1=location defined by custompath; 0=location in movie dir
+    custompath = GetKodiSetting("subtitles.custompath")   # path to non-standard dir with subtitles
+
+    if storagemode == 1:    # location == custompath
+        if xbmcvfs.exists(custompath):
+            subspath = custompath
+        else:
+            subspath = ""
+    else:
+        subspath = ""
+
+    if subspath:
+        Log("Scanning for orphaned subtitle files on custom path: " + subspath, xbmc.LOGNOTICE)
+        dirs, files = xbmcvfs.listdir(subspath)
+        for thisfile in files:
+            fullfilepath = os.path.join(subspath, thisfile.decode('utf-8'))
+            filebase, fileext = os.path.splitext(fullfilepath)
+            if fileext in extRemovalList:
+                # this file is subs related - add to subs list
+                Log("Adding to subs list: " + fullfilepath,xbmc.LOGDEBUG)
+                subfiles.append(fullfilepath)
+
+
+    # record scan time
+    ClearScanTime = time.time()
+    Log("Scanning for orphaned subtitle files finished. Processing took: " + '%.3f'%(ClearScanTime - ClearStartTime) + " seconds.", xbmc.LOGNOTICE)
+
+    Log("Clearing orphaned subtitle files.", xbmc.LOGNOTICE)
+    # update background dialog
+    pDialog.update(85, message='Clearing orphaned subtitle files')
+
+    # lists filled, compare subs list with video list
+    for subfile in subfiles:
+        # split filename from full path
+        subfilename = os.path.basename(subfile)
+        # split filename and extension
+        subfilebase, subfileext = os.path.splitext(subfilename)
+        # from filename split language designation
+        subfilecore, subfilelang = os.path.splitext(subfilebase)
+
+        # check if there is a video matching subfile
+        videoexists = False
+        for videofile in videofiles:
+            # split filename from full path
+            videofilename = os.path.basename(videofile)
+            # split filename and extension
+            videofilebase, videofileext = os.path.splitext(videofilename)
+
+            # check if subfile basename or corename equals videofile basename
+            if subfilebase.lower() == videofilebase.lower() or subfilecore.lower() == videofilebase.lower():
+                videoexists = True
+                break
+
+        if not videoexists:
+            if setting_SimulateRemovalOnly:
+                Log("There is no video file matching: " + subfile.encode('utf-8') + "  File would have been deleted if Simulate option had been off.", xbmc.LOGDEBUG)
+            else:
+                Log("There is no video file matching: " + subfile.encode('utf-8') + "  Deleting it.", xbmc.LOGDEBUG)
+                delete_file(subfile)
+        else:
+            Log("Video file matching: " + subfile.encode('utf-8'), xbmc.LOGDEBUG)
+            Log("              found: " + videofile.encode('utf-8'), xbmc.LOGDEBUG)
+
+    # record end time
+    ClearEndTime = time.time()
+    Log("Clearing orphaned subtitle files finished. Processing took: " + '%.3f'%(ClearEndTime - ClearScanTime) + " seconds.", xbmc.LOGNOTICE)
+
+    # close background dialog
+    pDialog.close()
+
+
+
+
 
 
 
@@ -939,7 +1296,11 @@ tempdeffilename = os.path.join(xbmc.translatePath("special://temp"), 'deffile.tx
 # list of input file extensions
 # extensions in lowercase with leading dot
 # FIXME - we do not include output extension .ass as conversion routine is sometimes wrongly triggered on converted subtitle file
-SubExtList = [ '.txt', '.srt', '.sub', '.subrip', '.microdvd', '.mpl' ]
+SubExtList = [ '.txt', '.srt', '.sub', '.subrip', '.microdvd', '.mpl', '.tmp' ]
+
+# list of video file extensions
+# extensions in lowercase with leading dot
+VideoExtList = [ '.mkv', '.avi', '.mp4', '.mpg', '.mpeg' ]
 
 
 if __name__ == '__main__':
@@ -949,7 +1310,7 @@ if __name__ == '__main__':
     xbmc.log("SubsMangler: started. Version: %s" % (__version__), level=xbmc.LOGNOTICE)
 
     # prepare timer to launch
-    rt = RepeatedTimer(3.0, DetectNewSubs)
+    rt = RepeatedTimer(2.0, DetectNewSubs)
 
     # set initial values
     DetectionIsRunning = False
@@ -959,18 +1320,18 @@ if __name__ == '__main__':
     # directory and file is local to the filesystem
     # no need to use xbmcvfs
     if not os.path.isdir(__addonworkdir__):
-        xbmc.log("SubsMangler: profile directory doesn't exist: " + __addonworkdir__ + "   Trying to create.", level=xbmc.LOGNOTICE)
+        xbmc.log("SubsMangler: profile directory doesn't exist: " + __addonworkdir__.encode('utf-8') + "   Trying to create.", level=xbmc.LOGNOTICE)
         try:
             os.mkdir(__addonworkdir__)
-            xbmc.log("SubsMangler: profile directory created: " + __addonworkdir__, level=xbmc.LOGNOTICE)
+            xbmc.log("SubsMangler: profile directory created: " + __addonworkdir__.encode('utf-8'), level=xbmc.LOGNOTICE)
         except OSError as e:
-            xbmc.log("SubsMangler: Log: can't create directory: " +__addonworkdir__, level=xbmc.LOGERROR)
-            xbmc.Log("Exception: " + str(e.message), xbmc.LOGERROR)
+            xbmc.log("SubsMangler: Log: can't create directory: " +__addonworkdir__.encode('utf-8'), level=xbmc.LOGERROR)
+            xbmc.Log("Exception: " + str(e.message).encode('utf-8'), xbmc.LOGERROR)
 
     # prepare external log handler
     # https://docs.python.org/2/library/logging.handlers.html
     logger = logging.getLogger(__name__)
-    loghandler = logging.handlers.TimedRotatingFileHandler(os.path.join(__addonworkdir__, 'smangler.log',), when="midnight", interval=1, backupCount=7)
+    loghandler = logging.handlers.TimedRotatingFileHandler(os.path.join(__addonworkdir__, 'smangler.log',), when="midnight", interval=1, backupCount=2)
     logger.addHandler(loghandler)
 
     # load settings
@@ -978,7 +1339,7 @@ if __name__ == '__main__':
 
     # check if external log is configured
     if setting_SeparateLogFile == 1:
-        xbmc.log("SubsMangler: External log enabled: " + os.path.join(__addonworkdir__, 'smangler.log'), level=xbmc.LOGNOTICE)
+        xbmc.log("SubsMangler: External log enabled: " + os.path.join(__addonworkdir__, 'smangler.log').encode('utf-8'), level=xbmc.LOGNOTICE)
 
     # monitor whether Kodi is running
     # http://kodi.wiki/view/Service_add-ons
@@ -989,7 +1350,6 @@ if __name__ == '__main__':
             rt.stop()
             xbmc.log("SubsMangler: Abort requested. Exiting.", level=xbmc.LOGNOTICE)
             break
-
 
 
         #
@@ -1004,50 +1364,22 @@ if __name__ == '__main__':
             # use sample file from addon's dir
             deffilename = os.path.join(__addondir__, 'resources', 'regexdef.txt')
 
-        # check if auto-update is enabled and player does not play any content
-        if setting_AutoUpdateDef and not xbmc.getCondVisibility('Player.HasMedia'):
-            # autoupdate regexp definitions every 6 hours
-            if ClockTick <=0:
-                Log("Trying to update regexp definitions from: " + deffileurl, xbmc.LOGINFO)
-                # download file from server
-                #http://stackabuse.com/download-files-with-python/
-                try:
-                    filedata = urllib2.urlopen(deffileurl)  
-                    datatowrite = filedata.read()
-                    with open(tempdeffilename, 'wb') as f:  
-                        f.write(datatowrite)
+        # housekeeping services
+        if ClockTick <=0 and not xbmc.getCondVisibility('Player.HasMedia'):
+            # check if auto-update is enabled and player does not play any content
+            if setting_AutoUpdateDef:
+                # update regexdef file
+                UpdateDefFile()
 
-                    # check if target file path exists
-                    if os.path.isfile(localdeffilename):
-                        # compare if downloaded temp file and current local file are identical
-                        if filecmp.cmp(tempdeffilename, localdeffilename, shallow=0):
-                            Log("Definitions file is up-to-date. Skipping update.", xbmc.LOGINFO)
-                        else:
-                            # remove current target file
-                            Log("Removing current file: " + localdeffilename)
-                            os.remove(localdeffilename)
-                            # copy temp file to target file
-                            copyfile(tempdeffilename, localdeffilename)
-                            Log("Regex definitions updated.", xbmc.LOGINFO)
-                    else:
-                        # copy temp file to target file
-                        copyfile(tempdeffilename, localdeffilename)
-                        Log("Regex definitions updated.", xbmc.LOGINFO)
+            # check if auto-update is enabled and player does not play any content
+            if setting_AutoRemoveOldSubs:
+                # clear old subtitle files
+                RemoveOldSubs()
 
-                    # remove temp file
-                    os.remove(tempdeffilename)
+            # reset timer to 6 hours
+            # 1 tick per 5 sec * 60 min * 6 hrs = 4320 ticks
+            ClockTick = 4320
 
-                except urllib2.URLError as e:
-                    Log("Can not download definitions: " + deffileurl, xbmc.LOGERROR)
-                    Log("Exception: " + str(e.reason), xbmc.LOGERROR)
-                except IOError as e:
-                    Log("Can not copy definitions file to: " + localdeffilename, xbmc.LOGERROR)
-                except OSError as e:
-                    Log("Can not remove temporary definitions file: " + tempdeffilename, xbmc.LOGERROR)
-
-                # reset timer to 6 hours
-                # 1 tick per 5 sec * 60 min * 6 hrs = 4320 ticks
-                ClockTick = 4320
         # decrease timer
         # avoid decreasing the timer to infinity
         if ClockTick > 0:

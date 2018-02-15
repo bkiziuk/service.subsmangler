@@ -4,8 +4,8 @@ msgstr ""
 #Polish
 
 msgctxt "#32001"
-msgid "Settings"
-msgstr "Ustawienia"
+msgid "Main"
+msgstr "Główne"
 
 msgctxt "#32002"
 msgid "Convert subtitles"
@@ -104,8 +104,8 @@ msgid "Yes"
 msgstr "Tak"
 
 msgctxt "#32048"
-msgid "Styles"
-msgstr "Style"
+msgid "Housekeeping"
+msgstr "Sprzątanie"
 
 msgctxt "#32049"
 msgid "Foreground color"
@@ -150,3 +150,27 @@ msgstr "Żółty"
 msgctxt "#32059"
 msgid "White"
 msgstr "Biały"
+
+msgctxt "#32070"
+msgid "Automatically remove orphaned subtitle files"
+msgstr "Automatycznie usuwaj osierocone pliki z napisami"
+
+msgctxt "#32071"
+msgid "Make a backup of processed subtitle file"
+msgstr "Utwórz kopię konwertowanego pliku z napisami"
+
+msgctxt "#32072"
+msgid "Remove backed-up copy of orphaned subtitle file"
+msgstr "Usuń kopię zapasową osieroconego pliku z napisami"
+
+msgctxt "#32073"
+msgid "Simulate file removal only"
+msgstr "Dokonaj tylko symulacji usuwania pliku"
+
+msgctxt "#32080"
+msgid "Conversion"
+msgstr "Konwersja"
+
+msgctxt "#32081"
+msgid "Adjust subtitle display time"
+msgstr "Koryguj czas wyświetlania napisów"
