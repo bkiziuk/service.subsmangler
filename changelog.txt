@@ -1,3 +1,5 @@
+v0.0.13 (2018-02-15)
+- fixed skipping next subtitle entry on list if current subtitle was deleted
 v0.0.12 (2018-02-14)
 - improved progress bar calculation
 - detection of forced internal subtitles and audio tracks matching preferred language

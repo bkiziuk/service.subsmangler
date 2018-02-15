@@ -441,10 +441,9 @@ def RemoveStrings(line, deflist):
     # iterate over every entry on the list
     for pattern in deflist:
         if re.search(pattern, line, re.IGNORECASE):
-            Log("RemoveStrings: Subtitles line: " + line, xbmc.LOGDEBUG)
-            Log("                matches regex: " + pattern, xbmc.LOGDEBUG)
+            Log("    matches regex: " + pattern, xbmc.LOGDEBUG)
             line = re.sub(pattern, '', line, flags=re.I)
-            Log("             Resulting string: " + line, xbmc.LOGDEBUG)
+            Log("    Resulting string: " + line, xbmc.LOGDEBUG)
     return line
 
 
@@ -488,7 +487,7 @@ def MangleSubtitles(originalinputfile):
     # from filename split language designation
     subfilecore, subfilelang = os.path.splitext(subfilebase)
 
-    Log("Read subtitle language designation: " + subfilelang,xbmc.LOGINFO)
+    Log("Read subtitle language designation: " + subfilelang[1:],xbmc.LOGINFO)
     # try to find ISO639-2 designation
     # remove dot from language code ('.en')
     subslang = GetIsoCode(subfilelang.lower()[1:]).lower()
@@ -649,81 +648,100 @@ def MangleSubtitles(originalinputfile):
     # process subs contents
     # iterate over every sub line and process its text
     # http://pythonhosted.org/pysubs2/api-reference.html#ssafile-a-subtitle-file
-    if setting_RemoveCCmarks or setting_RemoveAds:
-        # load definitions from file
-        Log("Definitions file used: " + deffilename, xbmc.LOGINFO)
+
+    # load regexp definitions from file
+    Log("Definitions file used: " + deffilename, xbmc.LOGINFO)
+    if setting_RemoveCCmarks:
+        # load CCmarks definitions
         CCmarksList = GetDefinitions("CCmarks")
+
+    if setting_RemoveAds:
+        # load Ads definitions
         AdsList = GetDefinitions("Ads")
         # load country specific definitions only if language was detected
         if subslang:
             AdsList += GetDefinitions("Ads_" + subslang)
 
-        # iterate over every line of subtitles and process each subtitle line
-        Log("Applying filtering lists.", xbmc.LOGINFO)
-        # get number of subs objects to not try to check beyond last item
-        subslength = len(subs)
-        for index, line in enumerate(subs):
-            # load single line to temp variable for processing
-            subsline = line.text.encode('utf-8')
-            # process subtitle line
+    # iterate over every line of subtitles and process each subtitle line
+    Log("Applying filtering lists.", xbmc.LOGINFO)
 
-            if setting_RemoveCCmarks:
-                # remove CC texts from subsline
-                subsline = RemoveStrings(subsline, CCmarksList)
+    # if nextlinestart == 0 then we are on the beginning of the list (last subtitle as list is reversed)
+    nextlinestart = 0
+    # iterate from last to first element to avoid skipping elements if current element was removed
+    # https://stackoverflow.com/questions/14267722/python-list-remove-skips-next-element-in-list/14283447#14283447
+    for line in reversed(subs):
+        # load single line to temp variable for processing
+        subsline = line.text.encode('utf-8')
 
-            if setting_RemoveAds:
-                # remove Advertisement strings from subsline
-                subsline = RemoveStrings(subsline, AdsList)
+        # process subtitle line
+        Log("Subtitle line: " + subsline, xbmc.LOGDEBUG)
+        if setting_RemoveCCmarks:
+            # remove CC texts from subsline
+            subsline = RemoveStrings(subsline, CCmarksList)
+        if setting_RemoveAds:
+            # remove Advertisement strings from subsline
+            subsline = RemoveStrings(subsline, AdsList)
 
-            # remove orphan whitespaces from beginning and end of line
-            subsline = subsline.strip()
-            # convert double or more whitespaces to single ones
-            subsline = re.sub(' {2,}', ' ', subsline)
-            # if line is empty after processing, remove line from subtitles file
-            # https://stackoverflow.com/questions/9573244/most-elegant-way-to-check-if-the-string-is-empty-in-python
-            if not subsline:
-                # remove empty line
-                subs.remove(line)
-                Log("Resulting line is empty. Removing from file.", xbmc.LOGDEBUG)
-            else:
-                # adjust minimum subtitle display time
-                # if calculated time is longer than actual time and if it does not overlap next sub time
-                if setting_AdjustSubDisplayTime:
-                    # minimum calculated length
-                    # http://bbc.github.io/subtitle-guidelines/#Timing
-                    # 500 ms for line + 400 ms per each word
-                    minCalcLength = 500 + (int(subsline.count(' ')) * 400)
+        # remove orphan whitespaces from beginning and end of line
+        subsline = subsline.strip()
+        # convert double or more whitespaces to single ones
+        subsline = re.sub(' {2,}', ' ', subsline)
 
-                    Log("Subtitle line " + str(index) + ": " + subsline, xbmc.LOGDEBUG)
-                    Log("    Min. calculated length: " + str(minCalcLength) + " ms")
-                    Log("    Actual length: " + str(line.duration) + " ms")
+        # if line is empty after processing, remove line from subtitles file
+        # https://stackoverflow.com/questions/9573244/most-elegant-way-to-check-if-the-string-is-empty-in-python
+        if not subsline:
+            # remove empty line
+            subs.remove(line)
+            Log("    Resulting line is empty. Removing from file.", xbmc.LOGDEBUG)
+        else:
+            # adjust minimum subtitle display time
+            # if calculated time is longer than actual time and if it does not overlap next sub time
+            if setting_AdjustSubDisplayTime:
+                # minimum calculated length
+                # http://bbc.github.io/subtitle-guidelines/#Timing
+                # 500 ms for line + 400 ms per each word (including line breaks)
+                minCalcLength = 500 + (int(sum(subsline.count(x) for x in (' ', '\n', '\N', '|'))) * 400)
 
-                    # check next subtitle start time
-                    # https://stackoverflow.com/questions/1011938/python-previous-and-next-values-inside-a-loop
-                    if index < (subslength - 1):
-                        # if it is not the last subtitle, assign next subtitle object
-                        nextline = subs[index + 1]
-                        # get next line start time and compare it to this subtitle end time
-                        nextlineclearance = nextline.start - line.end
-                        Log(  "    Clearance to next sub: " + str(nextlineclearance) + " ms")
+                Log("    Min. calculated length: " + str(minCalcLength) + " ms")
+                Log("    Actual length: " + str(line.duration) + " ms")
 
-                        if minCalcLength > line.duration:
-                            # adjust line.duration as much as possible towards minCalcLength
-                            # calculate amount of time to increase visibility of subtitle to reach minimum time
-                            expectedincrease = minCalcLength - line.duration
-                            # find amound of time to safely increase subtitle display length
-                            timetoincrease = min(nextlineclearance, expectedincrease) - 2
-                            # timetoincrease should be positive as negative line.duration will raise ValueError in pysubs2 library
-                            if timetoincrease < 0:
-                                timetoincrease = 0
-                            # modify subtitle object
-                            line.duration = line.duration + timetoincrease
-                            Log("    Time added to subtitle duration: " + str(timetoincrease) + " ms")
+                # check next subtitle start time and compare it to this subtitle end time
+                ## https://stackoverflow.com/questions/1011938/python-previous-and-next-values-inside-a-loop
+                if nextlinestart != 0:
+                    # if it is not the last subtitle (first on indexed list), calculate gap to next subtitle (previous on indexed list) object
+                    #
+                    # compare the next subtitle's start time with this subtitle's end time
+                    nextlineclearance = nextlinestart - line.end
+                    Log("    Clearance to next sub: " + str(nextlineclearance) + " ms")
+
+                if minCalcLength > line.duration:
+                    # calculate amount of time to increase visibility of subtitle to reach minimum time
+                    expectedincrease = minCalcLength - line.duration
+
+                    # find amount of time to safely increase subtitle display length
+                    if nextlinestart != 0:
+                        # calculate time increase that will satisfy expectedincrease but still does not overlap next subtitle
+                        timetoincrease = min(nextlineclearance, expectedincrease) - 2
+                    else:
+                        # for the last subtitle, there is no limitation of next subtitle start time, so increase to minimum calculated time
+                        timetoincrease = expectedincrease
+
+                    # timetoincrease should be positive as negative line.duration will raise ValueError in pysubs2 library
+                    if timetoincrease < 0:
+                        timetoincrease = 0
+
+                    # modify subtitle object
+                    line.duration = line.duration + timetoincrease
+                    Log("    Time added to subtitle duration: " + str(timetoincrease) + " ms")
+
+                # remember start time of subtitle
+                nextlinestart = line.start
 
 
-                # save changed line
-                line.plaintext = subsline.decode('utf-8')
-        Log("Filtering lists applied.", xbmc.LOGINFO)
+            # save changed line
+            line.plaintext = subsline.decode('utf-8')
+
+    Log("Filtering lists applied.", xbmc.LOGINFO)
 
     #save subs
     subs.save(tempoutputfile)
@@ -735,7 +753,7 @@ def MangleSubtitles(originalinputfile):
     MangleEndTime = time.time()
 
     # truncating seconds: https://stackoverflow.com/questions/8595973/truncate-to-3-decimals-in-python/8595991#8595991
-    Log("subtitle file processing finished. Processing took: " + '%.3f'%(MangleEndTime - MangleStartTime) + " seconds.", xbmc.LOGNOTICE)
+    Log("Subtitle file processing finished. Processing took: " + '%.3f'%(MangleEndTime - MangleStartTime) + " seconds.", xbmc.LOGNOTICE)
 
     # fixme - debug check if file is already released
     try:
