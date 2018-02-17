@@ -204,16 +204,28 @@ class XBMCPlayer(xbmc.Player):
 
     def onPlayBackEnded( self ):
         # Will be called when xbmc stops playing a file
+        global ClockTick
         # player finished playing video
         Log("VideoPlayer END detected.", xbmc.LOGINFO)
+
+        # add 30 minutes to timer in case timer reached 0 during playback
+        # prevents starting cleaning immediatelly after playback ended
+        # 1 tick per 5 sec * 30 min = 360 ticks
+        ClockTick += 360
 
         # stop monitoring dir for changed files
         rt.stop()
 
     def onPlayBackStopped( self ):
         # Will be called when user stops xbmc playing a file
+        global ClockTick
         # player has just been stopped
         Log("VideoPlayer STOP detected.", xbmc.LOGINFO)
+
+        # add 30 minutes to timer in case timer reached 0 during playback
+        # prevents starting cleaning immediatelly after playback ended
+        # 1 tick per 5 sec * 30 min = 360 ticks
+        ClockTick += 360
 
         # stop monitoring dir for changed files
         rt.stop()
@@ -506,6 +518,9 @@ def MangleSubtitles(originalinputfile):
     # record start time of processing
     MangleStartTime = time.time()
 
+
+    #FIXME - chardet 3.0.4 library does not work for Eastern European encodings
+    #using workaround solution
     # list of encodings to try
     # the last position should be "NO_MATCH" to detect end of list
     # https://msdn.microsoft.com/en-us/library/windows/desktop/dd317756(v=vs.85).aspx
@@ -1070,7 +1085,7 @@ def GetPlayingInfo():
     Log("File currently played: " + filepathname, xbmc.LOGINFO)
     Log("Subtitles download path: " + subspath, xbmc.LOGINFO)
     Log("Audio language: " + audiolang, xbmc.LOGINFO)
-    Log("Subtitles language: " + filelang + " (either internal or external)", xbmc.LOGINFO)
+    Log("Subtitles language (either internal or external): " + filelang, xbmc.LOGINFO)
 
     return subspath, filename, filepathname, filefps, audiolang, filelang
 
