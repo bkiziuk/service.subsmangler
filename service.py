@@ -715,7 +715,12 @@ def MangleSubtitles(originalinputfile):
                 # minimum calculated length
                 # http://bbc.github.io/subtitle-guidelines/#Timing
                 # 500 ms for line + 400 ms per each word (including line breaks)
-                minCalcLength = 500 + (int(sum(subsline.count(x) for x in (' ', '\n', '\N', '|'))) * 400)
+                #minCalcLength = 500 + (int(sum(subsline.count(x) for x in (' ', '\n', '\N', '|'))) * 400)
+
+                # alternative calculation formula for chars per second
+                # https://backlothelp.netflix.com/hc/en-us/articles/219375728-English-Template-Timed-Text-Style-Guide
+                # 500 ms for line + 67 ms per each character (15 chars per second)
+                minCalcLength = 500 + (len(subsline) * 67)
 
                 Log("    Min. calculated length: " + str(minCalcLength) + " ms")
                 Log("    Actual length: " + str(line.duration) + " ms")
