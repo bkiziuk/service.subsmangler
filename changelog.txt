@@ -1,3 +1,6 @@
+v0.0.15 (2018-02-22)
+- added ability to convert local subtitle files acompaning played video file
+- added Hungarian UI language
 v0.0.14 (2018-02-16)
 - scanning for subtitles will not be triggered immediatelly after video has ended
 v0.0.13 (2018-02-15)
