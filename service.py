@@ -1297,9 +1297,9 @@ def RemoveOldSubs():
 
         if not videoexists:
             if setting_SimulateRemovalOnly:
-                Log("There is no video file matching: " + subfile.encode('utf-8') + "  File would have been deleted if Simulate option had been off.", xbmc.LOGDEBUG)
+                Log("There is no video file matching: " + subfile.encode('utf-8') + "  File would have been deleted if Simulate option had been off.", xbmc.LOGNOTICE)
             else:
-                Log("There is no video file matching: " + subfile.encode('utf-8') + "  Deleting it.", xbmc.LOGDEBUG)
+                Log("There is no video file matching: " + subfile.encode('utf-8') + "  Deleting it.", xbmc.LOGNOTICE)
                 delete_file(subfile)
         else:
             Log("Video file matching: " + subfile.encode('utf-8'), xbmc.LOGDEBUG)
