@@ -68,7 +68,6 @@ class XBMCPlayer(xbmc.Player):
         global playingFilename
         global playingFilenamePath
         global playingFps
-        global SubExtList
         global SubsSearchWasOpened
         global setting_AutoInvokeSubsDialog
 
@@ -92,16 +91,6 @@ class XBMCPlayer(xbmc.Player):
                 # string is empty, may happen when playing buffered streams
                 Log("Empty string detected. Ignoring it.", xbmc.LOGWARNING)
                 return
-
-            # clear temp dir from subtitle files
-            tempfilelist = os.listdir(xbmc.translatePath("special://temp"))
-            Log("Clearing temporary files.", xbmc.LOGINFO)
-            for item in tempfilelist:
-                filebase, fileext = os.path.splitext(item)
-                if (fileext.lower() in SubExtList) or fileext.lower().endswith("ass"):
-                    os.remove(os.path.join(tempfilelist, item))
-                    Log("       File: " + os.path.join(tempfilelist, item) + "  removed.", xbmc.LOGINFO)
-
 
             # get jnformation on Kodi language settings
             # GUI language:
@@ -149,9 +138,20 @@ class XBMCPlayer(xbmc.Player):
             SubsSearchWasOpened = False
             # check if Subtitles Search window should be opened at player start
             if setting_AutoInvokeSubsDialog:
-                # get all files matching name of file being played and extension '.ass'
+                # get all files matching name of file being played
                 # also includes 'noautosubs' file and file with '.noautosubs' extension
-                localsubs = GetSubtitleFiles(subtitlePath, '.ass')
+                extlist = list()
+
+                if setting_NoAutoInvokeIfLocalUnprocSubsFound:
+                    # optionally search for all subtitle extensions
+                    # assignment operator just makes an alias for the list
+                    # https://stackoverflow.com/questions/2612802/how-to-clone-or-copy-a-list
+                    extlist = list(SubExtList)
+
+                # search for target extension '.ass'
+                extlist.append('.ass')
+
+                localsubs = GetSubtitleFiles(subtitlePath, extlist)
 
                 # check if there is 'noautosubs' file or extension on returned file list
                 noautosubs = False
@@ -264,22 +264,28 @@ def GetIsoCode(lang):
     # "terminologic" iso codes are derived from the pronunciation in the target
     # language (if different to the bibliographic code)
 
-    Log("Looking for language code for: " + lang, xbmc.LOGDEBUG)
-    f = codecs.open(os.path.join(__addondir__, 'resources', 'ISO-639-2_utf-8.txt'), 'rb', 'utf-8')
     outlang = ''
-    for line in f:
-        iD = {}
-        iD['bibliographic'], iD['terminologic'], iD['alpha2'], iD['english'], iD['french'] = line.strip().split('|')
 
-        if iD['bibliographic'].lower() == lang.lower() or iD['alpha2'].lower() == lang.lower() or iD['english'].lower() == lang.lower():
-            outlang = iD['bibliographic']
-            break
-    f.close()
+    if lang:
+        # language code is not empty
+        Log("Looking for language code for: " + lang, xbmc.LOGDEBUG)
+        f = codecs.open(os.path.join(__addondir__, 'resources', 'ISO-639-2_utf-8.txt'), 'rb', 'utf-8')
+        for line in f:
+            iD = {}
+            iD['bibliographic'], iD['terminologic'], iD['alpha2'], iD['english'], iD['french'] = line.strip().split('|')
 
-    if outlang:
-        Log("Language code found: " + outlang, xbmc.LOGDEBUG)
+            if iD['bibliographic'].lower() == lang.lower() or iD['alpha2'].lower() == lang.lower() or iD['english'].lower() == lang.lower():
+                outlang = iD['bibliographic']
+                break
+        f.close()
+
+        if outlang:
+            Log("Language code found: " + outlang, xbmc.LOGDEBUG)
+        else:
+            Log("Language code not found.", xbmc.LOGDEBUG)
     else:
-        Log("Language code not found.", xbmc.LOGDEBUG)
+        # language code is empty
+        Log("Language code is empty. Skipping searching.", xbmc.LOGINFO)
 
     return outlang
 
@@ -301,6 +307,7 @@ def GetBool(stringvalue):
 def GetSettings():
     global setting_LogLevel
     global setting_ConversionServiceEnabled
+    global setting_AlsoConvertExistingSubtitles
     global setting_SubsFontSize
     global setting_ForegroundColor
     global setting_BackgroundColor
@@ -309,6 +316,7 @@ def GetSettings():
     global setting_RemoveAds
     global setting_PauseOnConversion
     global setting_AutoInvokeSubsDialog
+    global setting_NoAutoInvokeIfLocalUnprocSubsFound
     global setting_AutoUpdateDef
     global setting_SeparateLogFile
     global setting_AutoRemoveOldSubs
@@ -317,39 +325,46 @@ def GetSettings():
     global setting_SimulateRemovalOnly
     global setting_AdjustSubDisplayTime
 
+    setting_AutoInvokeSubsDialog = GetBool(__addon__.getSetting("AutoInvokeSubsDialog"))
+    setting_NoAutoInvokeIfLocalUnprocSubsFound = GetBool(__addon__.getSetting("NoAutoInvokeIfLocalUnprocSubsFound"))
     setting_ConversionServiceEnabled = GetBool(__addon__.getSetting("ConversionServiceEnabled"))
+    setting_AlsoConvertExistingSubtitles = GetBool(__addon__.getSetting("AlsoConvertExistingSubtitles"))
     setting_SubsFontSize = int(__addon__.getSetting("SubsFontSize"))
     setting_ForegroundColor = int(__addon__.getSetting("ForegroundColor"))
     setting_BackgroundColor = int(__addon__.getSetting("BackgroundColor"))
     setting_BackgroundTransparency = int(__addon__.getSetting("BackgroundTransparency"))
     setting_RemoveCCmarks = GetBool(__addon__.getSetting("RemoveCCmarks"))
     setting_RemoveAds = GetBool(__addon__.getSetting("RemoveAdds"))
+    setting_AdjustSubDisplayTime = GetBool(__addon__.getSetting("AdjustSubDisplayTime"))
     setting_PauseOnConversion = GetBool(__addon__.getSetting("PauseOnConversion"))
-    setting_AutoInvokeSubsDialog = GetBool(__addon__.getSetting("AutoInvokeSubsDialog"))
-    setting_AutoRemoveOldSubs = GetBool(__addon__.getSetting("AutoRemoveOldSubs"))
     setting_BackupOldSubs = GetBool(__addon__.getSetting("BackupOldSubs"))
+    setting_AutoRemoveOldSubs = GetBool(__addon__.getSetting("AutoRemoveOldSubs"))
     setting_RemoveSubsBackup = GetBool(__addon__.getSetting("RemoveSubsBackup"))
     setting_SimulateRemovalOnly = GetBool(__addon__.getSetting("SimulateRemovalOnly"))
-    setting_AdjustSubDisplayTime = GetBool(__addon__.getSetting("AdjustSubDisplayTime"))
     setting_AutoUpdateDef = GetBool(__addon__.getSetting("AutoUpdateDef"))
     setting_LogLevel = int(__addon__.getSetting("LogLevel"))
     setting_SeparateLogFile = int(__addon__.getSetting("SeparateLogFile"))
 
     Log("Reading settings.", xbmc.LOGINFO)
-    Log("Setting: ConversionServiceEnabled = " + str(setting_ConversionServiceEnabled), xbmc.LOGINFO)
-    Log("                     SubsFontSize = " + str(setting_SubsFontSize), xbmc.LOGINFO)
-    Log("           BackgroundTransparency = " + str(setting_BackgroundTransparency), xbmc.LOGINFO)
-    Log("                    RemoveCCmarks = " + str(setting_RemoveCCmarks), xbmc.LOGINFO)
-    Log("                        RemoveAds = " + str(setting_RemoveAds), xbmc.LOGINFO)
-    Log("             AdjustSubDisplayTime = " + str(setting_AdjustSubDisplayTime), xbmc.LOGINFO)
-    Log("             AutoInvokeSubsDialog = " + str(setting_AutoInvokeSubsDialog), xbmc.LOGINFO)
-    Log("                    BackupOldSubs = " + str(setting_BackupOldSubs), xbmc.LOGINFO)
-    Log("                AutoRemoveOldSubs = " + str(setting_AutoRemoveOldSubs), xbmc.LOGINFO)
-    Log("                 RemoveSubsBackup = " + str(setting_RemoveSubsBackup), xbmc.LOGINFO)
-    Log("              SimulateRemovalOnly = " + str(setting_SimulateRemovalOnly), xbmc.LOGINFO)
-    Log("                    AutoUpdateDef = " + str(setting_AutoUpdateDef), xbmc.LOGINFO)
-    Log("                         LogLevel = " + str(setting_LogLevel), xbmc.LOGINFO)
-    Log("                  SeparateLogFile = " + str(setting_SeparateLogFile), xbmc.LOGINFO)
+    Log("Setting:       AutoInvokeSubsDialog = " + str(setting_AutoInvokeSubsDialog), xbmc.LOGINFO)
+    Log(" NoAutoInvokeIfLocalUnprocSubsFound = " + str(setting_NoAutoInvokeIfLocalUnprocSubsFound), xbmc.LOGINFO)
+    Log("           ConversionServiceEnabled = " + str(setting_ConversionServiceEnabled), xbmc.LOGINFO)
+    Log("       AlsoConvertExistingSubtitles = " + str(setting_AlsoConvertExistingSubtitles), xbmc.LOGINFO)
+    Log("                       SubsFontSize = " + str(setting_SubsFontSize), xbmc.LOGINFO)
+    Log("                    ForegroundColor = " + str(setting_ForegroundColor), xbmc.LOGINFO)
+    Log("                    BackgroundColor = " + str(setting_BackgroundColor), xbmc.LOGINFO)
+    Log("             BackgroundTransparency = " + str(setting_BackgroundTransparency), xbmc.LOGINFO)
+    Log("                      RemoveCCmarks = " + str(setting_RemoveCCmarks), xbmc.LOGINFO)
+    Log("                          RemoveAds = " + str(setting_RemoveAds), xbmc.LOGINFO)
+    Log("               AdjustSubDisplayTime = " + str(setting_AdjustSubDisplayTime), xbmc.LOGINFO)
+    Log("                  PauseOnConversion = " + str(setting_PauseOnConversion), xbmc.LOGINFO)
+    Log("                      BackupOldSubs = " + str(setting_BackupOldSubs), xbmc.LOGINFO)
+    Log("                  AutoRemoveOldSubs = " + str(setting_AutoRemoveOldSubs), xbmc.LOGINFO)
+    Log("                   RemoveSubsBackup = " + str(setting_RemoveSubsBackup), xbmc.LOGINFO)
+    Log("                SimulateRemovalOnly = " + str(setting_SimulateRemovalOnly), xbmc.LOGINFO)
+    Log("                      AutoUpdateDef = " + str(setting_AutoUpdateDef), xbmc.LOGINFO)
+    Log("                           LogLevel = " + str(setting_LogLevel), xbmc.LOGINFO)
+    Log("                    SeparateLogFile = " + str(setting_SeparateLogFile), xbmc.LOGINFO)
 
 
 
@@ -972,9 +987,21 @@ def DetectNewSubs():
         epoch_file = xbmcvfs.Stat(pathfile).st_mtime()
         epoch_now = time.time()
 
-        if  epoch_file > epoch_now - 6:
-            # Video filename matches subtitle filename and it was created/modified no later than 6 secods ago
+        if (epoch_file > epoch_now - 6) or setting_AlsoConvertExistingSubtitles:
+            # Video filename matches subtitle filename
+            # and either it was created/modified no later than 6 seconds ago or existing subtitles are taken into account as well
             Log("New subtitle file detected: " + pathfile, xbmc.LOGNOTICE)
+
+
+            # clear temp dir from subtitle files
+            tempfilelist = [f for f in os.listdir(xbmc.translatePath("special://temp/")) if os.path.isfile(os.path.join(xbmc.translatePath("special://temp/"), f))]
+            Log("Clearing temporary files.", xbmc.LOGINFO)
+            for item in tempfilelist:
+                filebase, fileext = os.path.splitext(item)
+                if (fileext.lower() in SubExtList) or fileext.lower().endswith("ass"):
+                    os.remove(os.path.join(xbmc.translatePath("special://temp/"), item))
+                    Log("       File: " + os.path.join(xbmc.translatePath("special://temp/"), item) + "  removed.", xbmc.LOGINFO)
+
 
             # record start time of processing
             RoutineStartTime = time.time()
