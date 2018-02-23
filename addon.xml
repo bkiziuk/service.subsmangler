@@ -6,57 +6,21 @@
     <extension point="xbmc.service" library="service.py" start="login"/>
     <extension point="xbmc.addon.metadata">
 		<summary lang="en">A comprehensive subtitle companion</summary>
-		<description lang="en">Adjusts subtitles files to include black background. Supports: microDVD, SubRip, MPL2 and TMP formats. Automatically invokes subtitle search dialog if local subtitles are not detected. Removes subtitle files if original video was deleted. Also, allows to remove advertisement texts and texts for the Hearing Impaired. Doesn't require external plugins.</description>
+		<summary lang="pl">Wszechstronny asystent napisów</summary>
+		<summary lang="hu">Egy teljeskörű felirat asszisztens</summary>
+		<description lang="en">Adjusts subtitle files to include black background. Supports: microDVD, SubRip, MPL2 and TMP formats. Automatically invokes subtitle search dialog if local subtitles are not detected. Removes subtitle files if original video was deleted. Also, allows to remove advertisement texts and texts for the Hearing Impaired. Doesn't require external plugins.</description>
         <description lang="pl">Konwertuje napisy dodając czarne tło. Obsługuje formaty microDVD, SubRip, MPL2 i TMP. Umożliwia automatyczne uruchamianie okna wyszukiwania napisów w sytuacji, gdy nie zostały wykryte lokalne napisy. Usuwa pliki z napisami dla skasowanych filmów. Pozwala również na usuwanie z napisów podpisów reklamowych oraz znaczników dla niesłyszących. Nie wymaga zależnych wtyczek.</description>
-        <description lang="hu">Feliratok beállítása fekete háttérrel. Támogatott: microDVD, SubRip, MPL2 és TMP formátumok. Automatikusan elindul a felirat kereső program, ha nem található helyi felirat fájl. Törli a letöltött feliratot, ha az eredeti videó törlésre kerül. Továbbá, eltávolítja a hírdetési szövegeket, illetve a hallássérülteknek szóló feliratokat. Nem igényel külső plugin-t.</description>        <disclaimer>A comprehensive subtitle companion</disclaimer>
-        <news>v0.0.15 (2018-02-22)
-- added ability to convert local subtitle files acompaning played video file
+        <description lang="hu">Feliratok beállítása fekete háttérrel. Támogatott: microDVD, SubRip, MPL2 és TMP formátumok. Automatikusan elindul a felirat kereső program, ha nem található helyi felirat fájl. Törli a letöltött feliratot, ha az eredeti videó törlésre kerül. Továbbá, eltávolítja a hírdetési szövegeket, illetve a hallássérülteknek szóló feliratokat. Nem igényel külső plugin-t.</description>
+        <disclaimer lang="en">A comprehensive subtitle companion</disclaimer>
+        <disclaimer lang="pl">Wszechstronny asystent napisów</disclaimer>
+        <disclaimer lang="hu">Egy teljeskörű felirat asszisztens</disclaimer>
+        <news>v0.0.15 (2018-02-23)
+- added ability to convert local subtitle files accompanying played video file
 - added Hungarian UI language
-v0.0.14 (2018-02-16)
-- scanning for subtitles will not be triggered immediatelly after video has ended
-v0.0.13 (2018-02-15)
-- fixed skipping next subtitle entry on list if current subtitle was deleted
-v0.0.12 (2018-02-14)
-- improved progress bar calculation
-- detection of forced internal subtitles and audio tracks matching preferred language
-v0.0.11 (2018-02-13)
-- unicode fixes
-- subtitle file matching against video files fixes
-- added possibility of extending subtitle display time to match minimum calculated time
-v0.0.10 (2018-02-11)
-- added possibility to automatically remove subtitle files for nonexisting videos
-v0.0.9 (2018-02-09)
-- improve extension detection of variable lengths
-- option not to pause playback during conversion
-v0.0.8 (2018-02-08)
-- added support for generic Ads section
-- added customizing of foreground/background colors
-- reorganized settings
-- improved Exception handling
-v0.0.7 (2018-02-07)
-- confirmation dialog if subtitles search dialog should be opened the next time
-- unicode fixes
-- more Windows codepages added
-- online playback will not trigger subtitles window
-v0.0.6 (2018-02-05)
-- fixes for handling Boolean values correctly in config file
-- respecting of 'noautosubs' flag file/extension when trying to open subtitles search dialog
-v0.0.5 (2018-02-04)
-- some code clean-up
-- regex auto-update
-- subtitles search dialog auto invoke
-- minimum xbmc.python: 2.25.0 - due to API availability
-v0.0.4 (2018-02-02)
-- separate log file with logrotation
-v0.0.3 (2018-02-01)
-- custom log filtering
-v0.0.2 (2018-01-31)
-- initial regexp filtering
-v0.0.1  (2018-01-21)
-- initial test version with subtitles conversion mechanism</news>
+</news>
         <platform>all</platform>
         <license>GNU General Public License v3.0</license>
-        <forum></forum>
+        <forum>https://forum.kodi.tv/showthread.php?tid=328763</forum>
         <website></website>
         <source>https://github.com/bkiziuk/service.subsmangler</source>
 		<language></language>
