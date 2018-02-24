@@ -71,6 +71,11 @@ class XBMCPlayer(xbmc.Player):
         global SubsSearchWasOpened
         global setting_AutoInvokeSubsDialog
 
+        # stop subtitle detection in case it was already running
+        # this prevents YesNo dialog from showing immediatelly after opening subtitle search dialog
+        # in case playback of new file is started during playback of another file without prior stopping it
+        rt.stop()
+
         # detect if Player is running by checking xbmc.Player().isPlayingVideo() or xbmc.getCondVisibility('Player.HasVideo')
         # use ConditionalVisibility checks: http://kodi.wiki/view/List_of_boolean_conditions
         #Log("xbmc.Player().isPlayingVideo(): " + str(xbmc.Player().isPlayingVideo()), xbmc.LOGINFO)
