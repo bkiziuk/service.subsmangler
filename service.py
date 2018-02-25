@@ -1,3 +1,4 @@
+import chardet
 import codecs
 import os
 import errno
@@ -539,32 +540,60 @@ def MangleSubtitles(originalinputfile):
     MangleStartTime = time.time()
 
 
-    #FIXME - chardet 3.0.4 library does not work for Eastern European encodings
-    #using workaround solution
-    # list of encodings to try
-    # the last position should be "NO_MATCH" to detect end of list
-    # https://msdn.microsoft.com/en-us/library/windows/desktop/dd317756(v=vs.85).aspx
-    encodings = [ "utf-8", "cp1250", "cp1251", "cp1252", "cp1253", "cp1254", "cp1255", "cp1256", "cp1257", "cp1258", "NO_MATCH" ]
-
-    # try to detect proper encoding
-    # https://stackoverflow.com/questions/436220/determine-the-encoding-of-text-in-python
-    for enc in encodings:
-        try:
-            with codecs.open(tempinputfile, mode="rb", encoding=enc) as reader:
-                temp = reader.read()
-                break
-        except Exception as e:
-            # no encoding fits the file
-            if enc == "NO_MATCH":
-                break
-            # encoding does not match
-            Log("Input file test for: " + enc + " failed.", xbmc.LOGINFO)
-            continue
-
-    # no encodings match
-    if enc == "NO_MATCH":
-        Log("No tried encodings match input file.", xbmc.LOGNOTICE)
+    #FIXME - chardet 3.0.4 library does not work for Eastern European encodings and misdetects some others
+    # read file to variable
+    try:
+        f = open(tempinputfile, mode="rb")
+        temp = f.read()
+        f.close()
+    except Exception as e:
+        Log("Can not read input file: " + tempinputfile)
+        Log("Exception: " + str(e.message), xbmc.LOGERROR)
         return
+
+    # pass contents to chardet for detection
+    chardetout = chardet.detect(temp)
+    chardet_encoding = chardetout['encoding']
+    chardet_confidence = chardetout['confidence']
+
+    Log("Input encoding according to chardet: " + chardet_encoding + " with confidence of: " + '%.3f'%chardet_confidence, xbmc.LOGINFO)
+
+    # chardet seems to misdetect some encodings
+    support_dict = {
+        'ISO-8859-2': 'cp1250',
+        'IBM855': 'cp1252'
+        }
+    # statically replace encodings
+    if chardet_encoding in support_dict:
+        enc = support_dict[chardet_encoding]
+    else:
+        enc = chardet_encoding
+
+
+    # # list of encodings to try
+    # # the last position should be "NO_MATCH" to detect end of list
+    # # https://msdn.microsoft.com/en-us/library/windows/desktop/dd317756(v=vs.85).aspx
+    # encodings = [ "utf-8", "cp1251", "cp1250", "cp1252", "cp1253", "cp1254", "cp1255", "cp1256", "cp1257", "cp1258", "NO_MATCH" ]
+
+    # # try to detect proper encoding
+    # # https://stackoverflow.com/questions/436220/determine-the-encoding-of-text-in-python
+    # for enc in encodings:
+    #     try:
+    #         with codecs.open(tempinputfile, mode="rb", encoding=enc) as reader:
+    #             temp = reader.read()
+    #             break
+    #     except Exception as e:
+    #         # no encoding fits the file
+    #         if enc == "NO_MATCH":
+    #             break
+    #         # encoding does not match
+    #         Log("Input file test for: " + enc + " failed.", xbmc.LOGINFO)
+    #         continue
+
+    # # no encodings match
+    # if enc == "NO_MATCH":
+    #     Log("No tried encodings match input file.", xbmc.LOGNOTICE)
+    #     return
 
     Log("Input encoding used: " + enc, xbmc.LOGINFO)
     Log("          Input FPS: " + str(playingFps), xbmc.LOGINFO)
