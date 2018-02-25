@@ -1,3 +1,5 @@
+v0.0.16 (2018-02-24)
+- fix for opening YesNo dialog immediatelly after SubSearch dialog if new playback was started without manual stop of the previous one
 v0.0.15 (2018-02-23)
 - added ability to convert local subtitle files accompanying played video file
 - added Hungarian UI language
