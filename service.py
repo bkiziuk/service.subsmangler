@@ -786,7 +786,10 @@ def MangleSubtitles(originalinputfile):
                         # for the last subtitle, there is no limitation of next subtitle start time, so increase to minimum calculated time
                         timetoincrease = expectedincrease
 
-                    # timetoincrease should be positive as negative line.duration will raise ValueError in pysubs2 library
+                    # check if line duration is positive as negative line.duration will raise ValueError in pysubs2 library
+                    if line.duration < 0:
+                        line.duration = 0
+                    # timetoincrease should be positive as well
                     if timetoincrease < 0:
                         timetoincrease = 0
 
@@ -843,6 +846,8 @@ def copy_file(srcFile, dstFile):
     try:
         Log("copy_file: srcFile: " + srcFile, xbmc.LOGINFO)
         Log("           dstFile: " + dstFile, xbmc.LOGINFO)
+        if xbmcvfs.exists(srcFile):
+            Log("copy_file: srcFile exists.", xbmc.LOGINFO)
         if xbmcvfs.exists(dstFile):
             Log("copy_file: dstFile exists. Trying to remove.", xbmc.LOGINFO)
             delete_file(dstFile)
@@ -851,19 +856,30 @@ def copy_file(srcFile, dstFile):
         Log("copy_file: Copy started.", xbmc.LOGINFO)
 
         # copy source file to target file
-        copyfile(FixPath(srcFile), FixPath(dstFile))
-        Log("copy_file: File copied.", xbmc.LOGINFO)
+        # copyfile(FixPath(srcFile), FixPath(dstFile))
+        # Log("copy_file: File copied.", xbmc.LOGINFO)
 
         # as xbmcvfs.copy() sometimes fails, make more tries to check if lock is permanent - test only
         # counter = 0
         # success = 0
-        # while not (success != 0 or counter >= 5):
+        # while not (success != 0 or counter >= 10):
         #     success = xbmcvfs.copy(srcFile, dstFile)
         #     Log("copy_file: SuccessStatus: " + str(success), xbmc.LOGINFO)
         #     counter += 1
-        #     xbmc.sleep(1000)
+        #     xbmc.sleep(500)
         # if counter > 1:
         #     Log("copy_file: First copy try failed. Number of tries: " + str(counter), xbmc.LOGWARNING)
+
+        filehandle = xbmcvfs.File(srcFile)
+        buffer = filehandle.read()
+        filehandle.close()
+        Log("File data read: " + str(buffer), xbmc.LOGINFO)
+        filehandle = xbmcvfs.File(dstFile, 'w')
+        result = filehandle.write(buffer)
+        filehandle.close()
+        Log("File data write result: " + str(result), xbmc.LOGINFO)
+
+
 
     except Exception as e:
         Log("copy_file: Copy failed.", xbmc.LOGERROR)
