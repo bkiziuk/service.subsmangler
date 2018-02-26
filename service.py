@@ -1,4 +1,3 @@
-import chardet
 import codecs
 import os
 import errno
@@ -307,6 +306,27 @@ def GetBool(stringvalue):
 
 
 
+# function translates path based on running OS
+def FixPath(path):
+    destpath = ""
+    if path.startswith("special://"):
+        # translate Kodi's special type paths
+        destpath = xbmc.translatePath(path)
+    elif path.lower().startswith("smb://") and xbmc.getCondVisibility('System.Platform.Windows'):
+        # translate smb: paths if platform is Windows
+        destpath = path.replace("smb://", "\\\\")
+        destpath = destpath.replace("/", "\\")
+    else:
+        destpath = path
+
+    if destpath != path:
+        Log("FixPath:  InputPath: " + path, xbmc.LOGINFO)
+        Log("FixPath: OutputPath: " + destpath, xbmc.LOGINFO)
+
+    return destpath
+
+
+
 # read settings from configuration file
 # settings are read only during addon's start - so for service type addon we need to re-read them after they are altered
 # https://forum.kodi.tv/showthread.php?tid=201423&pid=1766246#pid1766246
@@ -540,60 +560,31 @@ def MangleSubtitles(originalinputfile):
     MangleStartTime = time.time()
 
 
-    #FIXME - chardet 3.0.4 library does not work for Eastern European encodings and misdetects some others
-    # read file to variable
-    try:
-        f = open(tempinputfile, mode="rb")
-        temp = f.read()
-        f.close()
-    except Exception as e:
-        Log("Can not read input file: " + tempinputfile)
-        Log("Exception: " + str(e.message), xbmc.LOGERROR)
+
+    # list of encodings to try
+    # the last position should be "NO_MATCH" to detect end of list
+    # https://msdn.microsoft.com/en-us/library/windows/desktop/dd317756(v=vs.85).aspx
+    encodings = [ "utf-8", "cp1251", "cp1250", "cp1252", "cp1253", "cp1254", "cp1255", "cp1256", "cp1257", "cp1258", "NO_MATCH" ]
+
+    # try to detect proper encoding
+    # https://stackoverflow.com/questions/436220/determine-the-encoding-of-text-in-python
+    for enc in encodings:
+        try:
+            with codecs.open(tempinputfile, mode="rb", encoding=enc) as reader:
+                temp = reader.read()
+                break
+        except Exception as e:
+            # no encoding fits the file
+            if enc == "NO_MATCH":
+                break
+            # encoding does not match
+            Log("Input file test for: " + enc + " failed.", xbmc.LOGINFO)
+            continue
+
+    # no encodings match
+    if enc == "NO_MATCH":
+        Log("No tried encodings match input file.", xbmc.LOGNOTICE)
         return
-
-    # pass contents to chardet for detection
-    chardetout = chardet.detect(temp)
-    chardet_encoding = chardetout['encoding']
-    chardet_confidence = chardetout['confidence']
-
-    Log("Input encoding according to chardet: " + chardet_encoding + " with confidence of: " + '%.3f'%chardet_confidence, xbmc.LOGINFO)
-
-    # chardet seems to misdetect some encodings
-    support_dict = {
-        'ISO-8859-2': 'cp1250',
-        'IBM855': 'cp1252'
-        }
-    # statically replace encodings
-    if chardet_encoding in support_dict:
-        enc = support_dict[chardet_encoding]
-    else:
-        enc = chardet_encoding
-
-
-    # # list of encodings to try
-    # # the last position should be "NO_MATCH" to detect end of list
-    # # https://msdn.microsoft.com/en-us/library/windows/desktop/dd317756(v=vs.85).aspx
-    # encodings = [ "utf-8", "cp1251", "cp1250", "cp1252", "cp1253", "cp1254", "cp1255", "cp1256", "cp1257", "cp1258", "NO_MATCH" ]
-
-    # # try to detect proper encoding
-    # # https://stackoverflow.com/questions/436220/determine-the-encoding-of-text-in-python
-    # for enc in encodings:
-    #     try:
-    #         with codecs.open(tempinputfile, mode="rb", encoding=enc) as reader:
-    #             temp = reader.read()
-    #             break
-    #     except Exception as e:
-    #         # no encoding fits the file
-    #         if enc == "NO_MATCH":
-    #             break
-    #         # encoding does not match
-    #         Log("Input file test for: " + enc + " failed.", xbmc.LOGINFO)
-    #         continue
-
-    # # no encodings match
-    # if enc == "NO_MATCH":
-    #     Log("No tried encodings match input file.", xbmc.LOGNOTICE)
-    #     return
 
     Log("Input encoding used: " + enc, xbmc.LOGINFO)
     Log("          Input FPS: " + str(playingFps), xbmc.LOGINFO)
@@ -859,20 +850,13 @@ def copy_file(srcFile, dstFile):
             Log("copy_file: dstFile does not exist.", xbmc.LOGINFO)
         Log("copy_file: Copy started.", xbmc.LOGINFO)
 
-        # as copy sometimes fails, make more tries to check if lock is permanent - test only
-        counter = 0
-        success = 0
+        # copy source file to target file
+        copyfile(FixPath(srcFile), FixPath(dstFile))
+        Log("copy_file: File copied.", xbmc.LOGINFO)
 
-        # read file from source
-        f = xbmcvfs.File(srcFile)
-        buffer = f.read()
-        f.close()
-        # save to destination
-        f =xbmcvfs.File(dstFile, 'wb')
-        result = f.write(buffer)
-        f.close()
-        Log("copy_file: SuccessStatus: " + str(result), xbmc.LOGINFO)
-
+        # as xbmcvfs.copy() sometimes fails, make more tries to check if lock is permanent - test only
+        # counter = 0
+        # success = 0
         # while not (success != 0 or counter >= 5):
         #     success = xbmcvfs.copy(srcFile, dstFile)
         #     Log("copy_file: SuccessStatus: " + str(success), xbmc.LOGINFO)
@@ -880,10 +864,10 @@ def copy_file(srcFile, dstFile):
         #     xbmc.sleep(1000)
         # if counter > 1:
         #     Log("copy_file: First copy try failed. Number of tries: " + str(counter), xbmc.LOGWARNING)
-            
+
     except Exception as e:
         Log("copy_file: Copy failed.", xbmc.LOGERROR)
-        Log("Exception: " + str(e.message), xbmc.LOGERROR)
+        Log("Exception: " + str(e), xbmc.LOGERROR)
 
     wait_for_file(dstFile, True)
 
