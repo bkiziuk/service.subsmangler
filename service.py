@@ -847,6 +847,7 @@ def copy_file(srcFile, dstFile):
         Log("copy_file: srcFile: " + srcFile, xbmc.LOGINFO)
         Log("           dstFile: " + dstFile, xbmc.LOGINFO)
         if xbmcvfs.exists(srcFile):
+            #FIXME - debug
             Log("copy_file: srcFile exists.", xbmc.LOGINFO)
         if xbmcvfs.exists(dstFile):
             Log("copy_file: dstFile exists. Trying to remove.", xbmc.LOGINFO)
@@ -870,6 +871,7 @@ def copy_file(srcFile, dstFile):
         # if counter > 1:
         #     Log("copy_file: First copy try failed. Number of tries: " + str(counter), xbmc.LOGWARNING)
 
+        #FIXME - debug
         filehandle = xbmcvfs.File(srcFile)
         buffer = filehandle.read()
         filehandle.close()
