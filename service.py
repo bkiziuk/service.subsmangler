@@ -312,10 +312,10 @@ def FixPath(path):
     if path.startswith("special://"):
         # translate Kodi's special type paths
         destpath = xbmc.translatePath(path)
-    elif path.lower().startswith("smb://") and xbmc.getCondVisibility('System.Platform.Windows'):
+    elif path.lower().startswith("smb:") and xbmc.getCondVisibility('System.Platform.Windows'):
         # translate smb: paths if platform is Windows
-        destpath = path.replace("smb://", "\\\\")
-        destpath = destpath.replace("/", "\\")
+        destpath = path.replace("smb:", "")
+        destpath = os.path.normpath(destpath)
     else:
         destpath = path
 
