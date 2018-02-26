@@ -539,8 +539,7 @@ def MangleSubtitles(originalinputfile):
     MangleStartTime = time.time()
 
 
-    #FIXME - chardet 3.0.4 library does not work for Eastern European encodings
-    #using workaround solution
+
     # list of encodings to try
     # the last position should be "NO_MATCH" to detect end of list
     # https://msdn.microsoft.com/en-us/library/windows/desktop/dd317756(v=vs.85).aspx
@@ -840,7 +839,7 @@ def copy_file(srcFile, dstFile):
             xbmc.sleep(1000)
         if counter > 1:
             Log("copy_file: First copy try failed. Number of tries: " + str(counter), xbmc.LOGWARNING)
-            
+
     except Exception as e:
         Log("copy_file: Copy failed.", xbmc.LOGERROR)
         Log("Exception: " + str(e.message), xbmc.LOGERROR)
