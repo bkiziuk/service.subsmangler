@@ -766,7 +766,10 @@ def MangleSubtitles(originalinputfile):
                         # for the last subtitle, there is no limitation of next subtitle start time, so increase to minimum calculated time
                         timetoincrease = expectedincrease
 
-                    # timetoincrease should be positive as negative line.duration will raise ValueError in pysubs2 library
+                    # check if line.duration is positive as negative line.duration will raise ValueError in pysubs2 library
+                    if line.duration < 0:
+                        line.duration = 0
+                    # timetoincrease should be positive as well
                     if timetoincrease < 0:
                         timetoincrease = 0
 
