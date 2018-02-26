@@ -548,9 +548,9 @@ def MangleSubtitles(originalinputfile):
     # as pysubs2 library doesn't support Kodi's virtual file system and file can not be processed remotely on smb:// share,
     # file must be copied to temp folder for local processing
     # construct input_file name
-    tempinputfile = os.path.join(xbmc.translatePath("special://temp"), tempfile + "_in.txt")
+    tempinputfile = os.path.join(__addonworkdir__, tempfile + "_in.txt")
     # construct output_file name
-    tempoutputfile = os.path.join(xbmc.translatePath("special://temp"), tempfile + "_out.ass")
+    tempoutputfile = os.path.join(__addonworkdir__, tempfile + "_out.ass")
     # copy file to temp
     copy_file(originalinputfile, tempinputfile)
 
@@ -1051,13 +1051,13 @@ def DetectNewSubs():
 
 
             # clear temp dir from subtitle files
-            tempfilelist = [f for f in os.listdir(xbmc.translatePath("special://temp/")) if os.path.isfile(os.path.join(xbmc.translatePath("special://temp/"), f))]
+            tempfilelist = [f for f in os.listdir(__addonworkdir__) if os.path.isfile(os.path.join(__addonworkdir__, f))]
             Log("Clearing temporary files.", xbmc.LOGINFO)
             for item in tempfilelist:
                 filebase, fileext = os.path.splitext(item)
                 if (fileext.lower() in SubExtList) or fileext.lower().endswith("ass"):
-                    os.remove(os.path.join(xbmc.translatePath("special://temp/"), item))
-                    Log("       File: " + os.path.join(xbmc.translatePath("special://temp/"), item) + "  removed.", xbmc.LOGINFO)
+                    os.remove(os.path.join(__addonworkdir__, item))
+                    Log("       File: " + os.path.join(__addonworkdir__, item) + "  removed.", xbmc.LOGINFO)
 
 
             # record start time of processing
