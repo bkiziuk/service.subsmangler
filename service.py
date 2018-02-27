@@ -861,25 +861,25 @@ def copy_file(srcFile, dstFile):
         # Log("copy_file: File copied.", xbmc.LOGINFO)
 
         # as xbmcvfs.copy() sometimes fails, make more tries to check if lock is permanent - test only
-        # counter = 0
-        # success = 0
-        # while not (success != 0 or counter >= 10):
-        #     success = xbmcvfs.copy(srcFile, dstFile)
-        #     Log("copy_file: SuccessStatus: " + str(success), xbmc.LOGINFO)
-        #     counter += 1
-        #     xbmc.sleep(500)
-        # if counter > 1:
-        #     Log("copy_file: First copy try failed. Number of tries: " + str(counter), xbmc.LOGWARNING)
+        counter = 0
+        success = 0
+        while not (success != 0 or counter >= 3):
+            success = xbmcvfs.copy(srcFile, dstFile)
+            Log("copy_file: SuccessStatus: " + str(success), xbmc.LOGINFO)
+            counter += 1
+            xbmc.sleep(500)
+        if counter > 1:
+            Log("copy_file: First copy try failed. Number of tries: " + str(counter), xbmc.LOGWARNING)
 
-        #FIXME - debug
-        filehandle = xbmcvfs.File(srcFile)
-        buffer = filehandle.read()
-        filehandle.close()
-        Log("File data read: " + str(buffer), xbmc.LOGINFO)
-        filehandle = xbmcvfs.File(dstFile, 'w')
-        result = filehandle.write(buffer)
-        filehandle.close()
-        Log("File data write result: " + str(result), xbmc.LOGINFO)
+        # #FIXME - debug
+        # filehandle = xbmcvfs.File(srcFile)
+        # buffer = filehandle.read()
+        # filehandle.close()
+        # Log("File data read: " + str(buffer), xbmc.LOGINFO)
+        # filehandle = xbmcvfs.File(dstFile, 'w')
+        # result = filehandle.write(buffer)
+        # filehandle.close()
+        # Log("File data write result: " + str(result), xbmc.LOGINFO)
 
 
 
