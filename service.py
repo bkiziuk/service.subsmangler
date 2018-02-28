@@ -411,7 +411,12 @@ def Log(message, severity=xbmc.LOGDEBUG):
         # log the message to Log
         if setting_SeparateLogFile == 0:
             # use kodi.log for logging
-            xbmc.log("SubsMangler: " + message, level=xbmc.LOGNONE)
+            # check if string is str
+            if isinstance(message, str):
+                # convert to unicode string
+                message = message.decode('utf-8')
+            # reencode to utf-8
+            xbmc.log("SubsMangler: " + message.encode('utf-8'), level=xbmc.LOGNONE)
         else:
             # use own log file located in addon's datadir
 
@@ -564,7 +569,7 @@ def MangleSubtitles(originalinputfile):
     # list of encodings to try
     # the last position should be "NO_MATCH" to detect end of list
     # https://msdn.microsoft.com/en-us/library/windows/desktop/dd317756(v=vs.85).aspx
-    encodings = [ "utf-8", "cp1251", "cp1250", "cp1252", "cp1253", "cp1254", "cp1255", "cp1256", "cp1257", "cp1258", "NO_MATCH" ]
+    encodings = [ "utf-8", "cp1250", "cp1251", "cp1252", "cp1253", "cp1254", "cp1255", "cp1256", "cp1257", "cp1258", "NO_MATCH" ]
 
     # try to detect proper encoding
     # https://stackoverflow.com/questions/436220/determine-the-encoding-of-text-in-python
@@ -863,7 +868,7 @@ def copy_file(srcFile, dstFile):
         # as xbmcvfs.copy() sometimes fails, make more tries to check if lock is permanent - test only
         counter = 0
         success = 0
-        while not (success != 0 or counter >= 3):
+        while not (success != 0 or counter >= 5):
             success = xbmcvfs.copy(srcFile, dstFile)
             Log("copy_file: SuccessStatus: " + str(success), xbmc.LOGINFO)
             counter += 1
@@ -1050,12 +1055,12 @@ def DetectNewSubs():
             Log("New subtitle file detected: " + pathfile, xbmc.LOGNOTICE)
 
 
-            # clear temp dir from subtitle files
+            # clear storage dir from subtitle files
             tempfilelist = [f for f in os.listdir(__addonworkdir__) if os.path.isfile(os.path.join(__addonworkdir__, f))]
             Log("Clearing temporary files.", xbmc.LOGINFO)
             for item in tempfilelist:
                 filebase, fileext = os.path.splitext(item)
-                if (fileext.lower() in SubExtList) or fileext.lower().endswith("ass"):
+                if (fileext.lower() in SubExtList) or fileext.lower().endswith(".ass"):
                     os.remove(os.path.join(__addonworkdir__, item))
                     Log("       File: " + os.path.join(__addonworkdir__, item) + "  removed.", xbmc.LOGINFO)
 
@@ -1393,9 +1398,9 @@ __addonlang__ = __addon__.getLocalizedString
 # path and file name of public definitions
 global deffilename
 deffileurl = "http://bkiziuk.github.io/kodi-repo/regexdef.txt"
-localdeffilename = os.path.join(__addonworkdir__, 'regexdef.txt')
-sampledeffilename = os.path.join(__addondir__, 'resources', 'regexdef.txt')
-tempdeffilename = os.path.join(xbmc.translatePath("special://temp"), 'deffile.txt')
+localdeffilename = os.path.join(__addonworkdir__, 'regexdef.def')
+sampledeffilename = os.path.join(__addondir__, 'resources', 'regexdef.def')
+tempdeffilename = os.path.join(__addonworkdir__, 'tempdef.def')
 
 # list of input file extensions
 # extensions in lowercase with leading dot
@@ -1461,12 +1466,12 @@ if __name__ == '__main__':
         #
         # set definitions file location
         # dir is local, no need to use xbmcvfs()
-        if os.path.isfile(os.path.join(__addonworkdir__, 'regexdef.txt')):
+        if os.path.isfile(localdeffilename):
             # downloaded file is available
-            deffilename = os.path.join(__addonworkdir__, 'regexdef.txt')
+            deffilename = localdeffilename
         else:
             # use sample file from addon's dir
-            deffilename = os.path.join(__addondir__, 'resources', 'regexdef.txt')
+            deffilename = sampledeffilename
 
         # housekeeping services
         if ClockTick <=0 and not xbmc.getCondVisibility('Player.HasMedia'):
