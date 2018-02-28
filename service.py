@@ -559,7 +559,7 @@ def MangleSubtitles(originalinputfile):
     # copy file to temp
     copy_file(originalinputfile, tempinputfile)
 
-    Log("subtitle file processing started.", xbmc.LOGNOTICE)
+    Log("Subtitle file processing started.", xbmc.LOGNOTICE)
 
     # record start time of processing
     MangleStartTime = time.time()
@@ -868,7 +868,7 @@ def copy_file(srcFile, dstFile):
         # as xbmcvfs.copy() sometimes fails, make more tries to check if lock is permanent - test only
         counter = 0
         success = 0
-        while not (success != 0 or counter >= 5):
+        while not (success != 0 or counter >= 1):
             success = xbmcvfs.copy(srcFile, dstFile)
             Log("copy_file: SuccessStatus: " + str(success), xbmc.LOGINFO)
             counter += 1
@@ -1054,6 +1054,9 @@ def DetectNewSubs():
             # and either it was created/modified no later than 6 seconds ago or existing subtitles are taken into account as well
             Log("New subtitle file detected: " + pathfile, xbmc.LOGNOTICE)
 
+            Log("Subtitles processing routine started.")
+            # record start time of processing
+            RoutineStartTime = time.time()
 
             # clear storage dir from subtitle files
             tempfilelist = [f for f in os.listdir(__addonworkdir__) if os.path.isfile(os.path.join(__addonworkdir__, f))]
@@ -1063,10 +1066,6 @@ def DetectNewSubs():
                 if (fileext.lower() in SubExtList) or fileext.lower().endswith(".ass"):
                     os.remove(os.path.join(__addonworkdir__, item))
                     Log("       File: " + os.path.join(__addonworkdir__, item) + "  removed.", xbmc.LOGINFO)
-
-
-            # record start time of processing
-            RoutineStartTime = time.time()
 
             # hide subtitles
             xbmc.Player().showSubtitles(False)
