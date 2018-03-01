@@ -306,6 +306,27 @@ def GetBool(stringvalue):
 
 
 
+# # function translates path based on running OS
+# def FixPath(path):
+#     destpath = ""
+#     if path.startswith("special://"):
+#         # translate Kodi's special type paths
+#         destpath = xbmc.translatePath(path)
+#     elif path.lower().startswith("smb:") and xbmc.getCondVisibility('System.Platform.Windows'):
+#         # translate smb: paths if platform is Windows
+#         destpath = path.replace("smb:", "")
+#         destpath = os.path.normpath(destpath)
+#     else:
+#         destpath = path
+
+#     if destpath != path:
+#         Log("FixPath:  InputPath: " + path, xbmc.LOGINFO)
+#         Log("FixPath: OutputPath: " + destpath, xbmc.LOGINFO)
+
+#     return destpath
+
+
+
 # read settings from configuration file
 # settings are read only during addon's start - so for service type addon we need to re-read them after they are altered
 # https://forum.kodi.tv/showthread.php?tid=201423&pid=1766246#pid1766246
@@ -390,7 +411,12 @@ def Log(message, severity=xbmc.LOGDEBUG):
         # log the message to Log
         if setting_SeparateLogFile == 0:
             # use kodi.log for logging
-            xbmc.log("SubsMangler: " + message, level=xbmc.LOGNONE)
+            # check if string is str
+            if isinstance(message, str):
+                # convert to unicode string
+                message = message.decode('utf-8')
+            # reencode to utf-8
+            xbmc.log("SubsMangler: " + message.encode('utf-8'), level=xbmc.LOGNONE)
         else:
             # use own log file located in addon's datadir
 
@@ -527,13 +553,13 @@ def MangleSubtitles(originalinputfile):
     # as pysubs2 library doesn't support Kodi's virtual file system and file can not be processed remotely on smb:// share,
     # file must be copied to temp folder for local processing
     # construct input_file name
-    tempinputfile = os.path.join(xbmc.translatePath("special://temp"), tempfile + "_in.txt")
+    tempinputfile = os.path.join(__addonworkdir__, tempfile + "_in.txt")
     # construct output_file name
-    tempoutputfile = os.path.join(xbmc.translatePath("special://temp"), tempfile + "_out.ass")
+    tempoutputfile = os.path.join(__addonworkdir__, tempfile + "_out.ass")
     # copy file to temp
     copy_file(originalinputfile, tempinputfile)
 
-    Log("subtitle file processing started.", xbmc.LOGNOTICE)
+    Log("Subtitle file processing started.", xbmc.LOGNOTICE)
 
     # record start time of processing
     MangleStartTime = time.time()
@@ -825,6 +851,9 @@ def copy_file(srcFile, dstFile):
     try:
         Log("copy_file: srcFile: " + srcFile, xbmc.LOGINFO)
         Log("           dstFile: " + dstFile, xbmc.LOGINFO)
+        if xbmcvfs.exists(srcFile):
+            #FIXME - debug
+            Log("copy_file: srcFile exists.", xbmc.LOGINFO)
         if xbmcvfs.exists(dstFile):
             Log("copy_file: dstFile exists. Trying to remove.", xbmc.LOGINFO)
             delete_file(dstFile)
@@ -832,20 +861,34 @@ def copy_file(srcFile, dstFile):
             Log("copy_file: dstFile does not exist.", xbmc.LOGINFO)
         Log("copy_file: Copy started.", xbmc.LOGINFO)
 
-        # as copy sometimes fails, make more tries to check if lock is permanent - test only
+        # copy source file to target file
+        # copyfile(FixPath(srcFile), FixPath(dstFile))
+        # Log("copy_file: File copied.", xbmc.LOGINFO)
+
+        # as xbmcvfs.copy() sometimes fails, make more tries to check if lock is permanent - test only
         counter = 0
         success = 0
-        while not (success != 0 or counter >= 5):
+        while not (success != 0 or counter >= 1):
             success = xbmcvfs.copy(srcFile, dstFile)
             Log("copy_file: SuccessStatus: " + str(success), xbmc.LOGINFO)
             counter += 1
-            xbmc.sleep(1000)
+            xbmc.sleep(500)
         if counter > 1:
             Log("copy_file: First copy try failed. Number of tries: " + str(counter), xbmc.LOGWARNING)
 
+        # #FIXME - debug
+        # filehandle = xbmcvfs.File(srcFile)
+        # buffer = filehandle.read()
+        # filehandle.close()
+        # Log("File data read: " + str(buffer), xbmc.LOGINFO)
+        # filehandle = xbmcvfs.File(dstFile, 'w')
+        # result = filehandle.write(buffer)
+        # filehandle.close()
+        # Log("File data write result: " + str(result), xbmc.LOGINFO)
+
     except Exception as e:
         Log("copy_file: Copy failed.", xbmc.LOGERROR)
-        Log("Exception: " + str(e.message), xbmc.LOGERROR)
+        Log("Exception: " + str(e), xbmc.LOGERROR)
 
     wait_for_file(dstFile, True)
 
@@ -1009,19 +1052,18 @@ def DetectNewSubs():
             # and either it was created/modified no later than 6 seconds ago or existing subtitles are taken into account as well
             Log("New subtitle file detected: " + pathfile, xbmc.LOGNOTICE)
 
+            Log("Subtitles processing routine started.")
+            # record start time of processing
+            RoutineStartTime = time.time()
 
-            # clear temp dir from subtitle files
-            tempfilelist = [f for f in os.listdir(xbmc.translatePath("special://temp/")) if os.path.isfile(os.path.join(xbmc.translatePath("special://temp/"), f))]
+            # clear storage dir from subtitle files
+            tempfilelist = [f for f in os.listdir(__addonworkdir__) if os.path.isfile(os.path.join(__addonworkdir__, f))]
             Log("Clearing temporary files.", xbmc.LOGINFO)
             for item in tempfilelist:
                 filebase, fileext = os.path.splitext(item)
-                if (fileext.lower() in SubExtList) or fileext.lower().endswith("ass"):
-                    os.remove(os.path.join(xbmc.translatePath("special://temp/"), item))
-                    Log("       File: " + os.path.join(xbmc.translatePath("special://temp/"), item) + "  removed.", xbmc.LOGINFO)
-
-
-            # record start time of processing
-            RoutineStartTime = time.time()
+                if (fileext.lower() in SubExtList) or fileext.lower().endswith(".ass"):
+                    os.remove(os.path.join(__addonworkdir__, item))
+                    Log("       File: " + os.path.join(__addonworkdir__, item) + "  removed.", xbmc.LOGINFO)
 
             # hide subtitles
             xbmc.Player().showSubtitles(False)
@@ -1353,9 +1395,9 @@ __addonlang__ = __addon__.getLocalizedString
 # path and file name of public definitions
 global deffilename
 deffileurl = "http://bkiziuk.github.io/kodi-repo/regexdef.txt"
-localdeffilename = os.path.join(__addonworkdir__, 'regexdef.txt')
-sampledeffilename = os.path.join(__addondir__, 'resources', 'regexdef.txt')
-tempdeffilename = os.path.join(xbmc.translatePath("special://temp"), 'deffile.txt')
+localdeffilename = os.path.join(__addonworkdir__, 'regexdef.def')
+sampledeffilename = os.path.join(__addondir__, 'resources', 'regexdef.def')
+tempdeffilename = os.path.join(__addonworkdir__, 'tempdef.def')
 
 # list of input file extensions
 # extensions in lowercase with leading dot
@@ -1421,12 +1463,12 @@ if __name__ == '__main__':
         #
         # set definitions file location
         # dir is local, no need to use xbmcvfs()
-        if os.path.isfile(os.path.join(__addonworkdir__, 'regexdef.txt')):
+        if os.path.isfile(localdeffilename):
             # downloaded file is available
-            deffilename = os.path.join(__addonworkdir__, 'regexdef.txt')
+            deffilename = localdeffilename
         else:
             # use sample file from addon's dir
-            deffilename = os.path.join(__addondir__, 'resources', 'regexdef.txt')
+            deffilename = sampledeffilename
 
         # housekeeping services
         if ClockTick <=0 and not xbmc.getCondVisibility('Player.HasMedia'):
