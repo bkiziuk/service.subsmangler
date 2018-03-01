@@ -306,24 +306,24 @@ def GetBool(stringvalue):
 
 
 
-# function translates path based on running OS
-def FixPath(path):
-    destpath = ""
-    if path.startswith("special://"):
-        # translate Kodi's special type paths
-        destpath = xbmc.translatePath(path)
-    elif path.lower().startswith("smb:") and xbmc.getCondVisibility('System.Platform.Windows'):
-        # translate smb: paths if platform is Windows
-        destpath = path.replace("smb:", "")
-        destpath = os.path.normpath(destpath)
-    else:
-        destpath = path
+# # function translates path based on running OS
+# def FixPath(path):
+#     destpath = ""
+#     if path.startswith("special://"):
+#         # translate Kodi's special type paths
+#         destpath = xbmc.translatePath(path)
+#     elif path.lower().startswith("smb:") and xbmc.getCondVisibility('System.Platform.Windows'):
+#         # translate smb: paths if platform is Windows
+#         destpath = path.replace("smb:", "")
+#         destpath = os.path.normpath(destpath)
+#     else:
+#         destpath = path
 
-    if destpath != path:
-        Log("FixPath:  InputPath: " + path, xbmc.LOGINFO)
-        Log("FixPath: OutputPath: " + destpath, xbmc.LOGINFO)
+#     if destpath != path:
+#         Log("FixPath:  InputPath: " + path, xbmc.LOGINFO)
+#         Log("FixPath: OutputPath: " + destpath, xbmc.LOGINFO)
 
-    return destpath
+#     return destpath
 
 
 
