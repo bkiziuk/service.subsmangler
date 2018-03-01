@@ -791,7 +791,7 @@ def MangleSubtitles(originalinputfile):
                         # for the last subtitle, there is no limitation of next subtitle start time, so increase to minimum calculated time
                         timetoincrease = expectedincrease
 
-                    # check if line duration is positive as negative line.duration will raise ValueError in pysubs2 library
+                    # check if line.duration is positive as negative line.duration will raise ValueError in pysubs2 library
                     if line.duration < 0:
                         line.duration = 0
                     # timetoincrease should be positive as well
@@ -885,8 +885,6 @@ def copy_file(srcFile, dstFile):
         # result = filehandle.write(buffer)
         # filehandle.close()
         # Log("File data write result: " + str(result), xbmc.LOGINFO)
-
-
 
     except Exception as e:
         Log("copy_file: Copy failed.", xbmc.LOGERROR)
