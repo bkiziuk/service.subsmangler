@@ -17,10 +17,6 @@
         <news>v0.0.20 (2018-03-01)
 - fix Unicode crash in loging routine
 - use datadir for temp files instead of Kodi's temp
-v0.0.17 (2018-02-26)
-- xbmcvfs.copy() replaced by shutils.copyfile() to test if copy problems can be fixed
-v0.0.16 (2018-02-24)
-- fix for opening YesNo dialog immediatelly after SubSearch dialog if new playback was started without manual stop of the previous one
 </news>
         <platform>all</platform>
         <license>GNU General Public License v3.0</license>

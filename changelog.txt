@@ -1,3 +1,8 @@
+v0.0.20 (2018-03-01)
+- fix Unicode crash in logging routine
+- use datadir for temp files instead of Kodi's temp
+v0.0.18-v0.0.19
+- internal test builds
 v0.0.17 (2018-02-26)
 - xbmcvfs.copy() replaced by shutils.copyfile() to test if copy problems can be fixed
 v0.0.16 (2018-02-24)
