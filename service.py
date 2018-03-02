@@ -194,7 +194,7 @@ class XBMCPlayer(xbmc.Player):
                             while xbmc.getCondVisibility("Window.IsVisible(10153)"):
                                 xbmc.sleep(500)
                         else:
-                            Log("Video or subtitle language match Kodi's preferred settings. Not opening subtitle search dialog.")
+                            Log("Video or subtitle language match Kodi's preferred settings. Not opening subtitle search dialog.", xbmc.LOGINFO)
                     else:
                         Log("Local subtitles matching video being played detected. Enabling subtitles.", xbmc.LOGINFO)
                 else:
@@ -247,11 +247,11 @@ class XBMCMonitor(xbmc.Monitor):
     def onAbortRequested(self):
         # Will be called when XBMC requests Abort
         rt.stop()
-        Log("Abort requested in Monitor class.")
+        Log("Abort requested in Monitor class.", xbmc.LOGDEBUG)
 
     def onSettingsChanged(self):
         # Will be called when addon settings are changed
-        Log("Addon settings changed.")
+        Log("Addon settings changed.", xbmc.LOGINFO)
         GetSettings()
 
         # if service is not enabled any more, stop timer
@@ -536,7 +536,7 @@ def MangleSubtitles(originalinputfile):
     tempfile = "processed_subtitles"
 
     if not xbmcvfs.exists(originalinputfile):
-        Log("File does not exist: " + originalinputfile)
+        Log("File does not exist: " + originalinputfile, xbmc.LOGERROR)
         return
 
     # get subtitles language by splitting it from filename
@@ -767,8 +767,8 @@ def MangleSubtitles(originalinputfile):
                 # 500 ms for line + 67 ms per each character (15 chars per second)
                 minCalcLength = 500 + (len(subsline) * 67)
 
-                Log("    Min. calculated length: " + str(minCalcLength) + " ms")
-                Log("    Actual length: " + str(line.duration) + " ms")
+                Log("    Min. calculated length: " + str(minCalcLength) + " ms", xbmc.LOGDEBUG)
+                Log("    Actual length: " + str(line.duration) + " ms", xbmc.LOGDEBUG)
 
                 # check next subtitle start time and compare it to this subtitle end time
                 ## https://stackoverflow.com/questions/1011938/python-previous-and-next-values-inside-a-loop
@@ -777,7 +777,7 @@ def MangleSubtitles(originalinputfile):
                     #
                     # compare the next subtitle's start time with this subtitle's end time
                     nextlineclearance = nextlinestart - line.end
-                    Log("    Clearance to next sub: " + str(nextlineclearance) + " ms")
+                    Log("    Clearance to next sub: " + str(nextlineclearance) + " ms", xbmc.LOGDEBUG)
 
                 if minCalcLength > line.duration:
                     # calculate amount of time to increase visibility of subtitle to reach minimum time
@@ -800,7 +800,7 @@ def MangleSubtitles(originalinputfile):
 
                     # modify subtitle object
                     line.duration = line.duration + timetoincrease
-                    Log("    Time added to subtitle duration: " + str(timetoincrease) + " ms")
+                    Log("    Time added to subtitle duration: " + str(timetoincrease) + " ms", xbmc.LOGDEBUG)
 
                 # remember start time of subtitle
                 nextlinestart = line.start
@@ -1052,7 +1052,7 @@ def DetectNewSubs():
             # and either it was created/modified no later than 6 seconds ago or existing subtitles are taken into account as well
             Log("New subtitle file detected: " + pathfile, xbmc.LOGNOTICE)
 
-            Log("Subtitles processing routine started.")
+            Log("Subtitles processing routine started.", xbmc.LOGNOTICE)
             # record start time of processing
             RoutineStartTime = time.time()
 
@@ -1167,6 +1167,10 @@ def GetPlayingInfo():
     else:
         subspath = xbmc.getInfoLabel('Player.Folderpath')
 
+    # 1 second delay as sometimes read filename is empty
+    xbmc.sleep(1000)
+
+    # get video details
     filename = xbmc.getInfoLabel('Player.Filename')
     filepathname = xbmc.getInfoLabel('Player.Filenameandpath')
     filefps = xbmc.getInfoLabel('Player.Process(VideoFPS)')
@@ -1200,7 +1204,7 @@ def UpdateDefFile():
                 Log("Definitions file is up-to-date. Skipping update.", xbmc.LOGINFO)
             else:
                 # remove current target file
-                Log("Removing current file: " + localdeffilename)
+                Log("Found different definitions file. Removing current file: " + localdeffilename, xbmc.LOGINFO)
                 os.remove(localdeffilename)
                 # copy temp file to target file
                 copyfile(tempdeffilename, localdeffilename)
