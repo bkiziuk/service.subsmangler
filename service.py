@@ -546,31 +546,107 @@ def MangleSubtitles(originalinputfile):
 
 
 
-    # list of encodings to try
-    # the last position should be "NO_MATCH" to detect end of list
-    # https://msdn.microsoft.com/en-us/library/windows/desktop/dd317756(v=vs.85).aspx
-    encodings = [ "utf-8", "cp1250", "cp1251", "cp1252", "cp1253", "cp1254", "cp1255", "cp1256", "cp1257", "cp1258", "NO_MATCH" ]
+    # use proper encoding to decode subtitles
+    # the current implementation first tries to use UTF-8 encoding and, if that fails,
+    # uses an encoding based on language information
+    # this approach should work for most cases assuming that Windows encodings are used
+    #
+    # https://www.science.co.il/language/Locale-codes.php
+    charmap = {
+        'ara': 'cp1256',
+        'aze': 'cp1251',
+        'bat': 'cp1257',
+        'bel': 'cp1251',
+        'bul': 'cp1251',
+        'cze': 'cp1250',
+        'est': 'cp1257',
+        'grc': 'cp1253',
+        'heb': 'cp1255',
+        'hrv': 'cp1250',
+        'hun': 'cp1250',
+        'kaz': 'cp1251',
+        'kir': 'cp1251',
+        'lav': 'cp1257',
+        'lit': 'cp1257',
+        'mac': 'cp1251',
+        'mon': 'cp1251',
+        'per': 'cp1256',
+        'pol': 'cp1250',
+        'rum': 'cp1250',
+        'rus': 'cp1251',
+        'slo': 'cp1250',
+        'slv': 'cp1250',
+        'srp': 'cp1251',
+        'tat': 'cp1251',
+        'tur': 'cp1254',
+        'ukr': 'cp1251',
+        'urd': 'cp1256',
+        'uzb': 'cp1251',
+        'vie': 'cp1258'
+        # else: cp1252
+    }
 
-    # try to detect proper encoding
-    # https://stackoverflow.com/questions/436220/determine-the-encoding-of-text-in-python
-    #FIXME - this actually detects the first encoding which allows a file to be read without errors
-    for enc in encodings:
+    # first, check if the file can be properly read using UTF-8 encoding
+    enc = ""
+    try:
+        with codecs.open(tempinputfile, mode="rb", encoding="utf-8") as reader:
+            temp = reader.read()
+            # still no exception - seems to be a success
+            Log("UTF-8 encoding seems to be valid.", xbmc.LOGINFO)
+            enc = "utf-8"
+    except Exception as e:
+        # reading as UTF-8 failed
+        # try use encoding based on language
+        pass
+
+    # if reading as UTF-8 failed and the file language detection was a success
+    if (not enc) and subslang:
+        if charmap[subslang]:
+            # encoding found on the list
+            enc = charmap[subslang]
+        else:
+            # encoding not found on the list, use Western European encoding
+            enc = "cp1252"
+
+        # try to read file using language specific encoding
         try:
             with codecs.open(tempinputfile, mode="rb", encoding=enc) as reader:
                 temp = reader.read()
-                break
+                # still no exception - seems to be a success
+                Log("Chosen encoding: " + enc + " based on language: " + subslang + " seems to be valid.", xbmc.LOGINFO)
         except Exception as e:
-            # no encoding fits the file
-            if enc == "NO_MATCH":
-                break
-            # encoding does not match
-            Log("Input file test for: " + enc + " failed.", xbmc.LOGINFO)
-            continue
+            # reading based on assigned language encoding failed
+            enc = ""
 
-    # no encodings match
-    if enc == "NO_MATCH":
-        Log("No tried encodings match input file.", xbmc.LOGNOTICE)
-        return
+    # if identification tries failed, try a list of encodings as a last resort
+    if not enc:
+        # list of encodings to try
+        # the last position should be "NO_MATCH" to detect end of list
+        # https://msdn.microsoft.com/en-us/library/windows/desktop/dd317756(v=vs.85).aspx
+        # https://stackoverflow.com/questions/436220/determine-the-encoding-of-text-in-python
+        encodings = [ "utf-8", "cp1250", "cp1251", "cp1252", "cp1253", "cp1254", "cp1255", "cp1256", "cp1257", "cp1258", "NO_MATCH" ]
+
+        Log("Trying a list of encodings.", xbmc.LOGINFO)
+        # try to detect valid encoding
+        # this actually detects the first encoding which allows a file to be read without errors
+        for enc in encodings:
+            try:
+                with codecs.open(tempinputfile, mode="rb", encoding=enc) as reader:
+                    temp = reader.read()
+                    break
+            except Exception as e:
+                # no encoding fits the file
+                if enc == "NO_MATCH":
+                    break
+                # encoding does not match
+                Log("Input file test for: " + enc + " failed.", xbmc.LOGINFO)
+                continue
+
+        # no encodings match
+        if enc == "NO_MATCH":
+            Log("No tried encodings match input file.", xbmc.LOGNOTICE)
+            # subtitle processing aborted
+            return
 
     Log("Input encoding used: " + enc, xbmc.LOGINFO)
     Log("          Input FPS: " + str(playingFps), xbmc.LOGINFO)
