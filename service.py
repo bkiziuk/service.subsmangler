@@ -1,6 +1,5 @@
 import codecs
 import os
-import errno
 import filecmp
 import logging
 import re
@@ -81,6 +80,7 @@ class XBMCPlayer(xbmc.Player):
         if xbmc.getCondVisibility('Player.HasVideo'):
             # player has just been started, check what contents does it play and from
             Log("VideoPlayer START detected.", xbmc.LOGINFO)
+
             # get info on file being played
             subtitlePath, playingFilename, playingFilenamePath, playingFps, playingLang, playingSubs = GetPlayingInfo()
 
@@ -92,7 +92,7 @@ class XBMCPlayer(xbmc.Player):
                 return
             elif not playingFilenamePath:
                 # string is empty, may happen when playing buffered streams
-                Log("Empty string detected. Ignoring it.", xbmc.LOGWARNING)
+                Log("Empty 'playingFilenamePath' string detected. Not able to continue.", xbmc.LOGERROR)
                 return
 
             # get information on Kodi language settings
@@ -132,7 +132,6 @@ class XBMCPlayer(xbmc.Player):
             Log("Kodi's GUI language: " + guilanguage, xbmc.LOGINFO)
             Log("Kodi's preferred audio language: " + prefaudiolanguage, xbmc.LOGINFO)
             Log("Kodi's preferred subtitles language: " + prefsubtitlelanguage, xbmc.LOGINFO)
-
 
             # check if there is .ass subtitle file already on disk matching video being played
             # if not, automatically open subtitlesearch dialog
@@ -296,9 +295,9 @@ def GetIsoCode(lang):
         f.close()
 
         if outlang:
-            Log("Language code found: " + outlang, xbmc.LOGDEBUG)
+            Log("Language code found: " + outlang, xbmc.LOGINFO)
         else:
-            Log("Language code not found.", xbmc.LOGDEBUG)
+            Log("Language code not found.", xbmc.LOGWARNING)
     else:
         # language code is empty
         Log("Language code is empty. Skipping searching.", xbmc.LOGINFO)
@@ -1339,9 +1338,6 @@ def GetPlayingInfo():
             subspath = xbmc.translatePath("special://temp")
     else:   # location == movie dir
         subspath = xbmc.getInfoLabel('Player.Folderpath')
-
-    # 1 second delay as sometimes read filename is empty
-    xbmc.sleep(1000)
 
     # get video details
     filename = xbmc.getInfoLabel('Player.Filename')
