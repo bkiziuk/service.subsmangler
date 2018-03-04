@@ -175,6 +175,10 @@ msgctxt "#32073"
 msgid "Simulate file removal only"
 msgstr ""
 
+msgctxt "#32074"
+msgid "Remove orphaned unprocessed subtitle files"
+msgstr ""
+
 msgctxt "#32080"
 msgid "Conversion"
 msgstr ""

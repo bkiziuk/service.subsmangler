@@ -1,6 +1,7 @@
 v0.0.21 (2018-03-04)
 - add 1 second delay before trying to read playing file properties
-- try to guess file subtitle encoding based on its language
+- try to guess subtitle file encoding based on its language
+- add option to remove unprocessed subs during houekeeping
 v0.0.20 (2018-03-01)
 - fix Unicode crash in logging routine
 - use datadir for temp files instead of Kodi's temp

@@ -329,6 +329,7 @@ def GetSettings():
     global setting_AutoRemoveOldSubs
     global setting_BackupOldSubs
     global setting_RemoveSubsBackup
+    global setting_RemoveUnprocessedSubs
     global setting_SimulateRemovalOnly
     global setting_AdjustSubDisplayTime
 
@@ -347,6 +348,7 @@ def GetSettings():
     setting_BackupOldSubs = GetBool(__addon__.getSetting("BackupOldSubs"))
     setting_AutoRemoveOldSubs = GetBool(__addon__.getSetting("AutoRemoveOldSubs"))
     setting_RemoveSubsBackup = GetBool(__addon__.getSetting("RemoveSubsBackup"))
+    setting_RemoveUnprocessedSubs = GetBool(__addon__.getSetting("RemoveUnprocessedSubs"))
     setting_SimulateRemovalOnly = GetBool(__addon__.getSetting("SimulateRemovalOnly"))
     setting_AutoUpdateDef = GetBool(__addon__.getSetting("AutoUpdateDef"))
     setting_LogLevel = int(__addon__.getSetting("LogLevel"))
@@ -368,6 +370,7 @@ def GetSettings():
     Log("                      BackupOldSubs = " + str(setting_BackupOldSubs), xbmc.LOGINFO)
     Log("                  AutoRemoveOldSubs = " + str(setting_AutoRemoveOldSubs), xbmc.LOGINFO)
     Log("                   RemoveSubsBackup = " + str(setting_RemoveSubsBackup), xbmc.LOGINFO)
+    Log("              RemoveUnprocessedSubs = " + str(setting_RemoveUnprocessedSubs), xbmc.LOGINFO)
     Log("                SimulateRemovalOnly = " + str(setting_SimulateRemovalOnly), xbmc.LOGINFO)
     Log("                      AutoUpdateDef = " + str(setting_AutoUpdateDef), xbmc.LOGINFO)
     Log("                           LogLevel = " + str(setting_LogLevel), xbmc.LOGINFO)
@@ -1307,12 +1310,17 @@ def RemoveOldSubs():
     subfiles = list()
 
     # construct target list for file candidate extensions to be removed
+    # remove processed subs and .noautosubs files
     extRemovalList = [ '.ass', '.noautosubs' ]
+    # remove processed subs backup files
     if setting_RemoveSubsBackup:
         for ext in SubExtList:
             extRemovalList.append(ext + '_backup')
-    # FIXME - should we also remove any unprocessed subtitles?
-
+    # remove unprocessed subs
+    if setting_RemoveUnprocessedSubs:
+        for ext in SubExtList:
+            extRemovalList.append(ext)
+        
     # count number of sources
     # calculate progressbar increase per source
     progress = 0

@@ -27,7 +27,8 @@
     <category label="32048">
       <setting id="AutoRemoveOldSubs" type="bool" label="32070" default="true"/>
       <setting id="RemoveSubsBackup" type="bool" label="32072" default="true" subsetting="true" enable="eq(-1,true)"/>
-      <setting id="SimulateRemovalOnly" type="bool" label="32073" default="true" subsetting="true" enable="eq(-2,true)"/>
+      <setting id="RemoveUnprocessedSubs" type="bool" label="32074" default="false" subsetting="true" enable="eq(-2,true)"/>
+      <setting id="SimulateRemovalOnly" type="bool" label="32073" default="true" subsetting="true" enable="eq(-3,true)"/>
       <setting type="sep"/>
     </category>
 </settings>

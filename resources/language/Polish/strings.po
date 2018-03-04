@@ -175,6 +175,10 @@ msgctxt "#32073"
 msgid "Simulate file removal only"
 msgstr "Dokonaj tylko symulacji usuwania pliku"
 
+msgctxt "#32074"
+msgid "Remove orphaned unprocessed subtitle files"
+msgstr "Usuń nieprzetworzone osierocone pliki z napisami"
+
 msgctxt "#32080"
 msgid "Conversion"
 msgstr "Konwersja"
