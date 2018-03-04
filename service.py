@@ -267,6 +267,15 @@ class XBMCMonitor(xbmc.Monitor):
 # https://stackoverflow.com/questions/2879856/get-system-language-in-iso-639-3-letter-codes-in-python
 # http://www.loc.gov/standards/iso639-2/ISO-639-2_utf-8.txt
 def GetIsoCode(lang):
+    """Find correct ISO-639-3 language code.
+    
+    Arguments:
+        lang {str} -- language name, ISO-639-2 code or ISO-639-3 code
+    
+    Returns:
+        str -- ISO-639-3 code
+    """
+
     # "bibliographic" iso codes are derived from English word for the language
     # "terminologic" iso codes are derived from the pronunciation in the target
     # language (if different to the bibliographic code)
@@ -301,6 +310,15 @@ def GetIsoCode(lang):
 # function parses input value and determines if it should be True or False value
 # this is because Kodi's .getSetting function returns string type instead of a bool value
 def GetBool(stringvalue):
+    """Get boolean value from its text representation.
+    
+    Arguments:
+        stringvalue {str} -- string representation
+    
+    Returns:
+        bool -- boolean value
+    """
+
     if stringvalue in ["1", "true", "True", "TRUE"]:
         return True
     else:
@@ -312,6 +330,8 @@ def GetBool(stringvalue):
 # settings are read only during addon's start - so for service type addon we need to re-read them after they are altered
 # https://forum.kodi.tv/showthread.php?tid=201423&pid=1766246#pid1766246
 def GetSettings():
+    """Load settings from settings.xml file"""
+
     global setting_LogLevel
     global setting_ConversionServiceEnabled
     global setting_AlsoConvertExistingSubtitles
@@ -389,6 +409,15 @@ def GetSettings():
 # 6 = LOGFATAL
 # 7 = LOGNONE
 def Log(message, severity=xbmc.LOGDEBUG):
+    """Log message to internal Kodi log or external log file.
+    
+    Arguments:
+        message {str} -- message text
+    
+    Keyword Arguments:
+        severity {int} -- log level (default: {xbmc.LOGDEBUG})
+    """
+
     global setting_LogLevel
 
     if severity >= setting_LogLevel:
@@ -430,6 +459,15 @@ def Log(message, severity=xbmc.LOGDEBUG):
 # parse a list of definitions from file
 # load only a particular section
 def GetDefinitions(section):
+    """Load a list of definitions for a given section.
+    
+    Arguments:
+        section {str} -- name of section to load
+    
+    Returns:
+        list -- list of loaded definitions
+    """
+
     global deffilename
     importedlist = list()
 
@@ -479,6 +517,16 @@ def GetDefinitions(section):
 
 # remove all strings from line that match regex deflist
 def RemoveStrings(line, deflist):
+    """Remove all strings from line that match regex definition list
+    
+    Arguments:
+        line {str} -- text line to process
+        deflist {list} -- definitions list
+    
+    Returns:
+        str -- filtered line
+    """
+
     # iterate over every entry on the list
     for pattern in deflist:
         if re.search(pattern, line, re.IGNORECASE):
@@ -492,6 +540,15 @@ def RemoveStrings(line, deflist):
 # get subtitle location setting
 # https://forum.kodi.tv/showthread.php?tid=209587&pid=1844182#pid1844182
 def GetKodiSetting(name):
+    """Get Kodi setting value from given section name.
+    
+    Arguments:
+        name {str} -- Kodi section name
+
+    Returns:
+        str -- setting value
+    """
+
     # Uses XBMC/Kodi JSON-RPC API to retrieve subtitles location settings values.
     command = '''{
     "jsonrpc": "2.0",
@@ -514,6 +571,15 @@ def GetKodiSetting(name):
 # converts subtitles using pysubs2 library
 # pysubs2 code is written by Tomas Karabela - https://github.com/tkarabela/pysubs2
 def MangleSubtitles(originalinputfile):
+    """Convert subtitle file using pysubs2 library
+    
+    Arguments:
+        originalinputfile {str} -- file to be processed
+    
+    Returns:
+        str -- processed file name
+    """
+
 
     # tempfilename
     tempfile = "processed_subtitles"
@@ -903,6 +969,13 @@ def MangleSubtitles(originalinputfile):
 
 # copy function
 def copy_file(srcFile, dstFile):
+    """Copy file using xbmcvfs.
+    
+    Arguments:
+        srcFile {str} -- source file
+        dstFile {str} -- destination file
+    """
+
     try:
         Log("copy_file: srcFile: " + srcFile, xbmc.LOGINFO)
         Log("           dstFile: " + dstFile, xbmc.LOGINFO)
@@ -947,6 +1020,13 @@ def copy_file(srcFile, dstFile):
 
 # rename function
 def rename_file(oldfilepath, newfilepath):
+    """Rename file using xbmcvfs.
+    
+    Arguments:
+        oldfilepath {str} -- old file name
+        newfilepath {str} -- new file name
+    """
+
     try:
         Log("rename_file: srcFile: " + oldfilepath, xbmc.LOGINFO)
         Log("             dstFile: " + newfilepath, xbmc.LOGINFO)
@@ -967,6 +1047,12 @@ def rename_file(oldfilepath, newfilepath):
 
 # delete function
 def delete_file(filepath):
+    """Delete file using xbmcvfs.
+    
+    Arguments:
+        filepath {str} -- file to delete
+    """
+
     try:
         xbmcvfs.delete(filepath)
         Log("delete_file: File deleted: " + filepath, xbmc.LOGINFO)
@@ -980,6 +1066,16 @@ def delete_file(filepath):
 
 # function waits for file to appear or disappear, test purpose
 def wait_for_file(file, exists):
+    """Wait for file to appear or disappear.
+    
+    Arguments:
+        file {str} -- file to watch
+        exists {bool} -- True -> wait to appear; False -> wait to disappear
+    
+    Returns:
+        bool -- True -> if successed
+    """
+
     success = False
     if exists:
         Log("wait_for_file: if file exists: " + file, xbmc.LOGINFO)
@@ -1014,6 +1110,16 @@ def wait_for_file(file, exists):
 # get all subtitle file names in current directory contents for those matching video being played
 # get 'noautosubs' file or extension in order to match per directory or per file behaviour
 def GetSubtitleFiles(subspath, substypelist):
+    """Get subtitle file names. Includes 'noautosubs' file and '.noautosubs' extension.
+    
+    Arguments:
+        subspath {str} -- path to list files from
+        substypelist {list} -- list of file extensions to include
+    
+    Returns:
+        list -- list of files
+    """
+
     # use dictionary solution - load all files in directory to dictionary and remove those not fulfiling criteria
     # Python doesn't support smb:// paths. Use xbmcvfs: https://forum.kodi.tv/showthread.php?tid=211821
     dirs, files = xbmcvfs.listdir(subtitlePath)
@@ -1044,6 +1150,8 @@ def GetSubtitleFiles(subspath, substypelist):
 
 # pause playback
 def PlaybackPause():
+    """Pause playback if not paused."""
+
     # pause playback
     if not xbmc.getCondVisibility("player.paused"):
         xbmc.Player().pause()
@@ -1055,6 +1163,8 @@ def PlaybackPause():
 
 # resume playback
 def PlaybackResume():
+    """Resume playback if paused."""
+
     # resume playback
     if xbmc.getCondVisibility("player.paused"):
         Log("Playback is paused. Resuming.", xbmc.LOGINFO)
@@ -1068,6 +1178,8 @@ def PlaybackResume():
 # check if any files matching video being played are changed
 # http://timgolden.me.uk/python/win32_how_do_i/watch_directory_for_changes.html
 def DetectNewSubs():
+    """Detect new subtitle files matching video name being played."""
+
     global DetectionIsRunning
     global SubsSearchWasOpened
     global subtitlePath
@@ -1205,6 +1317,16 @@ def DetectNewSubs():
 # get information on file currently being played
 # http://kodi.wiki/view/InfoLabels
 def GetPlayingInfo():
+    """Get information on file being played.
+    
+    Returns:
+        subspath {str} -- subtitle file directory location
+        filename {str} -- video file name being played
+        filepathname {str} -- video file name being played including full path
+        filefps {str} -- file fps
+        audiolang {str} -- audio language designation
+        filelang {str} -- subtitle language designation
+    """
 
     # get settings from Kodi configuration on assumed subtitles location
     storagemode = GetKodiSetting("subtitles.storagemode") # 1=location defined by custompath; 0=location in movie dir
@@ -1239,6 +1361,8 @@ def GetPlayingInfo():
 
 # updates regexdef file from server
 def UpdateDefFile():
+    """Update regex definitions file from server."""
+
     Log("Trying to update regexp definitions from: " + deffileurl, xbmc.LOGINFO)
     # download file from server
     # http://stackabuse.com/download-files-with-python/
@@ -1281,6 +1405,8 @@ def UpdateDefFile():
 # walk through video sources and remove any subtitle files that do not acompany its own video any more
 # also remove '.noautosubs' files
 def RemoveOldSubs():
+    """Remove unneeded subtitle files from video sources directories."""
+
 
     # Uses XBMC/Kodi JSON-RPC API to retrieve video sources location
     # https://kodi.wiki/view/JSON-RPC_API/v8#Files.GetSources
@@ -1458,7 +1584,7 @@ tempdeffilename = os.path.join(__addonworkdir__, 'tempdef.def')
 
 # list of input file extensions
 # extensions in lowercase with leading dot
-# FIXME - we do not include output extension .ass as conversion routine is sometimes wrongly triggered on converted subtitle file
+# FIXME - we do not include output extension .ass
 SubExtList = [ '.txt', '.srt', '.sub', '.subrip', '.microdvd', '.mpl', '.tmp' ]
 
 # list of video file extensions
