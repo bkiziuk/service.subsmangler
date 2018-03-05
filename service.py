@@ -879,6 +879,18 @@ def MangleSubtitles(originalinputfile):
             subs.remove(line)
             Log("    Resulting line is empty. Removing from file.", xbmc.LOGDEBUG)
         else:
+            # increase line spacing if subtitle is multiline
+            # use Max Deryagin’s solution: https://www.md-subs.com/line-spacing-in-ssa
+            # check if subtitle is multiline
+            pos = subsline.find("\N")
+            if pos != -1:
+                # line is multiline - add tags
+                templine = "{\org(-2000000,0)\fr0.0001}"
+                
+
+
+
+
             # adjust minimum subtitle display time
             # if calculated time is longer than actual time and if it does not overlap next sub time
             if setting_AdjustSubDisplayTime:
