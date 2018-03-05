@@ -1,6 +1,5 @@
 import codecs
 import os
-import errno
 import filecmp
 import logging
 import re
@@ -81,6 +80,7 @@ class XBMCPlayer(xbmc.Player):
         if xbmc.getCondVisibility('Player.HasVideo'):
             # player has just been started, check what contents does it play and from
             Log("VideoPlayer START detected.", xbmc.LOGINFO)
+
             # get info on file being played
             subtitlePath, playingFilename, playingFilenamePath, playingFps, playingLang, playingSubs = GetPlayingInfo()
 
@@ -92,7 +92,7 @@ class XBMCPlayer(xbmc.Player):
                 return
             elif not playingFilenamePath:
                 # string is empty, may happen when playing buffered streams
-                Log("Empty string detected. Ignoring it.", xbmc.LOGWARNING)
+                Log("Empty 'playingFilenamePath' string detected. Not able to continue.", xbmc.LOGERROR)
                 return
 
             # get information on Kodi language settings
@@ -132,7 +132,6 @@ class XBMCPlayer(xbmc.Player):
             Log("Kodi's GUI language: " + guilanguage, xbmc.LOGINFO)
             Log("Kodi's preferred audio language: " + prefaudiolanguage, xbmc.LOGINFO)
             Log("Kodi's preferred subtitles language: " + prefsubtitlelanguage, xbmc.LOGINFO)
-
 
             # check if there is .ass subtitle file already on disk matching video being played
             # if not, automatically open subtitlesearch dialog
@@ -267,6 +266,15 @@ class XBMCMonitor(xbmc.Monitor):
 # https://stackoverflow.com/questions/2879856/get-system-language-in-iso-639-3-letter-codes-in-python
 # http://www.loc.gov/standards/iso639-2/ISO-639-2_utf-8.txt
 def GetIsoCode(lang):
+    """Find correct ISO-639-3 language code.
+
+    Arguments:
+        lang {str} -- language name, ISO-639-2 code or ISO-639-3 code
+
+    Returns:
+        str -- ISO-639-3 code
+    """
+
     # "bibliographic" iso codes are derived from English word for the language
     # "terminologic" iso codes are derived from the pronunciation in the target
     # language (if different to the bibliographic code)
@@ -287,9 +295,9 @@ def GetIsoCode(lang):
         f.close()
 
         if outlang:
-            Log("Language code found: " + outlang, xbmc.LOGDEBUG)
+            Log("Language code found: " + outlang, xbmc.LOGINFO)
         else:
-            Log("Language code not found.", xbmc.LOGDEBUG)
+            Log("Language code not found.", xbmc.LOGWARNING)
     else:
         # language code is empty
         Log("Language code is empty. Skipping searching.", xbmc.LOGINFO)
@@ -301,6 +309,15 @@ def GetIsoCode(lang):
 # function parses input value and determines if it should be True or False value
 # this is because Kodi's .getSetting function returns string type instead of a bool value
 def GetBool(stringvalue):
+    """Get boolean value from its text representation.
+
+    Arguments:
+        stringvalue {str} -- string representation
+
+    Returns:
+        bool -- boolean value
+    """
+
     if stringvalue in ["1", "true", "True", "TRUE"]:
         return True
     else:
@@ -312,6 +329,8 @@ def GetBool(stringvalue):
 # settings are read only during addon's start - so for service type addon we need to re-read them after they are altered
 # https://forum.kodi.tv/showthread.php?tid=201423&pid=1766246#pid1766246
 def GetSettings():
+    """Load settings from settings.xml file"""
+
     global setting_LogLevel
     global setting_ConversionServiceEnabled
     global setting_AlsoConvertExistingSubtitles
@@ -329,6 +348,7 @@ def GetSettings():
     global setting_AutoRemoveOldSubs
     global setting_BackupOldSubs
     global setting_RemoveSubsBackup
+    global setting_RemoveUnprocessedSubs
     global setting_SimulateRemovalOnly
     global setting_AdjustSubDisplayTime
 
@@ -347,6 +367,7 @@ def GetSettings():
     setting_BackupOldSubs = GetBool(__addon__.getSetting("BackupOldSubs"))
     setting_AutoRemoveOldSubs = GetBool(__addon__.getSetting("AutoRemoveOldSubs"))
     setting_RemoveSubsBackup = GetBool(__addon__.getSetting("RemoveSubsBackup"))
+    setting_RemoveUnprocessedSubs = GetBool(__addon__.getSetting("RemoveUnprocessedSubs"))
     setting_SimulateRemovalOnly = GetBool(__addon__.getSetting("SimulateRemovalOnly"))
     setting_AutoUpdateDef = GetBool(__addon__.getSetting("AutoUpdateDef"))
     setting_LogLevel = int(__addon__.getSetting("LogLevel"))
@@ -368,6 +389,7 @@ def GetSettings():
     Log("                      BackupOldSubs = " + str(setting_BackupOldSubs), xbmc.LOGINFO)
     Log("                  AutoRemoveOldSubs = " + str(setting_AutoRemoveOldSubs), xbmc.LOGINFO)
     Log("                   RemoveSubsBackup = " + str(setting_RemoveSubsBackup), xbmc.LOGINFO)
+    Log("              RemoveUnprocessedSubs = " + str(setting_RemoveUnprocessedSubs), xbmc.LOGINFO)
     Log("                SimulateRemovalOnly = " + str(setting_SimulateRemovalOnly), xbmc.LOGINFO)
     Log("                      AutoUpdateDef = " + str(setting_AutoUpdateDef), xbmc.LOGINFO)
     Log("                           LogLevel = " + str(setting_LogLevel), xbmc.LOGINFO)
@@ -386,6 +408,15 @@ def GetSettings():
 # 6 = LOGFATAL
 # 7 = LOGNONE
 def Log(message, severity=xbmc.LOGDEBUG):
+    """Log message to internal Kodi log or external log file.
+
+    Arguments:
+        message {str} -- message text
+
+    Keyword Arguments:
+        severity {int} -- log level (default: {xbmc.LOGDEBUG})
+    """
+
     global setting_LogLevel
 
     if severity >= setting_LogLevel:
@@ -427,6 +458,15 @@ def Log(message, severity=xbmc.LOGDEBUG):
 # parse a list of definitions from file
 # load only a particular section
 def GetDefinitions(section):
+    """Load a list of definitions for a given section.
+
+    Arguments:
+        section {str} -- name of section to load
+
+    Returns:
+        list -- list of loaded definitions
+    """
+
     global deffilename
     importedlist = list()
 
@@ -476,6 +516,16 @@ def GetDefinitions(section):
 
 # remove all strings from line that match regex deflist
 def RemoveStrings(line, deflist):
+    """Remove all strings from line that match regex definition list
+
+    Arguments:
+        line {str} -- text line to process
+        deflist {list} -- definitions list
+
+    Returns:
+        str -- filtered line
+    """
+
     # iterate over every entry on the list
     for pattern in deflist:
         if re.search(pattern, line, re.IGNORECASE):
@@ -489,6 +539,15 @@ def RemoveStrings(line, deflist):
 # get subtitle location setting
 # https://forum.kodi.tv/showthread.php?tid=209587&pid=1844182#pid1844182
 def GetKodiSetting(name):
+    """Get Kodi setting value from given section name.
+
+    Arguments:
+        name {str} -- Kodi section name
+
+    Returns:
+        str -- setting value
+    """
+
     # Uses XBMC/Kodi JSON-RPC API to retrieve subtitles location settings values.
     command = '''{
     "jsonrpc": "2.0",
@@ -511,6 +570,15 @@ def GetKodiSetting(name):
 # converts subtitles using pysubs2 library
 # pysubs2 code is written by Tomas Karabela - https://github.com/tkarabela/pysubs2
 def MangleSubtitles(originalinputfile):
+    """Convert subtitle file using pysubs2 library
+
+    Arguments:
+        originalinputfile {str} -- file to be processed
+
+    Returns:
+        str -- processed file name
+    """
+
 
     # tempfilename
     tempfile = "processed_subtitles"
@@ -546,31 +614,107 @@ def MangleSubtitles(originalinputfile):
 
 
 
-    # list of encodings to try
-    # the last position should be "NO_MATCH" to detect end of list
-    # https://msdn.microsoft.com/en-us/library/windows/desktop/dd317756(v=vs.85).aspx
-    encodings = [ "utf-8", "cp1250", "cp1251", "cp1252", "cp1253", "cp1254", "cp1255", "cp1256", "cp1257", "cp1258", "NO_MATCH" ]
+    # use proper encoding to decode subtitles
+    # the current implementation first tries to use UTF-8 encoding and, if that fails,
+    # uses an encoding based on language information
+    # this approach should work for most cases assuming that Windows encodings are used
+    #
+    # https://www.science.co.il/language/Locale-codes.php
+    charmap = {
+        'ara': 'cp1256',
+        'aze': 'cp1251',
+        'bat': 'cp1257',
+        'bel': 'cp1251',
+        'bul': 'cp1251',
+        'cze': 'cp1250',
+        'est': 'cp1257',
+        'grc': 'cp1253',
+        'heb': 'cp1255',
+        'hrv': 'cp1250',
+        'hun': 'cp1250',
+        'kaz': 'cp1251',
+        'kir': 'cp1251',
+        'lav': 'cp1257',
+        'lit': 'cp1257',
+        'mac': 'cp1251',
+        'mon': 'cp1251',
+        'per': 'cp1256',
+        'pol': 'cp1250',
+        'rum': 'cp1250',
+        'rus': 'cp1251',
+        'slo': 'cp1250',
+        'slv': 'cp1250',
+        'srp': 'cp1251',
+        'tat': 'cp1251',
+        'tur': 'cp1254',
+        'ukr': 'cp1251',
+        'urd': 'cp1256',
+        'uzb': 'cp1251',
+        'vie': 'cp1258'
+        # else: cp1252
+    }
 
-    # try to detect proper encoding
-    # https://stackoverflow.com/questions/436220/determine-the-encoding-of-text-in-python
-    #FIXME - this actually detects the first encoding which allows a file to be read without errors
-    for enc in encodings:
+    # first, check if the file can be properly read using UTF-8 encoding
+    enc = ""
+    try:
+        with codecs.open(tempinputfile, mode="rb", encoding="utf-8") as reader:
+            temp = reader.read()
+            # still no exception - seems to be a success
+            Log("UTF-8 encoding seems to be valid.", xbmc.LOGINFO)
+            enc = "utf-8"
+    except Exception as e:
+        # reading as UTF-8 failed
+        # try use encoding based on language
+        pass
+
+    # if reading as UTF-8 failed and the file language detection was a success
+    if (not enc) and subslang:
+        if charmap[subslang]:
+            # encoding found on the list
+            enc = charmap[subslang]
+        else:
+            # encoding not found on the list, use Western European encoding
+            enc = "cp1252"
+
+        # try to read file using language specific encoding
         try:
             with codecs.open(tempinputfile, mode="rb", encoding=enc) as reader:
                 temp = reader.read()
-                break
+                # still no exception - seems to be a success
+                Log("Chosen encoding: " + enc + " based on language: " + subslang + " seems to be valid.", xbmc.LOGINFO)
         except Exception as e:
-            # no encoding fits the file
-            if enc == "NO_MATCH":
-                break
-            # encoding does not match
-            Log("Input file test for: " + enc + " failed.", xbmc.LOGINFO)
-            continue
+            # reading based on assigned language encoding failed
+            enc = ""
 
-    # no encodings match
-    if enc == "NO_MATCH":
-        Log("No tried encodings match input file.", xbmc.LOGNOTICE)
-        return
+    # if identification tries failed, try a list of encodings as a last resort
+    if not enc:
+        # list of encodings to try
+        # the last position should be "NO_MATCH" to detect end of list
+        # https://msdn.microsoft.com/en-us/library/windows/desktop/dd317756(v=vs.85).aspx
+        # https://stackoverflow.com/questions/436220/determine-the-encoding-of-text-in-python
+        encodings = [ "utf-8", "cp1250", "cp1251", "cp1252", "cp1253", "cp1254", "cp1255", "cp1256", "cp1257", "cp1258", "NO_MATCH" ]
+
+        Log("Trying a list of encodings.", xbmc.LOGINFO)
+        # try to detect valid encoding
+        # this actually detects the first encoding which allows a file to be read without errors
+        for enc in encodings:
+            try:
+                with codecs.open(tempinputfile, mode="rb", encoding=enc) as reader:
+                    temp = reader.read()
+                    break
+            except Exception as e:
+                # no encoding fits the file
+                if enc == "NO_MATCH":
+                    break
+                # encoding does not match
+                Log("Input file test for: " + enc + " failed.", xbmc.LOGINFO)
+                continue
+
+        # no encodings match
+        if enc == "NO_MATCH":
+            Log("No tried encodings match input file.", xbmc.LOGNOTICE)
+            # subtitle processing aborted
+            return
 
     Log("Input encoding used: " + enc, xbmc.LOGINFO)
     Log("          Input FPS: " + str(playingFps), xbmc.LOGINFO)
@@ -824,6 +968,13 @@ def MangleSubtitles(originalinputfile):
 
 # copy function
 def copy_file(srcFile, dstFile):
+    """Copy file using xbmcvfs.
+
+    Arguments:
+        srcFile {str} -- source file
+        dstFile {str} -- destination file
+    """
+
     try:
         Log("copy_file: srcFile: " + srcFile, xbmc.LOGINFO)
         Log("           dstFile: " + dstFile, xbmc.LOGINFO)
@@ -868,6 +1019,13 @@ def copy_file(srcFile, dstFile):
 
 # rename function
 def rename_file(oldfilepath, newfilepath):
+    """Rename file using xbmcvfs.
+
+    Arguments:
+        oldfilepath {str} -- old file name
+        newfilepath {str} -- new file name
+    """
+
     try:
         Log("rename_file: srcFile: " + oldfilepath, xbmc.LOGINFO)
         Log("             dstFile: " + newfilepath, xbmc.LOGINFO)
@@ -888,6 +1046,12 @@ def rename_file(oldfilepath, newfilepath):
 
 # delete function
 def delete_file(filepath):
+    """Delete file using xbmcvfs.
+
+    Arguments:
+        filepath {str} -- file to delete
+    """
+
     try:
         xbmcvfs.delete(filepath)
         Log("delete_file: File deleted: " + filepath, xbmc.LOGINFO)
@@ -901,6 +1065,16 @@ def delete_file(filepath):
 
 # function waits for file to appear or disappear, test purpose
 def wait_for_file(file, exists):
+    """Wait for file to appear or disappear.
+
+    Arguments:
+        file {str} -- file to watch
+        exists {bool} -- True -> wait to appear; False -> wait to disappear
+
+    Returns:
+        bool -- True -> if successed
+    """
+
     success = False
     if exists:
         Log("wait_for_file: if file exists: " + file, xbmc.LOGINFO)
@@ -935,6 +1109,16 @@ def wait_for_file(file, exists):
 # get all subtitle file names in current directory contents for those matching video being played
 # get 'noautosubs' file or extension in order to match per directory or per file behaviour
 def GetSubtitleFiles(subspath, substypelist):
+    """Get subtitle file names. Includes 'noautosubs' file and '.noautosubs' extension.
+
+    Arguments:
+        subspath {str} -- path to list files from
+        substypelist {list} -- list of file extensions to include
+
+    Returns:
+        list -- list of files
+    """
+
     # use dictionary solution - load all files in directory to dictionary and remove those not fulfiling criteria
     # Python doesn't support smb:// paths. Use xbmcvfs: https://forum.kodi.tv/showthread.php?tid=211821
     dirs, files = xbmcvfs.listdir(subtitlePath)
@@ -965,6 +1149,8 @@ def GetSubtitleFiles(subspath, substypelist):
 
 # pause playback
 def PlaybackPause():
+    """Pause playback if not paused."""
+
     # pause playback
     if not xbmc.getCondVisibility("player.paused"):
         xbmc.Player().pause()
@@ -976,6 +1162,8 @@ def PlaybackPause():
 
 # resume playback
 def PlaybackResume():
+    """Resume playback if paused."""
+
     # resume playback
     if xbmc.getCondVisibility("player.paused"):
         Log("Playback is paused. Resuming.", xbmc.LOGINFO)
@@ -989,6 +1177,8 @@ def PlaybackResume():
 # check if any files matching video being played are changed
 # http://timgolden.me.uk/python/win32_how_do_i/watch_directory_for_changes.html
 def DetectNewSubs():
+    """Detect new subtitle files matching video name being played."""
+
     global DetectionIsRunning
     global SubsSearchWasOpened
     global subtitlePath
@@ -1126,6 +1316,16 @@ def DetectNewSubs():
 # get information on file currently being played
 # http://kodi.wiki/view/InfoLabels
 def GetPlayingInfo():
+    """Get information on file being played.
+
+    Returns:
+        subspath {str} -- subtitle file directory location
+        filename {str} -- video file name being played
+        filepathname {str} -- video file name being played including full path
+        filefps {str} -- file fps
+        audiolang {str} -- audio language designation
+        filelang {str} -- subtitle language designation
+    """
 
     # get settings from Kodi configuration on assumed subtitles location
     storagemode = GetKodiSetting("subtitles.storagemode") # 1=location defined by custompath; 0=location in movie dir
@@ -1134,13 +1334,10 @@ def GetPlayingInfo():
     if storagemode == 1:    # location == custompath
         if xbmcvfs.exists(custompath):
             subspath = custompath
-        else:    
+        else:
             subspath = xbmc.translatePath("special://temp")
     else:   # location == movie dir
         subspath = xbmc.getInfoLabel('Player.Folderpath')
-
-    # 1 second delay as sometimes read filename is empty
-    xbmc.sleep(1000)
 
     # get video details
     filename = xbmc.getInfoLabel('Player.Filename')
@@ -1160,6 +1357,8 @@ def GetPlayingInfo():
 
 # updates regexdef file from server
 def UpdateDefFile():
+    """Update regex definitions file from server."""
+
     Log("Trying to update regexp definitions from: " + deffileurl, xbmc.LOGINFO)
     # download file from server
     # http://stackabuse.com/download-files-with-python/
@@ -1202,6 +1401,8 @@ def UpdateDefFile():
 # walk through video sources and remove any subtitle files that do not acompany its own video any more
 # also remove '.noautosubs' files
 def RemoveOldSubs():
+    """Remove unneeded subtitle files from video source directories."""
+
 
     # Uses XBMC/Kodi JSON-RPC API to retrieve video sources location
     # https://kodi.wiki/view/JSON-RPC_API/v8#Files.GetSources
@@ -1231,11 +1432,16 @@ def RemoveOldSubs():
     subfiles = list()
 
     # construct target list for file candidate extensions to be removed
+    # remove processed subs and .noautosubs files
     extRemovalList = [ '.ass', '.noautosubs' ]
+    # remove processed subs backup files
     if setting_RemoveSubsBackup:
         for ext in SubExtList:
             extRemovalList.append(ext + '_backup')
-    # FIXME - should we also remove any unprocessed subtitles?
+    # remove unprocessed subs
+    if setting_RemoveUnprocessedSubs:
+        for ext in SubExtList:
+            extRemovalList.append(ext)
 
     # count number of sources
     # calculate progressbar increase per source
@@ -1374,7 +1580,7 @@ tempdeffilename = os.path.join(__addonworkdir__, 'tempdef.def')
 
 # list of input file extensions
 # extensions in lowercase with leading dot
-# FIXME - we do not include output extension .ass as conversion routine is sometimes wrongly triggered on converted subtitle file
+# FIXME - we do not include output extension .ass
 SubExtList = [ '.txt', '.srt', '.sub', '.subrip', '.microdvd', '.mpl', '.tmp' ]
 
 # list of video file extensions
