@@ -177,7 +177,7 @@ msgstr "Csak szimulálja a fájl törlést"
 
 msgctxt "#32074"
 msgid "Remove orphaned unprocessed subtitle files"
-msgstr ""
+msgstr "Törölje a nem feldolgozott árva felirat fájlokat"
 
 msgctxt "#32080"
 msgid "Conversion"

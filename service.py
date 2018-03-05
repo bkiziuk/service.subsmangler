@@ -267,10 +267,10 @@ class XBMCMonitor(xbmc.Monitor):
 # http://www.loc.gov/standards/iso639-2/ISO-639-2_utf-8.txt
 def GetIsoCode(lang):
     """Find correct ISO-639-3 language code.
-    
+
     Arguments:
         lang {str} -- language name, ISO-639-2 code or ISO-639-3 code
-    
+
     Returns:
         str -- ISO-639-3 code
     """
@@ -310,10 +310,10 @@ def GetIsoCode(lang):
 # this is because Kodi's .getSetting function returns string type instead of a bool value
 def GetBool(stringvalue):
     """Get boolean value from its text representation.
-    
+
     Arguments:
         stringvalue {str} -- string representation
-    
+
     Returns:
         bool -- boolean value
     """
@@ -409,10 +409,10 @@ def GetSettings():
 # 7 = LOGNONE
 def Log(message, severity=xbmc.LOGDEBUG):
     """Log message to internal Kodi log or external log file.
-    
+
     Arguments:
         message {str} -- message text
-    
+
     Keyword Arguments:
         severity {int} -- log level (default: {xbmc.LOGDEBUG})
     """
@@ -459,10 +459,10 @@ def Log(message, severity=xbmc.LOGDEBUG):
 # load only a particular section
 def GetDefinitions(section):
     """Load a list of definitions for a given section.
-    
+
     Arguments:
         section {str} -- name of section to load
-    
+
     Returns:
         list -- list of loaded definitions
     """
@@ -517,11 +517,11 @@ def GetDefinitions(section):
 # remove all strings from line that match regex deflist
 def RemoveStrings(line, deflist):
     """Remove all strings from line that match regex definition list
-    
+
     Arguments:
         line {str} -- text line to process
         deflist {list} -- definitions list
-    
+
     Returns:
         str -- filtered line
     """
@@ -540,7 +540,7 @@ def RemoveStrings(line, deflist):
 # https://forum.kodi.tv/showthread.php?tid=209587&pid=1844182#pid1844182
 def GetKodiSetting(name):
     """Get Kodi setting value from given section name.
-    
+
     Arguments:
         name {str} -- Kodi section name
 
@@ -571,10 +571,10 @@ def GetKodiSetting(name):
 # pysubs2 code is written by Tomas Karabela - https://github.com/tkarabela/pysubs2
 def MangleSubtitles(originalinputfile):
     """Convert subtitle file using pysubs2 library
-    
+
     Arguments:
         originalinputfile {str} -- file to be processed
-    
+
     Returns:
         str -- processed file name
     """
@@ -969,7 +969,7 @@ def MangleSubtitles(originalinputfile):
 # copy function
 def copy_file(srcFile, dstFile):
     """Copy file using xbmcvfs.
-    
+
     Arguments:
         srcFile {str} -- source file
         dstFile {str} -- destination file
@@ -1020,7 +1020,7 @@ def copy_file(srcFile, dstFile):
 # rename function
 def rename_file(oldfilepath, newfilepath):
     """Rename file using xbmcvfs.
-    
+
     Arguments:
         oldfilepath {str} -- old file name
         newfilepath {str} -- new file name
@@ -1047,7 +1047,7 @@ def rename_file(oldfilepath, newfilepath):
 # delete function
 def delete_file(filepath):
     """Delete file using xbmcvfs.
-    
+
     Arguments:
         filepath {str} -- file to delete
     """
@@ -1066,11 +1066,11 @@ def delete_file(filepath):
 # function waits for file to appear or disappear, test purpose
 def wait_for_file(file, exists):
     """Wait for file to appear or disappear.
-    
+
     Arguments:
         file {str} -- file to watch
         exists {bool} -- True -> wait to appear; False -> wait to disappear
-    
+
     Returns:
         bool -- True -> if successed
     """
@@ -1110,11 +1110,11 @@ def wait_for_file(file, exists):
 # get 'noautosubs' file or extension in order to match per directory or per file behaviour
 def GetSubtitleFiles(subspath, substypelist):
     """Get subtitle file names. Includes 'noautosubs' file and '.noautosubs' extension.
-    
+
     Arguments:
         subspath {str} -- path to list files from
         substypelist {list} -- list of file extensions to include
-    
+
     Returns:
         list -- list of files
     """
@@ -1317,7 +1317,7 @@ def DetectNewSubs():
 # http://kodi.wiki/view/InfoLabels
 def GetPlayingInfo():
     """Get information on file being played.
-    
+
     Returns:
         subspath {str} -- subtitle file directory location
         filename {str} -- video file name being played
@@ -1334,7 +1334,7 @@ def GetPlayingInfo():
     if storagemode == 1:    # location == custompath
         if xbmcvfs.exists(custompath):
             subspath = custompath
-        else:    
+        else:
             subspath = xbmc.translatePath("special://temp")
     else:   # location == movie dir
         subspath = xbmc.getInfoLabel('Player.Folderpath')
@@ -1401,7 +1401,7 @@ def UpdateDefFile():
 # walk through video sources and remove any subtitle files that do not acompany its own video any more
 # also remove '.noautosubs' files
 def RemoveOldSubs():
-    """Remove unneeded subtitle files from video sources directories."""
+    """Remove unneeded subtitle files from video source directories."""
 
 
     # Uses XBMC/Kodi JSON-RPC API to retrieve video sources location
@@ -1442,7 +1442,7 @@ def RemoveOldSubs():
     if setting_RemoveUnprocessedSubs:
         for ext in SubExtList:
             extRemovalList.append(ext)
-        
+
     # count number of sources
     # calculate progressbar increase per source
     progress = 0

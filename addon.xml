@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="service.subsmangler" name="Subtitles Mangler" version="0.0.21" provider-name="bkiziuk">
+<addon id="service.subsmangler" name="Subtitles Mangler" version="0.0.22" provider-name="bkiziuk">
     <requires>
         <import addon="xbmc.python" version="2.25.0"/>
     </requires>
@@ -14,10 +14,9 @@
         <disclaimer lang="en">A comprehensive subtitle companion</disclaimer>
         <disclaimer lang="pl">Wszechstronny asystent napisów</disclaimer>
         <disclaimer lang="hu">Egy teljeskörű felirat asszisztens</disclaimer>
-        <news>v0.0.21 (2018-03-04)
-- add 1 second delay before trying to read properties of video being played
+        <news>v0.0.22 (2018-03-05)
 - try to guess subtitle file encoding based on its language
-- add option to remove unprocessed subs during houekeeping
+- add option to remove unprocessed subs during housekeeping
 v0.0.20 (2018-03-01)
 - fix Unicode crash in logging routine
 - use datadir for temp files instead of Kodi's temp
