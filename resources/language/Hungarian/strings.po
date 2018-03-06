@@ -179,6 +179,10 @@ msgctxt "#32074"
 msgid "Remove orphaned unprocessed subtitle files"
 msgstr "Törölje a nem feldolgozott árva felirat fájlokat"
 
+msgctxt "#32075"
+msgid "Try to maintain bigger line spacing"
+msgstr "Próbáljon meg nagyobb sorközt tartani"
+
 msgctxt "#32080"
 msgid "Conversion"
 msgstr "Konvertálás"

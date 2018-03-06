@@ -179,6 +179,10 @@ msgctxt "#32074"
 msgid "Remove orphaned unprocessed subtitle files"
 msgstr ""
 
+msgctxt "#32075"
+msgid "Try to maintain bigger line spacing"
+msgstr ""
+
 msgctxt "#32080"
 msgid "Conversion"
 msgstr ""

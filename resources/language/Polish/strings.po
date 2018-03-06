@@ -179,6 +179,10 @@ msgctxt "#32074"
 msgid "Remove orphaned unprocessed subtitle files"
 msgstr "Usuń nieprzetworzone osierocone pliki z napisami"
 
+msgctxt "#32075"
+msgid "Try to maintain bigger line spacing"
+msgstr "Próbuj utrzymywać większy odstęp pomiędzy wierszami"
+
 msgctxt "#32080"
 msgid "Conversion"
 msgstr "Konwersja"
