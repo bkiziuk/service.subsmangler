@@ -15,14 +15,15 @@
       <setting id="ForegroundColor" type="select" label="32049" lvalues="32051|32052|32053|32054|32055|32056|32057|32058|32059" default="8" enable="eq(-4,true)"/>
       <setting id="BackgroundColor" type="select" label="32050" lvalues="32051|32052|32053|32054|32055|32056|32057|32058|32059" default="0" enable="eq(-5,true)"/>
       <setting id="BackgroundTransparency" type="slider" label="32007" default="0" range="0,100" option="percent" enable="eq(-6,true)"/>
+      <setting id="MaintainBiggerLineSpacing" type="bool" label="32075" default="false" enable="eq(-7,true)"/>
       <setting type="sep"/>
-      <setting id="RemoveCCmarks" type="bool" label="32004" default="true" enable="eq(-8,true)"/>
-      <setting id="RemoveAdds" type="bool" label="32005" default="true" enable="eq(-9,true)"/>
-      <setting id="AdjustSubDisplayTime" type="bool" label="32081" default="false" enable="eq(-10,true)"/>
-      <setting id="PauseOnConversion" type="bool" label="32011" default="true" enable="eq(-11,true)"/>
-      <setting id="BackupOldSubs" type="bool" label="32071" default="true" enable="eq(-12,true)"/>
+      <setting id="RemoveCCmarks" type="bool" label="32004" default="true" enable="eq(-9,true)"/>
+      <setting id="RemoveAdds" type="bool" label="32005" default="true" enable="eq(-10,true)"/>
+      <setting id="AdjustSubDisplayTime" type="bool" label="32081" default="false" enable="eq(-11,true)"/>
+      <setting id="PauseOnConversion" type="bool" label="32011" default="true" enable="eq(-12,true)"/>
+      <setting id="BackupOldSubs" type="bool" label="32071" default="true" enable="eq(-13,true)"/>
       <setting type="sep"/>
-      <setting id="AutoUpdateDef" type="bool" label="32006" default="true" enable="eq(-14,true)"/>
+      <setting id="AutoUpdateDef" type="bool" label="32006" default="true" enable="eq(-15,true)"/>
     </category>
     <category label="32048">
       <setting id="AutoRemoveOldSubs" type="bool" label="32070" default="true"/>

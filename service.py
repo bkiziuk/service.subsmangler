@@ -295,7 +295,7 @@ def GetIsoCode(lang):
         f.close()
 
         if outlang:
-            Log("Language code found: " + outlang, xbmc.LOGINFO)
+            Log("Language code found: " + outlang, xbmc.LOGDEBUG)
         else:
             Log("Language code not found.", xbmc.LOGWARNING)
     else:
@@ -338,6 +338,7 @@ def GetSettings():
     global setting_ForegroundColor
     global setting_BackgroundColor
     global setting_BackgroundTransparency
+    global setting_MaintainBiggerLineSpacing
     global setting_RemoveCCmarks
     global setting_RemoveAds
     global setting_PauseOnConversion
@@ -360,6 +361,7 @@ def GetSettings():
     setting_ForegroundColor = int(__addon__.getSetting("ForegroundColor"))
     setting_BackgroundColor = int(__addon__.getSetting("BackgroundColor"))
     setting_BackgroundTransparency = int(__addon__.getSetting("BackgroundTransparency"))
+    setting_MaintainBiggerLineSpacing = GetBool(__addon__.getSetting("MaintainBiggerLineSpacing"))
     setting_RemoveCCmarks = GetBool(__addon__.getSetting("RemoveCCmarks"))
     setting_RemoveAds = GetBool(__addon__.getSetting("RemoveAdds"))
     setting_AdjustSubDisplayTime = GetBool(__addon__.getSetting("AdjustSubDisplayTime"))
@@ -382,6 +384,7 @@ def GetSettings():
     Log("                    ForegroundColor = " + str(setting_ForegroundColor), xbmc.LOGINFO)
     Log("                    BackgroundColor = " + str(setting_BackgroundColor), xbmc.LOGINFO)
     Log("             BackgroundTransparency = " + str(setting_BackgroundTransparency), xbmc.LOGINFO)
+    Log("          MaintainBiggerLineSpacing = " + str(setting_MaintainBiggerLineSpacing), xbmc.LOGINFO)
     Log("                      RemoveCCmarks = " + str(setting_RemoveCCmarks), xbmc.LOGINFO)
     Log("                          RemoveAds = " + str(setting_RemoveAds), xbmc.LOGINFO)
     Log("               AdjustSubDisplayTime = " + str(setting_AdjustSubDisplayTime), xbmc.LOGINFO)
@@ -879,6 +882,15 @@ def MangleSubtitles(originalinputfile):
             subs.remove(line)
             Log("    Resulting line is empty. Removing from file.", xbmc.LOGDEBUG)
         else:
+            # increase line spacing if subtitle is multiline
+            # use Max Deryagin's solution: https://www.md-subs.com/line-spacing-in-ssa
+            # FIXME - currently only 2-line is supported
+            # check if subtitle is multiline
+            if setting_MaintainBiggerLineSpacing and re.search(r"\N", subsline):
+                # line is multiline - add tags
+                subsline = r"{\org(-2000000,0)\fr0.00012}" + subsline
+                subsline = subsline.replace(r"\N", r"{\r}\N")
+
             # adjust minimum subtitle display time
             # if calculated time is longer than actual time and if it does not overlap next sub time
             if setting_AdjustSubDisplayTime:
