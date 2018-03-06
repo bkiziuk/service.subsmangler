@@ -295,7 +295,7 @@ def GetIsoCode(lang):
         f.close()
 
         if outlang:
-            Log("Language code found: " + outlang, xbmc.LOGINFO)
+            Log("Language code found: " + outlang, xbmc.LOGDEBUG)
         else:
             Log("Language code not found.", xbmc.LOGWARNING)
     else:
@@ -361,7 +361,7 @@ def GetSettings():
     setting_ForegroundColor = int(__addon__.getSetting("ForegroundColor"))
     setting_BackgroundColor = int(__addon__.getSetting("BackgroundColor"))
     setting_BackgroundTransparency = int(__addon__.getSetting("BackgroundTransparency"))
-    setting_MaintainBiggerLineSpacing = int(__addon__.getSetting("MaintainBiggerLineSpacing"))
+    setting_MaintainBiggerLineSpacing = GetBool(__addon__.getSetting("MaintainBiggerLineSpacing"))
     setting_RemoveCCmarks = GetBool(__addon__.getSetting("RemoveCCmarks"))
     setting_RemoveAds = GetBool(__addon__.getSetting("RemoveAdds"))
     setting_AdjustSubDisplayTime = GetBool(__addon__.getSetting("AdjustSubDisplayTime"))
