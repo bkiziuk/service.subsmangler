@@ -196,12 +196,22 @@ class XBMCPlayer(xbmc.Player):
                         else:
                             Log("Video or subtitle language match Kodi's preferred settings. Not opening subtitle search dialog.", xbmc.LOGINFO)
                     else:
-                        Log("Local subtitles matching video being played detected. Enabling subtitles.", xbmc.LOGINFO)
+                        # enable .ass subtitles if they are present on the list
+                        asssubs = False
+                        for item in localsubs:
+                            if ".ass" in item[-4:]:
+                                Log("Local 'ass' subtitles matching video being played detected. Enabling subtitles.", xbmc.LOGINFO)
+                                xbmc.Player().setSubtitles(item)
+                                asssubs = True
+                                break
+
+                        if not asssubs:
+                            Log("Local non 'ass' subtitles matching video being played detected. Not opening subtitle search dialog.", xbmc.LOGINFO)
                 else:
                     Log("'noautosubs' file or extension detected. Not opening subtitle search dialog.", xbmc.LOGINFO)
-
-            # enable subtitles if there are any
-            xbmc.Player().showSubtitles(True)
+            else:
+                # enable subtitles if there are any
+                xbmc.Player().showSubtitles(True)
 
             # check periodically if there are any files changed in monitored subdir that match file being played
             if setting_ConversionServiceEnabled:
