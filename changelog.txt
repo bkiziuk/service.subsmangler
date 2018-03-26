@@ -1,5 +1,7 @@
-v0.0.24 (2018-03-26)
+v0.0.25 (2018-03-26)
 - if 'ass' subtitles are already available, enable them directly instead of just enabling subtitles. This prevents internal subtitles to be shown instead.
+v0.0.24 (2018-03-24)
+- try to read video info several times if the first try returns no information
 v0.0.23 (2018-03-06)
 - add option to maintain bigger space between lines so that background doesn't overlap
 v0.0.22 (2018-03-05)
