@@ -32,7 +32,7 @@ v0.0.22 (2018-03-05)
         <broken></broken>
         <assets>
             <icon>resources/icon.png</icon>
-            <fanart></fanart>
+            <fanart>resources/fanart.jpg</fanart>
             <screenshot></screenshot>
         </assets>
     </extension>
