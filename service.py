@@ -82,7 +82,15 @@ class XBMCPlayer(xbmc.Player):
             Log("VideoPlayer START detected.", xbmc.LOGINFO)
 
             # get info on file being played
-            subtitlePath, playingFilename, playingFilenamePath, playingFps, playingLang, playingSubs = GetPlayingInfo()
+            playingFilenamePath = ''
+            counter = 0
+            # try to read info several times as sometimes reading fails
+            while not (playingFilenamePath or counter >= 3): 
+                xbmc.sleep(500)
+                subtitlePath, playingFilename, playingFilenamePath, playingFps, playingLang, playingSubs = GetPlayingInfo()
+                counter += 1
+            if counter > 1:
+                Log("First GetPlayingInfo() read failed. Number of tries: " + str(counter), xbmc.LOGWARNING)
 
             # ignore all streaming videos
             # http://xion.io/post/code/python-startswith-tuple.html
