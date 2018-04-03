@@ -1,3 +1,6 @@
+v0.0.26 (2018-04-03)
+- fix: enabling existing 'ass' subtitles didn't work due to lack of full path
+- add fanart
 v0.0.25 (2018-03-26)
 - if 'ass' subtitles are already available, enable them directly instead of just enabling subtitles. This prevents internal subtitles to be shown instead.
 v0.0.24 (2018-03-24)

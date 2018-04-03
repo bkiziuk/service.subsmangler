@@ -208,8 +208,8 @@ class XBMCPlayer(xbmc.Player):
                         asssubs = False
                         for item in localsubs:
                             if ".ass" in item[-4:]:
-                                Log("Local 'ass' subtitles matching video being played detected. Enabling subtitles.", xbmc.LOGINFO)
-                                xbmc.Player().setSubtitles(item)
+                                Log("Local 'ass' subtitles matching video being played detected. Enabling subtitles: " + os.path.join(subtitlePath, item), xbmc.LOGINFO)
+                                xbmc.Player().setSubtitles(os.path.join(subtitlePath, item))
                                 asssubs = True
                                 break
 
