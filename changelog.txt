@@ -1,3 +1,5 @@
+v0.0.27 (2018-04-26)
+- code clean-up (remove unused imports)
 v0.0.26 (2018-04-03)
 - fix: enabling existing 'ass' subtitles didn't work due to lack of full path
 - add fanart

@@ -3,14 +3,12 @@ import os
 import filecmp
 import logging
 import re
-import stat
 import string
 import time
 import urllib2
 import xbmc
 import xbmcgui
 import xbmcaddon
-import xbmcplugin
 import xbmcvfs
 
 from datetime import datetime
