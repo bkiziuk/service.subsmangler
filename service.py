@@ -14,6 +14,7 @@ import xbmcvfs
 from datetime import datetime
 from json import loads
 from shutil import copyfile
+from logging.handlers import RotatingFileHandler
 from threading import Timer
 from resources.lib import pysubs2
 
