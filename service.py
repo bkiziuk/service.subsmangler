@@ -877,6 +877,8 @@ def MangleSubtitles(originalinputfile):
         # load single line to temp variable for processing
         subsline = line.text.encode('utf-8')
 
+        RemoveWhitespaces(subsline)
+
         # process subtitle line
         Log("Subtitle line: " + subsline, xbmc.LOGDEBUG)
         if setting_RemoveCCmarks:
@@ -886,10 +888,7 @@ def MangleSubtitles(originalinputfile):
             # remove Advertisement strings from subsline
             subsline = RemoveStrings(subsline, AdsList)
 
-        # remove orphan whitespaces from beginning and end of line
-        subsline = subsline.strip()
-        # convert double or more whitespaces to single ones
-        subsline = re.sub(' {2,}', ' ', subsline)
+        RemoveWhitespaces(subsline)
 
         # if line is empty after processing, remove line from subtitles file
         # https://stackoverflow.com/questions/9573244/most-elegant-way-to-check-if-the-string-is-empty-in-python
@@ -934,6 +933,7 @@ def MangleSubtitles(originalinputfile):
                     # find amount of time to safely increase subtitle display length
                     if nextlinestart != 0:
                         # calculate time increase that will satisfy expectedincrease but still does not overlap next subtitle
+                        # maintain a gap of at least 2ms
                         timetoincrease = min(nextlineclearance, expectedincrease) - 2
                     else:
                         # for the last subtitle, there is no limitation of next subtitle start time, so increase to minimum calculated time
@@ -991,6 +991,22 @@ def MangleSubtitles(originalinputfile):
         delete_file(originalinputfile)
 
     return originaloutputfile
+
+
+
+def RemoveWhitespaces(subsline):
+    """Removes unnecessary whitespaces from processed line
+    
+    Arguments:
+        subsline {str} -- text to be processed
+    """
+
+    # remove orphan whitespaces from beginning and end of line
+    subsline = subsline.strip()
+    # convert double or more whitespaces to single ones
+    subsline = re.sub(' {2,}', ' ', subsline)
+
+    return subsline
 
 
 
