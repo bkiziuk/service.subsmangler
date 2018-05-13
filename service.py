@@ -83,7 +83,7 @@ class XBMCPlayer(xbmc.Player):
             playingFilenamePath = ''
             counter = 0
             # try to read info several times as sometimes reading fails
-            while not (playingFilenamePath or counter >= 3): 
+            while not (playingFilenamePath or counter >= 3):
                 xbmc.sleep(500)
                 subtitlePath, playingFilename, playingFilenamePath, playingFps, playingLang, playingSubs = GetPlayingInfo()
                 counter += 1
@@ -684,26 +684,25 @@ def MangleSubtitles(originalinputfile):
     except Exception as e:
         # reading as UTF-8 failed
         # try use encoding based on language
-        pass
 
-    # if reading as UTF-8 failed and the file language detection was a success
-    if (not enc) and subslang:
-        if charmap[subslang]:
-            # encoding found on the list
-            enc = charmap[subslang]
-        else:
-            # encoding not found on the list, use Western European encoding
-            enc = "cp1252"
+        # if reading as UTF-8 failed and the file language detection was a success
+        if (not enc) and subslang:
+            if charmap[subslang]:
+                # encoding found on the list
+                enc = charmap[subslang]
+            else:
+                # encoding not found on the list, use Western European encoding
+                enc = "cp1252"
 
-        # try to read file using language specific encoding
-        try:
-            with codecs.open(tempinputfile, mode="rb", encoding=enc) as reader:
-                temp = reader.read()
-                # still no exception - seems to be a success
-                Log("Chosen encoding: " + enc + " based on language: " + subslang + " seems to be valid.", xbmc.LOGINFO)
-        except Exception as e:
-            # reading based on assigned language encoding failed
-            enc = ""
+            # try to read file using language specific encoding
+            try:
+                with codecs.open(tempinputfile, mode="rb", encoding=enc) as reader:
+                    temp = reader.read()
+                    # still no exception - seems to be a success
+                    Log("Chosen encoding: " + enc + " based on language: " + subslang + " seems to be valid.", xbmc.LOGINFO)
+            except Exception as e:
+                # reading based on assigned language encoding failed
+                enc = ""
 
     # if identification tries failed, try a list of encodings as a last resort
     if not enc:
@@ -996,7 +995,7 @@ def MangleSubtitles(originalinputfile):
 
 def RemoveWhitespaces(subsline):
     """Removes unnecessary whitespaces from processed line
-    
+
     Arguments:
         subsline {str} -- text to be processed
     """
