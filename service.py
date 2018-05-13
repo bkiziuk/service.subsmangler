@@ -13,7 +13,6 @@ import xbmcvfs
 
 from datetime import datetime
 from json import loads
-from logging.handlers import RotatingFileHandler
 from shutil import copyfile
 from threading import Timer
 from resources.lib import pysubs2
@@ -1431,13 +1430,13 @@ def UpdateDefFile():
         # remove temp file
         os.remove(tempdeffilename)
 
+    except OSError as e:
+        Log("Can not remove temporary definitions file: " + tempdeffilename, xbmc.LOGERROR)
     except urllib2.URLError as e:
         Log("Can not download definitions: " + deffileurl, xbmc.LOGERROR)
         Log("Exception: " + str(e.reason), xbmc.LOGERROR)
     except IOError as e:
         Log("Can not copy definitions file to: " + localdeffilename, xbmc.LOGERROR)
-    except OSError as e:
-        Log("Can not remove temporary definitions file: " + tempdeffilename, xbmc.LOGERROR)
 
 
 
@@ -1615,7 +1614,6 @@ __addonlang__ = __addon__.getLocalizedString
 
 
 # path and file name of public definitions
-global deffilename
 deffileurl = "http://bkiziuk.github.io/kodi-repo/regexdef.txt"
 localdeffilename = os.path.join(__addonworkdir__, 'regexdef.def')
 sampledeffilename = os.path.join(__addondir__, 'resources', 'regexdef.def')
