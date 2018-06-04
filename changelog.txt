@@ -1,3 +1,5 @@
+v0.0.31 (2018-06-04)
+- add Czech & Slovak language
 v0.0.30 (2018-05-14)
 - fix broken handlers definition
 v0.0.29 (2018-05-14)
