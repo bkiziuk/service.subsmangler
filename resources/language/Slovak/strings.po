@@ -9,19 +9,19 @@ msgstr "Hlavný"
 
 msgctxt "#32002"
 msgid "Convert subtitles"
-msgstr "Konvertovať titulky "
+msgstr "Konvertovať titulky"
 
 msgctxt "#32003"
 msgid "Font size"
-msgstr "Veľkosť písma "
+msgstr "Veľkosť písma"
 
 msgctxt "#32004"
 msgid "Remove Closed Captioning"
-msgstr "Odstrániť zatvorené titulky "
+msgstr "Odstrániť zatvorené titulky"
 
 msgctxt "#32005"
 msgid "Remove advertisements"
-msgstr "Odstrániť reklamy "
+msgstr "Odstrániť reklamy"
 
 msgctxt "#32006"
 msgid "Auto-update filtering definitions"
@@ -29,7 +29,7 @@ msgstr "Automatický update definície filtrovanie"
 
 msgctxt "#32007"
 msgid "Background transparency"
-msgstr "Priehľadnosť pozadia "
+msgstr "Priehľadnosť pozadia"
 
 msgctxt "#32010"
 msgid "Invoke subtitles search dialog on playback start"
@@ -37,15 +37,15 @@ msgstr "Pri štarte prehrávaní vyvolať dialóg vyhľadávania titulkov"
 
 msgctxt "#32011"
 msgid "Pause Playback during conversion"
-msgstr "Pozastaviť prehrávanie počas konverzie "
+msgstr "Pozastaviť prehrávanie počas konverzie"
 
 msgctxt "#32012"
 msgid "Include subtitles already found on disk"
-msgstr "Obsahuje titulky už nájdené na disku "
+msgstr "Obsahuje titulky už nájdené na disku"
 
 msgctxt "#32013"
 msgid "Don't invoke dialog if local unprocessed subs are found"
-msgstr "Nevyvolať dialóg ak sú nájdené nespracované titulky "
+msgstr "Nevyvolať dialóg ak sú nájdené nespracované titulky"
 
 msgctxt "#32020"
 msgid "Logging level"
@@ -149,7 +149,7 @@ msgstr "Červená"
 
 msgctxt "#32057"
 msgid "Light blue"
-msgstr "Svetlo modrá "
+msgstr "Svetlo modrá"
 
 msgctxt "#32058"
 msgid "Yellow"
@@ -161,27 +161,27 @@ msgstr "Biela"
 
 msgctxt "#32070"
 msgid "Automatically remove orphaned subtitle files"
-msgstr "Automaticky odstrániť súbor samostatných titulkov "
+msgstr "Automaticky odstrániť súbor samostatných titulkov"
 
 msgctxt "#32071"
 msgid "Make a backup of processed subtitle file"
-msgstr "Vytvoriť zálohu spracovávaného súboru titulkov "
+msgstr "Vytvoriť zálohu spracovávaného súboru titulkov"
 
 msgctxt "#32072"
 msgid "Remove backed-up copy of orphaned subtitle file"
-msgstr "Odstrániť zálohovanú kópiu súboru samostatných titulkov "
+msgstr "Odstrániť zálohovanú kópiu súboru samostatných titulkov"
 
 msgctxt "#32073"
 msgid "Simulate file removal only"
-msgstr "Iba vyskúšať odstránenie súboru "
+msgstr "Iba vyskúšať odstránenie súboru"
 
 msgctxt "#32074"
 msgid "Remove orphaned unprocessed subtitle files"
-msgstr "Odstrániť samostatný nespracovaný súbor titulkov "
+msgstr "Odstrániť samostatný nespracovaný súbor titulkov"
 
 msgctxt "#32075"
 msgid "Try to maintain bigger line spacing"
-msgstr "Skúsiť použiť väcší medzeru medzi riadkami "
+msgstr "Skúsiť použiť väcší medzeru medzi riadkami"
 
 msgctxt "#32080"
 msgid "Conversion"
@@ -189,4 +189,12 @@ msgstr "Konverzia"
 
 msgctxt "#32081"
 msgid "Adjust subtitle display time"
-msgstr " Nastaviť čas zobrazenia tituklů "
+msgstr "Nastaviť čas zobrazenia tituklů"
+
+msgctxt "#32090"
+msgid "Scanning for subtitle files"
+msgstr "Hledání souborů titulků"
+
+msgctxt "#32091"
+msgid "Clearing orphaned subtitle files"
+msgstr "Mazání souborů samostatných titulků"

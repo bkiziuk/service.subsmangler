@@ -190,3 +190,11 @@ msgstr "Konwersja"
 msgctxt "#32081"
 msgid "Adjust subtitle display time"
 msgstr "Koryguj czas wyświetlania napisów"
+
+msgctxt "#32090"
+msgid "Scanning for subtitle files"
+msgstr "Poszukiwanie plików z napisami"
+
+msgctxt "#32091"
+msgid "Clearing orphaned subtitle files"
+msgstr "Usuwanie osieroconych plików z napisami"

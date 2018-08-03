@@ -190,3 +190,11 @@ msgstr "Konverze"
 msgctxt "#32081"
 msgid "Adjust subtitle display time"
 msgstr "Nastavit čas zobrazení tituklů"
+
+msgctxt "#32090"
+msgid "Scanning for subtitle files"
+msgstr "Hledání souborů titulků"
+
+msgctxt "#32091"
+msgid "Clearing orphaned subtitle files"
+msgstr "Mazání souborů samostatných titulků"
