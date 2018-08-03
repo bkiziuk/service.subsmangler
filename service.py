@@ -1468,7 +1468,7 @@ def RemoveOldSubs():
     # create background dialog
     # http://mirrors.kodi.tv/docs/python-docs/13.0-gotham/xbmcgui.html#DialogProgressBG
     pDialog = xbmcgui.DialogProgressBG()
-    pDialog.create('Subtitles Mangler', 'Scanning for subtitle files')
+    pDialog.create('Subtitles Mangler', __addonlang__(32090).encode("utf-8"))
 
     # initiate empty lists
     videofiles = list()
@@ -1498,7 +1498,7 @@ def RemoveOldSubs():
 
         # update background dialog
         progress += pIncrease
-        pDialog.update(progress, message='Scanning for subtitle files: ' + source.get('label'))
+        pDialog.update(progress, message=__addonlang__(32090).encode("utf-8") + ': ' + source.get('label'))
 
         # http://code.activestate.com/recipes/435875-a-simple-non-recursive-directory-walker/
         directories = [startdir]
@@ -1552,7 +1552,7 @@ def RemoveOldSubs():
     Log("Scanning for orphaned subtitle files finished. Processing took: " + '%.3f'%(ClearScanTime - ClearStartTime) + " seconds.", xbmc.LOGNOTICE)
     Log("Clearing orphaned subtitle files.", xbmc.LOGNOTICE)
     # update background dialog
-    pDialog.update(85, message='Clearing orphaned subtitle files')
+    pDialog.update(85, message=__addonlang__(32091).encode("utf-8"))
 
     # lists filled, compare subs list with video list
     for subfile in subfiles:
