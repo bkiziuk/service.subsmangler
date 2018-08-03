@@ -4,7 +4,8 @@ v0.0.32 (2018-06-16)
 -- convert existing non-ass subtitles already found on disk --> True
 -- if possible, extend subtitle display time if it is too short --> True
 v0.0.31 (2018-06-04)
-- add Czech and Slovak language
+- add Czech and Slovak language (thanks to anonymous translator)
+- add Hungarian language (thanks to Gyorgy Popovics)
 v0.0.30 (2018-05-14)
 - fix broken handlers definition
 v0.0.29 (2018-05-14)
