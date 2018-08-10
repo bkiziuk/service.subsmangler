@@ -1,3 +1,5 @@
+v0.0.33 (2018-08-10)
+- add German language (thanks to anonymous translator)
 v0.0.32 (2018-06-16)
 - alter default settings:
 -- don't auto invoke Subtitle Search dialog if local subtitles are present --> True
