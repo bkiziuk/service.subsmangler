@@ -1,3 +1,5 @@
+v0.0.34 (2018-08-11)
+- fix Unicode crash in ProgressDialog
 v0.0.33 (2018-08-10)
 - add German language (thanks to anonymous translator)
 v0.0.32 (2018-06-16)
@@ -42,7 +44,6 @@ v0.0.16 (2018-02-24)
 - fix for opening YesNo dialog immediatelly after SubSearch dialog if new playback was started without manual stop of the previous one
 v0.0.15 (2018-02-23)
 - added ability to convert local subtitle files accompanying played video file
-- added Hungarian UI language
 v0.0.14 (2018-02-16)
 - scanning for subtitles will not be triggered immediatelly after video has ended
 v0.0.13 (2018-02-15)
