@@ -676,7 +676,7 @@ def MangleSubtitles(originalinputfile):
     # first, check if the file can be properly read using UTF-8 encoding
     enc = ""
     try:
-        with codecs.open(tempinputfile, mode="rb", encoding="utf-8") as reader:
+        with codecs.open(tempinputfile, mode="rb", encoding='utf-8') as reader:
             temp = reader.read()
             # still no exception - seems to be a success
             Log("UTF-8 encoding seems to be valid.", xbmc.LOGINFO)
@@ -1324,10 +1324,10 @@ def DetectNewSubs():
 
         # display YesNo dialog
         # http://mirrors.xbmc.org/docs/python-docs/13.0-gotham/xbmcgui.html#Dialog-yesno
-        YesNoDialog = xbmcgui.Dialog().yesno("Subtitles Mangler", __addonlang__(32040).encode("utf-8"), line2=__addonlang__(32041).encode("utf-8"), nolabel=__addonlang__(32042).encode("utf-8"), yeslabel=__addonlang__(32043).encode("utf-8"))
+        YesNoDialog = xbmcgui.Dialog().yesno("Subtitles Mangler", __addonlang__(32040).encode('utf-8'), line2=__addonlang__(32041).encode('utf-8'), nolabel=__addonlang__(32042).encode('utf-8'), yeslabel=__addonlang__(32043).encode('utf-8'))
         if YesNoDialog:
             # user does not want the subtitle search dialog to appear again for this file
-            Log("Answer is Yes. Setting .noautosubs extension flag for file: " + playingFilenamePath.encode("utf-8"), xbmc.LOGINFO)
+            Log("Answer is Yes. Setting .noautosubs extension flag for file: " + playingFilenamePath.encode('utf-8'), xbmc.LOGINFO)
             # set '.noautosubs' extension for file being played
             try:
                 filebase, fileext = os.path.splitext(playingFilenamePath)
@@ -1468,7 +1468,7 @@ def RemoveOldSubs():
     # create background dialog
     # http://mirrors.kodi.tv/docs/python-docs/13.0-gotham/xbmcgui.html#DialogProgressBG
     pDialog = xbmcgui.DialogProgressBG()
-    pDialog.create('Subtitles Mangler', __addonlang__(32090).encode("utf-8"))
+    pDialog.create('Subtitles Mangler', __addonlang__(32090).encode('utf-8'))
 
     # initiate empty lists
     videofiles = list()
@@ -1498,7 +1498,7 @@ def RemoveOldSubs():
 
         # update background dialog
         progress += pIncrease
-        pDialog.update(progress, message=__addonlang__(32090).encode("utf-8") + ': ' + source.get('label').encode("utf-8"))
+        pDialog.update(progress, message=__addonlang__(32090).encode('utf-8') + ': ' + source.get('label').encode('utf-8'))
 
         # http://code.activestate.com/recipes/435875-a-simple-non-recursive-directory-walker/
         directories = [startdir]
@@ -1552,7 +1552,7 @@ def RemoveOldSubs():
     Log("Scanning for orphaned subtitle files finished. Processing took: " + '%.3f'%(ClearScanTime - ClearStartTime) + " seconds.", xbmc.LOGNOTICE)
     Log("Clearing orphaned subtitle files.", xbmc.LOGNOTICE)
     # update background dialog
-    pDialog.update(85, message=__addonlang__(32091).encode("utf-8"))
+    pDialog.update(85, message=__addonlang__(32091).encode('utf-8'))
 
     # lists filled, compare subs list with video list
     for subfile in subfiles:
@@ -1608,7 +1608,7 @@ def RemoveOldSubs():
 # https://www.joelonsoftware.com/2003/10/08/the-absolute-minimum-every-software-developer-absolutely-positively-must-know-about-unicode-and-character-sets-no-excuses/
 
 __addon__ = xbmcaddon.Addon(id='service.subsmangler')
-__addondir__ = xbmc.translatePath(__addon__.getAddonInfo('path').decode("utf-8"))
+__addondir__ = xbmc.translatePath(__addon__.getAddonInfo('path').decode('utf-8'))
 __addonworkdir__ = xbmc.translatePath(__addon__.getAddonInfo('profile').decode('utf-8'))
 __version__ = __addon__.getAddonInfo('version')
 __addonlang__ = __addon__.getLocalizedString
