@@ -1498,7 +1498,7 @@ def RemoveOldSubs():
 
         # update background dialog
         progress += pIncrease
-        pDialog.update(progress, message=__addonlang__(32090).encode("utf-8") + ': ' + source.get('label'))
+        pDialog.update(progress, message=__addonlang__(32090).encode("utf-8") + ': ' + source.get('label').encode("utf-8"))
 
         # http://code.activestate.com/recipes/435875-a-simple-non-recursive-directory-walker/
         directories = [startdir]
