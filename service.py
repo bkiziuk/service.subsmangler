@@ -60,168 +60,18 @@ class XBMCPlayer(xbmc.Player):
         pass
 
     def onPlayBackStarted( self ):
-        # Will be called when xbmc starts playing a file
-        global subtitlePath
-        global playingFilename
-        global playingFilenamePath
-        global playingFps
-        global SubsSearchWasOpened
-        global setting_AutoInvokeSubsDialog
+        # Will be called when xbmc player is created
+        # however stream may not be available at this point
+        # for Kodi 18 use onAVStarted
+        if int(__kodiversion__[:2]) == 17:
+            GetSubtitles()
 
-        # stop subtitle detection in case it was already running
-        # this prevents YesNo dialog from showing immediatelly after opening subtitle search dialog
-        # in case playback of new file is started during playback of another file without prior stopping it
-        rt.stop()
-
-        # detect if Player is running by checking xbmc.Player().isPlayingVideo() or xbmc.getCondVisibility('Player.HasVideo')
-        # use ConditionalVisibility checks: http://kodi.wiki/view/List_of_boolean_conditions
-        if xbmc.getCondVisibility('Player.HasVideo'):
-            # player has just been started, check what contents does it play and from
-            Log("VideoPlayer START detected.", xbmc.LOGINFO)
-
-            # get info on file being played
-            playingFilenamePath = ''
-            counter = 0
-            # try to read info several times as sometimes reading fails
-            while not (playingFilenamePath or counter >= 3):
-                xbmc.sleep(500)
-                subtitlePath, playingFilename, playingFilenamePath, playingFps, playingLang, playingSubs = GetPlayingInfo()
-                counter += 1
-            if counter > 1:
-                Log("First GetPlayingInfo() read failed. Number of tries: " + str(counter), xbmc.LOGWARNING)
-
-            # ignore all streaming videos
-            # http://xion.io/post/code/python-startswith-tuple.html
-            protocols = ("http", "https", "mms", "rtsp", "pvr")
-            if playingFilenamePath.lower().startswith(tuple(p + '://' for p in protocols)):
-                Log("Video stream detected. Ignoring it.", xbmc.LOGINFO)
-                return
-            elif not playingFilenamePath:
-                # string is empty, may happen when playing buffered streams
-                Log("Empty 'playingFilenamePath' string detected. Not able to continue.", xbmc.LOGERROR)
-                return
-
-            # get information on Kodi language settings
-            # GUI language:
-            #   resource.language.en_gb == en, resource.language.pl_pl == pl, etc.
-            # audio & subtitles languages:
-            #   original == Original video language
-            #   default == GUI interface language
-            #   forced_only == (only for subtitles) only forced subtitles
-            #   none == (only for subtitles) no subtitles
-            #   English == English, Polish == Polish, etc.
-            # GUI language
-            guilanguage = GetKodiSetting('locale.language')
-            # preferred audio language
-            prefaudiolanguage = GetKodiSetting('locale.audiolanguage')
-            # preferred subtitle language
-            prefsubtitlelanguage = GetKodiSetting('locale.subtitlelanguage')
-
-            # map values to ISO 639-2
-            guilanguage = guilanguage.replace('resource.language.', '')
-            guilanguage = GetIsoCode(guilanguage[:2])
-
-            if prefaudiolanguage == 'default':
-                prefaudiolanguage = guilanguage
-            elif prefaudiolanguage == 'original':
-                pass
-            else:
-                prefaudiolanguage = GetIsoCode(prefaudiolanguage)
-
-            if prefsubtitlelanguage == 'default':
-                prefsubtitlelanguage = guilanguage
-            elif prefsubtitlelanguage == 'original' or prefsubtitlelanguage == 'none' or prefsubtitlelanguage == 'forced_only':
-                prefsubtitlelanguage = 'none'
-            else:
-                prefsubtitlelanguage = GetIsoCode(prefsubtitlelanguage)
-
-            Log("Kodi's GUI language: " + guilanguage, xbmc.LOGINFO)
-            Log("Kodi's preferred audio language: " + prefaudiolanguage, xbmc.LOGINFO)
-            Log("Kodi's preferred subtitles language: " + prefsubtitlelanguage, xbmc.LOGINFO)
-
-            # check if there is .ass subtitle file already on disk matching video being played
-            # if not, automatically open subtitlesearch dialog
-            #FIXME - check if Kodi settings on auto subtitles download infuence the process
-            #
-            # set initial value for SubsSearchWasOpened flag
-            SubsSearchWasOpened = False
-            # check if Subtitles Search window should be opened at player start
-            if setting_AutoInvokeSubsDialog:
-                # get all files matching name of file being played
-                # also includes 'noautosubs' file and file with '.noautosubs' extension
-                extlist = list()
-
-                if setting_NoAutoInvokeIfLocalUnprocSubsFound:
-                    # optionally search for all subtitle extensions, not only '.ass'
-                    # assignment operator just makes an alias for the list
-                    # https://stackoverflow.com/questions/2612802/how-to-clone-or-copy-a-list
-                    extlist = list(SubExtList)
-
-                # search for target extension '.ass'
-                extlist.append('.ass')
-
-                # get all file names matching name of file being played
-                localsubs = GetSubtitleFiles(subtitlePath, extlist)
-
-                # check if there is 'noautosubs' file or extension on returned file list
-                noautosubs = False
-                for item in localsubs:
-                    if "noautosubs" in item[-10:]:
-                        # set noautosubs flag informing that subtitles search window should not be invoked
-                        noautosubs = True
-                        # delete this item from list to not falsely trigger enabling subtitles below
-                        del localsubs[item]
-                        break
-
-                if not noautosubs:
-                    # noautosubs file or extension not found
-                    # it is possible to invoke SubsSearch dialog or enable locally found subtitles
-                    #
-                    # check if local subtitles exist (list should not be empty)
-                    # https://stackoverflow.com/questions/53513/how-do-i-check-if-a-list-is-empty/53522#53522
-                    if not localsubs:
-                        # local subs don't exist on disk
-                        # check Kodi preferences on subtitles and compare with currently played video to see if search dialog should be opened
-                        #
-                        # do not open search dialog if:
-                        # - Kodi preferred audio language match audio language
-                        # - Kodi preferred subtitle language match loaded subtitle language
-                        if not ((prefaudiolanguage == playingLang) or (prefsubtitlelanguage == playingSubs)):
-                            Log("No local subtitles matching video being played. Opening search dialog.", xbmc.LOGINFO)
-                            # set flag to remember that subtitles search dialog was opened
-                            SubsSearchWasOpened = True
-                            # invoke subtitles search dialog
-                            xbmc.executebuiltin('ActivateWindow(10153)')  # subtitles search
-                            # hold further execution until window is closed
-                            # wait for window to appear
-                            while not xbmc.getCondVisibility("Window.IsVisible(10153)"):
-                                xbmc.sleep(1000)
-                            # wait for window to disappear
-                            while xbmc.getCondVisibility("Window.IsVisible(10153)"):
-                                xbmc.sleep(500)
-                        else:
-                            Log("Video or subtitle language match Kodi's preferred settings. Not opening subtitle search dialog.", xbmc.LOGINFO)
-                    else:
-                        # enable .ass subtitles if they are present on the list
-                        asssubs = False
-                        for item in localsubs:
-                            if ".ass" in item[-4:]:
-                                Log("Local 'ass' subtitles matching video being played detected. Enabling subtitles: " + os.path.join(subtitlePath, item), xbmc.LOGINFO)
-                                xbmc.Player().setSubtitles(os.path.join(subtitlePath, item))
-                                asssubs = True
-                                break
-
-                        if not asssubs:
-                            Log("Local non 'ass' subtitles matching video being played detected. Not opening subtitle search dialog.", xbmc.LOGINFO)
-                else:
-                    Log("'noautosubs' file or extension detected. Not opening subtitle search dialog.", xbmc.LOGINFO)
-            else:
-                # enable subtitles if there are any
-                xbmc.Player().showSubtitles(True)
-
-            # check periodically if there are any files changed in monitored subdir that match file being played
-            if setting_ConversionServiceEnabled:
-                rt.start()
+    def onAVStarted ( self ):
+        # Will be called when xbmc has video
+        # works only on Kodi 18 onwards
+        # on Kodi >= 17 onPlaybackStarted seems to be failing very often: https://forum.kodi.tv/showthread.php?tid=334929
+        if int(__kodiversion__[:2]) >= 18:
+            GetSubtitles()
 
     def onPlayBackEnded( self ):
         # Will be called when xbmc stops playing a file
@@ -274,6 +124,173 @@ class XBMCMonitor(xbmc.Monitor):
         # if service is not enabled any more, stop timer
         if not setting_ConversionServiceEnabled:
             rt.stop()
+
+
+
+# function checks if stream is a local file and tries to find matching subtitles
+# if subtitles are not found, it opens search dialog
+def GetSubtitles():
+    global subtitlePath
+    global playingFilename
+    global playingFilenamePath
+    global playingFps
+    global SubsSearchWasOpened
+    global setting_AutoInvokeSubsDialog
+
+    # stop subtitle detection in case it was already running
+    # this prevents YesNo dialog from showing immediatelly after opening subtitle search dialog
+    # in case playback of new file is started during playback of another file without prior stopping it
+    rt.stop()
+
+    # detect if Player is running by checking xbmc.Player().isPlayingVideo() or xbmc.getCondVisibility('Player.HasVideo')
+    # use ConditionalVisibility checks: http://kodi.wiki/view/List_of_boolean_conditions
+    if xbmc.getCondVisibility('Player.HasVideo'):
+        # player has just been started, check what contents does it play and from
+        Log("VideoPlayer START detected.", xbmc.LOGINFO)
+
+        # get info on file being played
+        playingFilenamePath = ''
+        counter = 0
+        # try to read info several times as sometimes reading fails
+        while not (playingFilenamePath or counter >= 3):
+            xbmc.sleep(500)
+            subtitlePath, playingFilename, playingFilenamePath, playingFps, playingLang, playingSubs = GetPlayingInfo()
+            counter += 1
+        if counter > 1:
+            Log("First GetPlayingInfo() read failed. Number of tries: " + str(counter), xbmc.LOGWARNING)
+
+        # ignore all streaming videos
+        # http://xion.io/post/code/python-startswith-tuple.html
+        protocols = ("http", "https", "mms", "rtsp", "pvr")
+        if playingFilenamePath.lower().startswith(tuple(p + '://' for p in protocols)):
+            Log("Video stream detected. Ignoring it.", xbmc.LOGINFO)
+            return
+        elif not playingFilenamePath:
+            # string is empty, may happen when playing buffered streams
+            Log("Empty 'playingFilenamePath' string detected. Not able to continue.", xbmc.LOGERROR)
+            return
+
+        # get information on Kodi language settings
+        # GUI language:
+        #   resource.language.en_gb == en, resource.language.pl_pl == pl, etc.
+        # audio & subtitles languages:
+        #   original == Original video language
+        #   default == GUI interface language
+        #   forced_only == (only for subtitles) only forced subtitles
+        #   none == (only for subtitles) no subtitles
+        #   English == English, Polish == Polish, etc.
+        # GUI language
+        guilanguage = GetKodiSetting('locale.language')
+        # preferred audio language
+        prefaudiolanguage = GetKodiSetting('locale.audiolanguage')
+        # preferred subtitle language
+        prefsubtitlelanguage = GetKodiSetting('locale.subtitlelanguage')
+
+        # map values to ISO 639-2
+        guilanguage = guilanguage.replace('resource.language.', '')
+        guilanguage = GetIsoCode(guilanguage[:2])
+
+        if prefaudiolanguage == 'default':
+            prefaudiolanguage = guilanguage
+        elif prefaudiolanguage == 'original':
+            pass
+        else:
+            prefaudiolanguage = GetIsoCode(prefaudiolanguage)
+
+        if prefsubtitlelanguage == 'default':
+            prefsubtitlelanguage = guilanguage
+        elif prefsubtitlelanguage == 'original' or prefsubtitlelanguage == 'none' or prefsubtitlelanguage == 'forced_only':
+            prefsubtitlelanguage = 'none'
+        else:
+            prefsubtitlelanguage = GetIsoCode(prefsubtitlelanguage)
+
+        Log("Kodi's GUI language: " + guilanguage, xbmc.LOGINFO)
+        Log("Kodi's preferred audio language: " + prefaudiolanguage, xbmc.LOGINFO)
+        Log("Kodi's preferred subtitles language: " + prefsubtitlelanguage, xbmc.LOGINFO)
+
+        # check if there is .ass subtitle file already on disk matching video being played
+        # if not, automatically open subtitlesearch dialog
+        #FIXME - check if Kodi settings on auto subtitles download infuence the process
+        #
+        # set initial value for SubsSearchWasOpened flag
+        SubsSearchWasOpened = False
+        # check if Subtitles Search window should be opened at player start
+        if setting_AutoInvokeSubsDialog:
+            # get all files matching name of file being played
+            # also includes 'noautosubs' file and file with '.noautosubs' extension
+            extlist = list()
+
+            if setting_NoAutoInvokeIfLocalUnprocSubsFound:
+                # optionally search for all subtitle extensions, not only '.ass'
+                # assignment operator just makes an alias for the list
+                # https://stackoverflow.com/questions/2612802/how-to-clone-or-copy-a-list
+                extlist = list(SubExtList)
+
+            # search for target extension '.ass'
+            extlist.append('.ass')
+
+            # get all file names matching name of file being played
+            localsubs = GetSubtitleFiles(subtitlePath, extlist)
+
+            # check if there is 'noautosubs' file or extension on returned file list
+            noautosubs = False
+            for item in localsubs:
+                if "noautosubs" in item[-10:]:
+                    # set noautosubs flag informing that subtitles search window should not be invoked
+                    noautosubs = True
+                    # delete this item from list to not falsely trigger enabling subtitles below
+                    del localsubs[item]
+                    break
+
+            if not noautosubs:
+                # noautosubs file or extension not found
+                # it is possible to invoke SubsSearch dialog or enable locally found subtitles
+                #
+                # check if local subtitles exist (list should not be empty)
+                # https://stackoverflow.com/questions/53513/how-do-i-check-if-a-list-is-empty/53522#53522
+                if not localsubs:
+                    # local subs don't exist on disk
+                    # check Kodi preferences on subtitles and compare with currently played video to see if search dialog should be opened
+                    #
+                    # do not open search dialog if:
+                    # - Kodi preferred audio language match audio language
+                    # - Kodi preferred subtitle language match loaded subtitle language
+                    if not ((prefaudiolanguage == playingLang) or (prefsubtitlelanguage == playingSubs)):
+                        Log("No local subtitles matching video being played. Opening search dialog.", xbmc.LOGINFO)
+                        # set flag to remember that subtitles search dialog was opened
+                        SubsSearchWasOpened = True
+                        # invoke subtitles search dialog
+                        xbmc.executebuiltin('ActivateWindow(10153)')  # subtitles search
+                        # hold further execution until window is closed
+                        # wait for window to appear
+                        while not xbmc.getCondVisibility("Window.IsVisible(10153)"):
+                            xbmc.sleep(1000)
+                        # wait for window to disappear
+                        while xbmc.getCondVisibility("Window.IsVisible(10153)"):
+                            xbmc.sleep(500)
+                    else:
+                        Log("Video or subtitle language match Kodi's preferred settings. Not opening subtitle search dialog.", xbmc.LOGINFO)
+                else:
+                    # enable .ass subtitles if they are present on the list
+                    asssubs = False
+                    for item in localsubs:
+                        if ".ass" in item[-4:]:
+                            Log("Local 'ass' subtitles matching video being played detected. Enabling subtitles: " + os.path.join(subtitlePath, item), xbmc.LOGINFO)
+                            xbmc.Player().setSubtitles(os.path.join(subtitlePath, item))
+                            asssubs = True
+                            break
+
+                    if not asssubs:
+                        Log("Local non 'ass' subtitles matching video being played detected. Not opening subtitle search dialog.", xbmc.LOGINFO)
+            else:
+                Log("'noautosubs' file or extension detected. Not opening subtitle search dialog.", xbmc.LOGINFO)
+        else:
+            # enable subtitles if there are any
+            xbmc.Player().showSubtitles(True)
+
+        # check periodically if there are any files changed in monitored subdir that match file being played
+        if setting_ConversionServiceEnabled:
+            rt.start()
 
 
 
@@ -1278,7 +1295,13 @@ def DetectNewSubs():
                 # show busy animation
                 # https://forum.kodi.tv/showthread.php?tid=280621&pid=2363462#pid2363462
                 # https://kodi.wiki/view/Window_IDs
-                xbmc.executebuiltin('ActivateWindow(10138)')  # Busy dialog on
+                # busydialog is going away in Kodi 18 - https://forum.kodi.tv/showthread.php?tid=333950&pid=2754978#pid2754978
+                if int(__kodiversion__[:2]) == 17:
+                    xbmc.executebuiltin('ActivateWindow(busydialog)')  # busydialog on - Kodi 17
+                else:
+                     if int(__kodiversion__[:2]) >= 18:
+                        xbmc.executebuiltin('ActivateWindow(busydialognocancel)')  # busydialog on - Kodi 18
+
                 # pause playback
                 PlaybackPause()
 
@@ -1300,7 +1323,12 @@ def DetectNewSubs():
 
             # hide busy animation
             # https://forum.kodi.tv/showthread.php?tid=280621&pid=2363462#pid2363462
-            xbmc.executebuiltin('Dialog.Close(10138)')  # Busy dialog off
+            if int(__kodiversion__[:2]) == 17:
+                xbmc.executebuiltin('Dialog.Close(busydialog)')  # busydialog off - Kodi 17
+            else:
+                if int(__kodiversion__[:2]) >= 18:
+                    xbmc.executebuiltin('Dialog.Close(busydialognocancel)')  # busydialog off - Kodi 18
+
 
             # record end time of processing
             RoutineEndTime = time.time()
@@ -1612,6 +1640,7 @@ __addondir__ = xbmc.translatePath(__addon__.getAddonInfo('path').decode('utf-8')
 __addonworkdir__ = xbmc.translatePath(__addon__.getAddonInfo('profile').decode('utf-8'))
 __version__ = __addon__.getAddonInfo('version')
 __addonlang__ = __addon__.getLocalizedString
+__kodiversion__ = xbmc.getInfoLabel('System.BuildVersion')[:4]
 
 
 # path and file name of public definitions
@@ -1634,7 +1663,7 @@ if __name__ == '__main__':
     monitor = XBMCMonitor()
     player = XBMCPlayer()
 
-    xbmc.log("SubsMangler: started. Version: %s" % (__version__), level=xbmc.LOGNOTICE)
+    xbmc.log("SubsMangler: started. Version: " + __version__.encode('utf-8') + ". Kodi version: " + __kodiversion__.encode('utf-8'), level=xbmc.LOGNOTICE)
 
     # prepare timer to launch
     rt = RepeatedTimer(2.0, DetectNewSubs)
