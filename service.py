@@ -467,7 +467,7 @@ def Log(message, severity=xbmc.LOGDEBUG):
             xbmc.log("SubsMangler: " + message.encode('utf-8'), level=xbmc.LOGNONE)
         else:
             # use smangler's own log file located in addon's datadir
-            # konstruct log text
+            # construct log text
             # cut last 3 trailing zero's from timestamp
             logtext = str(datetime.now())[:-3]
             if severity == xbmc.LOGDEBUG:
