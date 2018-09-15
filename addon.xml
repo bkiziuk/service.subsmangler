@@ -29,15 +29,10 @@
         <platform>all</platform>
         <license>GNU General Public License v3.0</license>
         <forum>https://forum.kodi.tv/showthread.php?tid=328763</forum>
-        <website></website>
         <source>https://github.com/bkiziuk/service.subsmangler</source>
-		<language></language>
-		<email></email>
-        <broken></broken>
         <assets>
             <icon>resources/icon.png</icon>
             <fanart>resources/fanart.jpg</fanart>
-            <screenshot></screenshot>
         </assets>
     </extension>
 </addon>
