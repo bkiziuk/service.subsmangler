@@ -1,8 +1,0 @@
-*.pyo
-*.pyc
-.DS_Store
-/.vs/VSWorkspaceState.json
-/.vs/launch.vs.json
-/.vs/script.module.pysubs2/v15/.suo
-/.vs/slnx.sqlite
-.vscode/settings.json
