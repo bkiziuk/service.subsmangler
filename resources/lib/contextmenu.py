@@ -28,15 +28,26 @@ def main():
             # extension flag is set for this file
             YesNoDialog = xbmcgui.Dialog().yesno("Subtitles Mangler", __addonlang__(32103).encode('utf-8'), line2=filepathname.encode('utf-8'), line3=__addonlang__(32104).encode('utf-8'), nolabel=__addonlang__(32042).encode('utf-8'), yeslabel=__addonlang__(32043).encode('utf-8'))
             # answering Yes clears the flag
-
-            #TODO: answer yes
-
+            if YesNoDialog:
+                # delete .noautosubs file
+                try:
+                    xbmcvfs.delete(filebase + ".noautosubs")
+                except Exception as e:
+                    xbmc.log("SubsMangler: Delete failed: " + os.path.join(filebase, ".noautosubs").encode('utf-8'), xbmc.LOGERROR)
+                    xbmc.log("  Exception: " + str(e.message), xbmc.LOGERROR)
         else:
             # extension flag is not set for this file
             YesNoDialog = xbmcgui.Dialog().yesno("Subtitles Mangler", __addonlang__(32105).encode('utf-8'), line2=filepathname.encode('utf-8'), line3=__addonlang__(32106).encode('utf-8'), nolabel=__addonlang__(32042).encode('utf-8'), yeslabel=__addonlang__(32043).encode('utf-8'))
             # answering Yes sets the flag
-
-            #TODO: answer Yes
+            if YesNoDialog:
+                # create .noautosubs file
+                try:
+                    f = xbmcvfs.File (filebase + ".noautosubs", 'w')
+                    result = f.write("# This file was created by Subtitles Mangler.\n# Presence of this file prevents automatical opening of subtitles search dialog.")
+                    f.close()
+                except Exception as e:
+                    xbmc.log("SubsMangler: Can not create noautosubs file.", xbmc.LOGERROR)
+                    xbmc.log("  Exception: " + str(e.message), xbmc.LOGERROR)
 
 
 
