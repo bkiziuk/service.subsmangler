@@ -209,7 +209,7 @@ msgid "Clearing orphaned subtitle files"
 msgstr ""
 
 msgctxt "#32100"
-msgid "noautosubs flag"
+msgid "Manage '.noautosubs' flag"
 msgstr ""
 
 msgctxt "#32101"

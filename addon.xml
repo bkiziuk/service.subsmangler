@@ -5,12 +5,10 @@
     </requires>
     <extension point="xbmc.service" library="service.py" start="login"/>
     <extension point="kodi.context.item" library="resources/lib/contextmenu.py">
-        <menu id="kodi.core.main">
-            <item>
-                <label>32100</label>
-                <visible>Container.Content(movies) | Container.Content(tvshows)</visible>
-            </item>
-        </menu>
+        <item>
+            <label>32100</label>
+            <visible>true</visible> <!--Container.Content(movies) | Container.Content(tvshows)-->
+        </item>
     </extension>
     <extension point="xbmc.addon.metadata">
         <summary lang="cs_CZ">Kompletní průvodce titukly</summary>

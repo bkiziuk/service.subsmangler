@@ -19,12 +19,14 @@ def main():
     filepath = xbmc.getInfoLabel('ListItem.Path')
 
     # check if noautosubs file exists
+    #TODO: fix clicking on collection
+    #TODO: recognize clicking on the folder and then check the contents for 'noautosubs' file
     if (xbmcvfs.exists(os.path.join(filepath, "noautosubs"))):
         xbmcgui.Dialog().ok("Subtitles Mangler", __addonlang__(32101).encode('utf-8'), line2=filepath.encode('utf-8'), line3=__addonlang__(32102).encode('utf-8'))
     else:
         # check if .noautosubs extension exists
         filebase, fileext = os.path.splitext(filepathname)
-        if (xbmcvfs.exists(os.path.join(filebase, ".noautosubs"))):
+        if (xbmcvfs.exists(filebase + ".noautosubs")):
             # extension flag is set for this file
             YesNoDialog = xbmcgui.Dialog().yesno("Subtitles Mangler", __addonlang__(32103).encode('utf-8'), line2=filepathname.encode('utf-8'), line3=__addonlang__(32104).encode('utf-8'), nolabel=__addonlang__(32042).encode('utf-8'), yeslabel=__addonlang__(32043).encode('utf-8'))
             # answering Yes clears the flag
