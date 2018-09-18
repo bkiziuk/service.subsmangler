@@ -207,3 +207,32 @@ msgstr "Poszukiwanie plików z napisami"
 msgctxt "#32091"
 msgid "Clearing orphaned subtitle files"
 msgstr "Usuwanie osieroconych plików z napisami"
+
+msgctxt "#32100"
+msgid "Set/Clear .noautosubs flag"
+msgstr "Ustaw/Wyczyść flagę '.noautosubs'"
+
+msgctxt "#32101"
+msgid "Following path contains 'noautosubs' file:"
+msgstr "Ta ścieżka zawiera plik 'noautosubs':"
+
+msgctxt "#32102"
+msgid "Subtitle search dialog will not be opened."
+msgstr "Okno wyszukiwania napisów nie zostanie otwarte."
+
+msgctxt "#32103"
+msgid "'.noautosubs' extension flag IS SET for file:"
+msgstr "Flaga '.noautosubs' JEST ustawiona dla tego pliku:"
+
+msgctxt "#32104"
+msgid "Do you want to CLEAR it?"
+msgstr "Czy chcesz ją WYCZYŚCIĆ?"
+
+msgctxt "#32105"
+msgid "'.noautosubs' extension flag IS CLEARED for file:"
+msgstr "Flaga '.noautosubs' NIE JEST ustawiona dla tego pliku:"
+
+msgctxt "#32106"
+msgid "Do you want to SET it?"
+msgstr "Czy chcesz ją USTAWIĆ?"
+
