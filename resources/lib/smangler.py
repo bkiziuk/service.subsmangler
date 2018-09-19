@@ -1326,7 +1326,7 @@ def DetectNewSubs():
             # set '.noautosubs' extension for file being played
             filebase, fileext = os.path.splitext(playingFilenamePath)
             # create .noautosubs file
-            common.CreateNoAutoSubsFile(filebase)
+            common.CreateNoAutoSubsFile(filebase + ".noautosubs")
 
         else:
             # user wants the dialog to appear again next time the video is played

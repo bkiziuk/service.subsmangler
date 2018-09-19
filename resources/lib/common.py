@@ -186,16 +186,16 @@ def GetBool(stringvalue):
 
 
 # function creates '.noautosubs' file for a particular video file
-def CreateNoAutoSubsFile(filebase):
-    """Create '.noautosubs' file.
+def CreateNoAutoSubsFile(file):
+    """Create 'noautosubs' file.
 
     Arguments:
-        filebase {str} -- path and name of file (without extension)
+        file {str} -- path and name of file
     """
 
     # create .noautosubs file
     try:
-        f = xbmcvfs.File (filebase + ".noautosubs", 'w')
+        f = xbmcvfs.File (file, 'w')
         result = f.write("# This file was created by Subtitles Mangler.\n# Presence of this file prevents automatical opening of subtitles search dialog.")
         f.close()
     except Exception as e:

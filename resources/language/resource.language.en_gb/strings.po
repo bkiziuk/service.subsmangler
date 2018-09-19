@@ -209,7 +209,7 @@ msgid "Clearing orphaned subtitle files"
 msgstr ""
 
 msgctxt "#32100"
-msgid "Manage '.noautosubs' flag"
+msgid "Manage 'noautosubs' flag"
 msgstr ""
 
 msgctxt "#32101"
@@ -236,3 +236,10 @@ msgctxt "#32106"
 msgid "Do you want to SET it?"
 msgstr ""
 
+msgctxt "#32107"
+msgid "'noautosubs' file IS SET for folder:"
+msgstr ""
+
+msgctxt "#32108"
+msgid "'noautosubs' file IS CLEARED for folder:"
+msgstr ""
