@@ -7,7 +7,7 @@
     <extension point="kodi.context.item" library="resources/lib/contextmenu.py">
         <item>
             <label>32100</label>
-            <visible>true</visible> <!--Container.Content(movies) | Container.Content(tvshows)-->
+            <visible>Container.Content(movies) | Container.Content(tvshows)</visible> <!--Container.Content(movies) | Container.Content(tvshows)-->
         </item>
     </extension>
     <extension point="xbmc.addon.metadata">
