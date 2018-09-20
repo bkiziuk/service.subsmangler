@@ -104,6 +104,10 @@ msgctxt "#32032"
 msgid "Separate log file (smangler.log)"
 msgstr "Egyedi lg fájl (smangler.log)"
 
+msgctxt "#32033"
+msgid "Show 'noautosubs' context menu item"
+msgstr ""
+
 msgctxt "#32040"
 msgid "No new subtitles file has been detected."
 msgstr "Nem található új felirat fájl."

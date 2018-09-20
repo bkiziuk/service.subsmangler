@@ -121,6 +121,7 @@ def GetSettings():
 
     setting_AutoInvokeSubsDialog = GetBool(__addon__.getSetting("AutoInvokeSubsDialog"))
     setting_NoAutoInvokeIfLocalUnprocSubsFound = GetBool(__addon__.getSetting("NoAutoInvokeIfLocalUnprocSubsFound"))
+    setting_ShowNoautosubsContextItem = GetBool(__addon__.getSetting("ShowNoautosubsContextItem"))
     setting_ConversionServiceEnabled = GetBool(__addon__.getSetting("ConversionServiceEnabled"))
     setting_AlsoConvertExistingSubtitles = GetBool(__addon__.getSetting("AlsoConvertExistingSubtitles"))
     setting_SubsFontSize = int(__addon__.getSetting("SubsFontSize"))
@@ -144,6 +145,7 @@ def GetSettings():
     Log("Reading settings.", xbmc.LOGINFO)
     Log("Setting:       AutoInvokeSubsDialog = " + str(setting_AutoInvokeSubsDialog), xbmc.LOGINFO)
     Log(" NoAutoInvokeIfLocalUnprocSubsFound = " + str(setting_NoAutoInvokeIfLocalUnprocSubsFound), xbmc.LOGINFO)
+    Log("          ShowNoautosubsContextItem = " + str(setting_ShowNoautosubsContextItem), xbmc.LOGINFO)
     Log("           ConversionServiceEnabled = " + str(setting_ConversionServiceEnabled), xbmc.LOGINFO)
     Log("       AlsoConvertExistingSubtitles = " + str(setting_AlsoConvertExistingSubtitles), xbmc.LOGINFO)
     Log("                       SubsFontSize = " + str(setting_SubsFontSize), xbmc.LOGINFO)
@@ -163,6 +165,12 @@ def GetSettings():
     Log("                      AutoUpdateDef = " + str(setting_AutoUpdateDef), xbmc.LOGINFO)
     Log("                           LogLevel = " + str(setting_LogLevel), xbmc.LOGINFO)
     Log("                    SeparateLogFile = " + str(setting_SeparateLogFile), xbmc.LOGINFO)
+
+    # set setting value into the skin
+    if setting_ShowNoautosubsContextItem:
+        xbmc.executebuiltin('Skin.SetString(SubsMangler_ShowContextItem, true)')
+    else:
+        xbmc.executebuiltin('Skin.SetString(SubsMangler_ShowContextItem, false)')
 
 
 

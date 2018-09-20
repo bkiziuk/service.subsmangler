@@ -104,6 +104,10 @@ msgctxt "#32032"
 msgid "Separate log file (smangler.log)"
 msgstr "Osobny plik z logami (smangler.log)"
 
+msgctxt "#32033"
+msgid "Show 'noautosubs' context menu item"
+msgstr "Pokazuj menu kontekstowe 'noautosubs'"
+
 msgctxt "#32040"
 msgid "No new subtitles file has been detected."
 msgstr "Nie wykryto nowego pliku z napisami."

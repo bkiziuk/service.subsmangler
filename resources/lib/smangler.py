@@ -141,8 +141,6 @@ def PreparePlugin():
     # https://nedbatchelder.com/text/unipain.html
     # https://www.joelonsoftware.com/2003/10/08/the-absolute-minimum-every-software-developer-absolutely-positively-must-know-about-unicode-and-character-sets-no-excuses/
 
-
-
     # path and file name of public definitions
     global deffileurl
     global localdeffilename

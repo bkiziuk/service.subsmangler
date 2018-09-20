@@ -7,9 +7,9 @@ import xbmcgui
 import xbmcvfs
 import common
 
-# check if .noautosubs extension flag should be set or cleared
+# check if .noautosubs extension flag or 'noautosubs' file should be set or cleared
 def main():
-    """check if .noautosubs extension flag should be set or cleared
+    """check if .noautosubs extension flag or 'noautosubs' file should be set or cleared
     """
 
     # get the path and name of file clicked onto
@@ -18,9 +18,8 @@ def main():
     filepath = xbmc.getInfoLabel('ListItem.Path')
 
     common.Log("Context menu invoked on: " + filepathname.encode('utf-8'), xbmc.LOGINFO)
-    # check if noautosubs file exists
-    #TODO: recognize clicking on the folder and then check the contents for 'noautosubs' file
 
+    # check if noautosubs file exists
     # do nothing if clicked item is not a real file
     if filepathname[:8].lower() == "videodb:":
         return
