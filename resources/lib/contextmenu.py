@@ -34,12 +34,8 @@ def main():
             # answering Yes deletes the file
             if YesNoDialog:
                 common.Log("Answer is Yes. Deleting file: " + os.path.join(filepathname, "noautosubs").encode('utf-8'), xbmc.LOGDEBUG)
-                # delete .noautosubs file
-                try:
-                    xbmcvfs.delete(os.path.join(filepathname, "noautosubs"))
-                except Exception as e:
-                    common.Log("Delete failed: " + os.path.join(filepath, "noautosubs").encode('utf-8'), xbmc.LOGERROR)
-                    common.Log("  Exception: " + str(e.message), xbmc.LOGERROR)
+                # delete noautosubs file
+                common.DeleteFile(os.path.join(filepathname, "noautosubs"))
             else:
                 common.Log("Answer is No. Doing nothing.", xbmc.LOGDEBUG)
 
@@ -72,11 +68,7 @@ def main():
                 if YesNoDialog:
                     common.Log("Answer is Yes. Deleting file: " + filebase.encode('utf-8') + ".noautosubs", xbmc.LOGDEBUG)
                     # delete .noautosubs file
-                    try:
-                        xbmcvfs.delete(filebase + ".noautosubs")
-                    except Exception as e:
-                        common.Log("Delete failed: " + os.path.join(filebase, ".noautosubs").encode('utf-8'), xbmc.LOGERROR)
-                        common.Log("  Exception: " + str(e.message), xbmc.LOGERROR)
+                    common.DeleteFile(filebase + ".noautosubs")
                 else:
                     common.Log("Answer is No. Doing nothing.", xbmc.LOGDEBUG)
 

@@ -209,3 +209,19 @@ def CreateNoAutoSubsFile(file):
     except Exception as e:
         Log("Can not create noautosubs file.", xbmc.LOGERROR)
         Log("  Exception: " + str(e.message), xbmc.LOGERROR)
+
+
+
+# function deletes file
+def DeleteFile(file):
+    """Delete file
+
+    Arguments:
+        file {str} -- path and name of file
+    """
+
+    try:
+        xbmcvfs.delete(file)
+    except Exception as e:
+        common.Log("Delete failed: " + file.encode('utf-8'), xbmc.LOGERROR)
+        common.Log("    Exception: " + str(e.message), xbmc.LOGERROR)

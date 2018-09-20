@@ -240,3 +240,10 @@ msgctxt "#32106"
 msgid "Do you want to SET it?"
 msgstr "Czy chcesz ją USTAWIĆ?"
 
+msgctxt "#32107"
+msgid "'noautosubs' file IS SET for folder:"
+msgstr "Flaga 'noautosubs' JEST ustawiona w folderze:"
+
+msgctxt "#32108"
+msgid "'noautosubs' file IS CLEARED for folder:"
+msgstr "Flaga 'noautosubs' NIE JEST ustawiona w folderze:"

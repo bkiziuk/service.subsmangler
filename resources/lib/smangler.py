@@ -1,4 +1,4 @@
-# This file includes code for core SubsMangler functionality
+# This file includes code for SubsMangler's core functionality
 
 import codecs
 import os
