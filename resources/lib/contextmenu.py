@@ -21,7 +21,9 @@ def main():
 
     # check if noautosubs file exists
     # do nothing if clicked item is not a real file
-    if filepathname[:8].lower() == "videodb:":
+    protocols = ("videodb", "plugin")
+    if filepathname.lower().startswith(tuple(p + '://' for p in protocols)):
+        common.Log("Source not supported. Ignoring it.", xbmc.LOGINFO)
         return
 
     # check if clicked item is a folder
