@@ -278,7 +278,7 @@ def GetSubtitles():
 
         # ignore all streaming videos
         # http://xion.io/post/code/python-startswith-tuple.html
-        protocols = ("http", "https", "mms", "rtsp", "pvr")
+        protocols = ("http", "https", "mms", "rtsp", "pvr", "plugin")
         if playingFilenamePath.lower().startswith(tuple(p + '://' for p in protocols)):
             common.Log("Video stream detected. Ignoring it.", xbmc.LOGINFO)
             return
