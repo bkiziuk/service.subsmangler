@@ -327,7 +327,6 @@ def GetSubtitles():
 
         # check if there is .ass subtitle file already on disk matching video being played
         # if not, automatically open subtitlesearch dialog
-        #FIXME - check if Kodi settings on auto subtitles download infuence the process
         #
         # set initial value for SubsSearchWasOpened flag
         SubsSearchWasOpened = False

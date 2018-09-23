@@ -223,5 +223,5 @@ def DeleteFile(file):
     try:
         xbmcvfs.delete(file)
     except Exception as e:
-        common.Log("Delete failed: " + file.encode('utf-8'), xbmc.LOGERROR)
-        common.Log("    Exception: " + str(e.message), xbmc.LOGERROR)
+        Log("Delete failed: " + file.encode('utf-8'), xbmc.LOGERROR)
+        Log("    Exception: " + str(e.message), xbmc.LOGERROR)
