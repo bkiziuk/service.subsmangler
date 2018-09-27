@@ -214,36 +214,36 @@ msgstr "Mazání souborů samostatných titulků"
 
 msgctxt "#32100"
 msgid "Manage 'noautosubs' flag"
-msgstr ""
+msgstr "Nastavení 'noautosubs' příznaku"
 
 msgctxt "#32101"
 msgid "Following path contains 'noautosubs' file:"
-msgstr ""
+msgstr "Následující oprava obsahuje soubor 'noautosubs':"
 
 msgctxt "#32102"
 msgid "Subtitle search dialog will not be opened."
-msgstr ""
+msgstr "Dialog hledání titulků nebude otevřen."
 
 msgctxt "#32103"
 msgid "'.noautosubs' extension flag IS SET for file:"
-msgstr ""
+msgstr "'.noautosubs' příznak je nastaven pro soubor:"
 
 msgctxt "#32104"
 msgid "Do you want to CLEAR it?"
-msgstr ""
+msgstr "Přejete si to odstranit?"
 
 msgctxt "#32105"
 msgid "'.noautosubs' extension flag IS CLEARED for file:"
-msgstr ""
+msgstr "'.noautosubs' příznak byl odebrán od souboru:"
 
 msgctxt "#32106"
 msgid "Do you want to SET it?"
-msgstr ""
+msgstr "Přejete si to nastavit?"
 
 msgctxt "#32107"
 msgid "'noautosubs' file IS SET for folder:"
-msgstr ""
+msgstr "'.noautosubs'soubor je nstaven pro složku:"
 
 msgctxt "#32108"
 msgid "'noautosubs' file IS CLEARED for folder:"
-msgstr ""
+msgstr "'.noautosubs' soubor je odebrán složce:"
