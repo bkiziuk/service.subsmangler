@@ -214,36 +214,36 @@ msgstr "Löschen von verwaisten Untertiteldateien"
 
 msgctxt "#32100"
 msgid "Manage 'noautosubs' flag"
-msgstr ""
+msgstr "Verwaltung der 'noautosubs' Markierung"
 
 msgctxt "#32101"
 msgid "Following path contains 'noautosubs' file:"
-msgstr ""
+msgstr "im folgenden Pfad befindet sich die Datei 'noautosubs:'"
 
 msgctxt "#32102"
 msgid "Subtitle search dialog will not be opened."
-msgstr ""
+msgstr "der Untertitel-Suchdialog wird nicht geoeffnet"
 
 msgctxt "#32103"
 msgid "'.noautosubs' extension flag IS SET for file:"
-msgstr ""
+msgstr "die Erweiterung '.noautosubs' ist für die Datei AKTIV"
 
 msgctxt "#32104"
 msgid "Do you want to CLEAR it?"
-msgstr ""
+msgstr "Wollen Sie es loeschen?"
 
 msgctxt "#32105"
 msgid "'.noautosubs' extension flag IS CLEARED for file:"
-msgstr ""
+msgstr "'.noautosubs' Erweiterung wird geloescht für die Datei"
 
 msgctxt "#32106"
 msgid "Do you want to SET it?"
-msgstr ""
+msgstr "Wollen Sie es Aktivieren?"
 
 msgctxt "#32107"
 msgid "'noautosubs' file IS SET for folder:"
-msgstr ""
+msgstr "'noautosubs' Datei IST AKTIV fuer Ordner:"
 
 msgctxt "#32108"
 msgid "'noautosubs' file IS CLEARED for folder:"
-msgstr ""
+msgstr "'noautosubs' Datei IST GELOESCHT fuer Ordner:""
