@@ -214,36 +214,36 @@ msgstr "Árva felirat fájlok törlése"
 
 msgctxt "#32100"
 msgid "Manage 'noautosubs' flag"
-msgstr ""
+msgstr "'noautosubs' beállítás kezelése"
 
 msgctxt "#32101"
 msgid "Following path contains 'noautosubs' file:"
-msgstr ""
+msgstr "A következő hely tartalmaz 'noautosubs' funkciót:"
 
 msgctxt "#32102"
 msgid "Subtitle search dialog will not be opened."
-msgstr ""
+msgstr "A feliratkereső ablak nem fog megjelenni"
 
 msgctxt "#32103"
 msgid "'.noautosubs' extension flag IS SET for file:"
-msgstr ""
+msgstr "'.noautosubs' kiterjesztés BEÁLLíTVA a fájlnak:"
 
 msgctxt "#32104"
 msgid "Do you want to CLEAR it?"
-msgstr ""
+msgstr "Ki akarja KAPCSOLNI?"
 
 msgctxt "#32105"
 msgid "'.noautosubs' extension flag IS CLEARED for file:"
-msgstr ""
+msgstr "'.noautosubs' funkció KIKAPCSOLVA a fájlnál:"
 
 msgctxt "#32106"
 msgid "Do you want to SET it?"
-msgstr ""
+msgstr "Be akarja KAPCSOLNI?"
 
 msgctxt "#32107"
 msgid "'noautosubs' file IS SET for folder:"
-msgstr ""
+msgstr "'noautosubs' funkció BEKAPCSOLVA a mappának:"
 
 msgctxt "#32108"
 msgid "'noautosubs' file IS CLEARED for folder:"
-msgstr ""
+msgstr "'noautosubs' funkció KIKAPCSOLVA a mappánál:"
