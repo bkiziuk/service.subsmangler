@@ -527,10 +527,14 @@ def RemoveStrings(line, deflist):
 
     # iterate over every entry on the list
     for pattern in deflist:
-        if re.search(pattern, line, re.IGNORECASE):
-            common.Log("    matches regex: " + pattern, xbmc.LOGDEBUG)
-            line = re.sub(pattern, '', line, flags=re.I)
-            common.Log("    Resulting string: " + line, xbmc.LOGDEBUG)
+        try:
+            if re.search(pattern, line, re.IGNORECASE):
+                common.Log("    matches regex: " + pattern, xbmc.LOGDEBUG)
+                line = re.sub(pattern, '', line, flags=re.I)
+                common.Log("    Resulting string: " + line, xbmc.LOGDEBUG)
+        except Exception as e:
+            common.Log("    Regex error: '" + e.message + "' in Regex: " + pattern, xbmc.LOGERROR)
+
     return line
 
 
