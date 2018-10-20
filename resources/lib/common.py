@@ -79,6 +79,8 @@ def Log(message, severity=xbmc.LOGDEBUG):
                 logtext += "  NOTICE: "
             elif severity == xbmc.LOGWARNING:
                 logtext += " WARNING: "
+            elif severity == xbmc.LOGERROR:
+                logtext += "   ERROR: "
             elif severity == xbmc.LOGSEVERE:
                 logtext += "  SEVERE: "
             elif severity == xbmc.LOGFATAL:
