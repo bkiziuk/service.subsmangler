@@ -80,10 +80,10 @@ class XBMCPlayer(xbmc.Player):
         # player finished playing video
         common.Log("VideoPlayer END detected.", xbmc.LOGINFO)
 
-        # add 30 minutes to timer in case timer reached 0 during playback
+        # add 15 minutes to timer in case timer was close to 0 before playback start
         # this prevents starting cleanup immediatelly after playback ended
-        # 1 tick per 5 sec * 30 min = 360 ticks
-        ClockTick += 360
+        # 1 tick per 5 sec * 15 min = 180 ticks
+        ClockTick += 180
 
         # stop monitoring dir for changed files
         rt.stop()
@@ -94,10 +94,10 @@ class XBMCPlayer(xbmc.Player):
         # player has just been stopped
         common.Log("VideoPlayer STOP detected.", xbmc.LOGINFO)
 
-        # add 30 minutes to timer in case timer reached 0 during playback
+        # add 15 minutes to timer in case timer was close to 0 before playback start
         # this prevents starting cleanup immediatelly after playback ended
-        # 1 tick per 5 sec * 30 min = 360 ticks
-        ClockTick += 360
+        # 1 tick per 5 sec * 15 min = 180 ticks
+        ClockTick += 180
 
         # stop monitoring dir for changed files
         rt.stop()
@@ -221,13 +221,12 @@ def SupplementaryServices():
         deffilename = sampledeffilename
 
     # housekeeping services
-    if ClockTick <=0 and not xbmc.getCondVisibility('Player.HasMedia'):
+    if ClockTick <= 0 and not xbmc.getCondVisibility('Player.HasMedia'):
         # check if auto-update is enabled and player does not play any content
         if common.setting_AutoUpdateDef:
             # update regexdef file
             UpdateDefFile()
 
-        # check if auto-update is enabled and player does not play any content
         if common.setting_AutoRemoveOldSubs:
             # clear old subtitle files
             RemoveOldSubs()
@@ -236,9 +235,9 @@ def SupplementaryServices():
         # 1 tick per 5 sec * 60 min * 6 hrs = 4320 ticks
         ClockTick = 4320
 
-    # decrease timer
+    # decrease timer if player is idle
     # avoid decreasing the timer to infinity
-    if ClockTick > 0:
+    if ClockTick > 0 and not xbmc.getCondVisibility('Player.HasMedia'):
         ClockTick -= 1
 
 
