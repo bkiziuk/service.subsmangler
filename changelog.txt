@@ -1,4 +1,4 @@
-v1.1.0 (TBD)
+v1.1.0 (2018-10-27)
 - implement context menu for easier management of 'noautosubs' file/extension
 - change default logging destination to separate log file
 - decrease housekeeping timer only if player is idle
