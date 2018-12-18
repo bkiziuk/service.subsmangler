@@ -1311,29 +1311,33 @@ def DetectNewSubs():
 
     # check if subtitles search window was opened but there were no new subtitles processed
     if SubsSearchWasOpened:
-        common.Log("Subtitles search window was opened but no new subtitles were detected. Opening YesNo dialog.", xbmc.LOGINFO)
+        if not common.setting_NoConfirmationInvokeIfDownloadedSubsNotFound:
+            common.Log("Subtitles search window was opened but no new subtitles were detected. Opening YesNo dialog.", xbmc.LOGINFO)
 
-        # pause playbcak
-        PlaybackPause()
+            # pause playbcak
+            PlaybackPause()
 
-        # display YesNo dialog
-        # http://mirrors.xbmc.org/docs/python-docs/13.0-gotham/xbmcgui.html#Dialog-yesno
-        YesNoDialog = xbmcgui.Dialog().yesno("Subtitles Mangler", common.__addonlang__(32040).encode('utf-8'), line2=common.__addonlang__(32041).encode('utf-8'), nolabel=common.__addonlang__(32042).encode('utf-8'), yeslabel=common.__addonlang__(32043).encode('utf-8'))
-        if YesNoDialog:
-            # user does not want the subtitle search dialog to appear again for this file
-            common.Log("Answer is Yes. Setting .noautosubs extension flag for file: " + playingFilenamePath.encode('utf-8'), xbmc.LOGINFO)
+            # display YesNo dialog
+            # http://mirrors.xbmc.org/docs/python-docs/13.0-gotham/xbmcgui.html#Dialog-yesno
+            YesNoDialog = xbmcgui.Dialog().yesno("Subtitles Mangler", common.__addonlang__(32040).encode('utf-8'), line2=common.__addonlang__(32041).encode('utf-8'), nolabel=common.__addonlang__(32042).encode('utf-8'), yeslabel=common.__addonlang__(32043).encode('utf-8'))
+            if YesNoDialog:
+                # user does not want the subtitle search dialog to appear again for this file
+                common.Log("Answer is Yes. Setting .noautosubs extension flag for file: " + playingFilenamePath.encode('utf-8'), xbmc.LOGINFO)
 
-            # set '.noautosubs' extension for file being played
-            filebase, fileext = os.path.splitext(playingFilenamePath)
-            # create .noautosubs file
-            common.CreateNoAutoSubsFile(filebase + ".noautosubs")
+                # set '.noautosubs' extension for file being played
+                filebase, fileext = os.path.splitext(playingFilenamePath)
+                # create .noautosubs file
+                common.CreateNoAutoSubsFile(filebase + ".noautosubs")
+
+            else:
+                # user wants the dialog to appear again next time the video is played
+                common.Log("Answer is No. Doing nothing.", xbmc.LOGINFO)
+
+            # resume playback
+            PlaybackResume()
 
         else:
-            # user wants the dialog to appear again next time the video is played
-            common.Log("Answer is No. Doing nothing.", xbmc.LOGINFO)
-
-        # resume playback
-        PlaybackResume()
+            common.Log("Subtitles search window was opened and no new subtitles were detected, but configuration prevents YesNo dialog from opening.", xbmc.LOGINFO)
 
         # clear the flag to prevent opening dialog on next call of DetectNewSubs()
         SubsSearchWasOpened = False
