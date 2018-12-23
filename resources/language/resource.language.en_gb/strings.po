@@ -208,6 +208,10 @@ msgctxt "#32081"
 msgid "Adjust subtitle display time"
 msgstr ""
 
+msgctxt "#32082"
+msgid "Shrink overlapping subtitle time"
+msgstr  ""
+
 msgctxt "#32090"
 msgid "Scanning for subtitle files"
 msgstr ""

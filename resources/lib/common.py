@@ -121,6 +121,7 @@ def GetSettings():
     global setting_RemoveUnprocessedSubs
     global setting_SimulateRemovalOnly
     global setting_AdjustSubDisplayTime
+    global setting_FixOverlappingSubDisplayTime
 
     setting_AutoInvokeSubsDialog = GetBool(__addon__.getSetting("AutoInvokeSubsDialog"))
     setting_NoAutoInvokeIfLocalUnprocSubsFound = GetBool(__addon__.getSetting("NoAutoInvokeIfLocalUnprocSubsFound"))
@@ -136,6 +137,7 @@ def GetSettings():
     setting_RemoveCCmarks = GetBool(__addon__.getSetting("RemoveCCmarks"))
     setting_RemoveAds = GetBool(__addon__.getSetting("RemoveAdds"))
     setting_AdjustSubDisplayTime = GetBool(__addon__.getSetting("AdjustSubDisplayTime"))
+    setting_FixOverlappingSubDisplayTime = GetBool(__addon__.getSetting("FixOverlappingSubDisplayTime"))
     setting_PauseOnConversion = GetBool(__addon__.getSetting("PauseOnConversion"))
     setting_BackupOldSubs = GetBool(__addon__.getSetting("BackupOldSubs"))
     setting_AutoRemoveOldSubs = GetBool(__addon__.getSetting("AutoRemoveOldSubs"))
@@ -161,6 +163,7 @@ def GetSettings():
     Log("                                RemoveCCmarks = " + str(setting_RemoveCCmarks), xbmc.LOGINFO)
     Log("                                    RemoveAds = " + str(setting_RemoveAds), xbmc.LOGINFO)
     Log("                         AdjustSubDisplayTime = " + str(setting_AdjustSubDisplayTime), xbmc.LOGINFO)
+    Log("                 FixOverlappingSubDisplayTime = " + str(setting_FixOverlappingSubDisplayTime), xbmc.LOGINFO)
     Log("                            PauseOnConversion = " + str(setting_PauseOnConversion), xbmc.LOGINFO)
     Log("                                BackupOldSubs = " + str(setting_BackupOldSubs), xbmc.LOGINFO)
     Log("                            AutoRemoveOldSubs = " + str(setting_AutoRemoveOldSubs), xbmc.LOGINFO)

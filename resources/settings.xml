@@ -23,10 +23,11 @@
       <setting id="RemoveCCmarks" type="bool" label="32004" default="true" enable="eq(-9,true)"/>
       <setting id="RemoveAdds" type="bool" label="32005" default="true" enable="eq(-10,true)"/>
       <setting id="AdjustSubDisplayTime" type="bool" label="32081" default="true" enable="eq(-11,true)"/>
-      <setting id="PauseOnConversion" type="bool" label="32011" default="true" enable="eq(-12,true)"/>
-      <setting id="BackupOldSubs" type="bool" label="32071" default="true" enable="eq(-13,true)"/>
+      <setting id="FixOverlappingSubDisplayTime" type="bool" label="32082" default="false" subsetting="true" enable="eq(-1,true)"/>
+      <setting id="PauseOnConversion" type="bool" label="32011" default="true" enable="eq(-13,true)"/>
+      <setting id="BackupOldSubs" type="bool" label="32071" default="true" enable="eq(-14,true)"/>
       <setting type="sep"/>
-      <setting id="AutoUpdateDef" type="bool" label="32006" default="true" enable="eq(-15,true)"/>
+      <setting id="AutoUpdateDef" type="bool" label="32006" default="true" enable="eq(-16,true)"/>
     </category>
     <category label="32048">
       <setting id="AutoRemoveOldSubs" type="bool" label="32070" default="true"/>

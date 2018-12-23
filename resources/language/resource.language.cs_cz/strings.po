@@ -208,6 +208,10 @@ msgctxt "#32081"
 msgid "Adjust subtitle display time"
 msgstr "Nastavit čas zobrazení tituklů"
 
+msgctxt "#32082"
+msgid "Shrink overlapping subtitle time"
+msgstr  ""
+
 msgctxt "#32090"
 msgid "Scanning for subtitle files"
 msgstr "Hledání souborů titulků"
