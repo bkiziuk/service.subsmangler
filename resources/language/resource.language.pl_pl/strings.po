@@ -210,7 +210,7 @@ msgstr "Koryguj czas wyświetlania napisów"
 
 msgctxt "#32082"
 msgid "Shrink overlapping subtitle time"
-msgstr  "Skracaj czas napisów zachodzących na siebie"
+msgstr "Skracaj czas napisów zachodzących na siebie"
 
 msgctxt "#32090"
 msgid "Scanning for subtitle files"
