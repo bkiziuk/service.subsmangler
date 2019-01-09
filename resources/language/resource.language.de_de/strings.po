@@ -210,7 +210,7 @@ msgstr "Anpassung der Anzeigezeit der Untertitel"
 
 msgctxt "#32082"
 msgid "Shrink overlapping subtitle time"
-msgstr  ""
+msgstr ""
 
 msgctxt "#32090"
 msgid "Scanning for subtitle files"
@@ -254,4 +254,4 @@ msgstr "'noautosubs' Datei IST AKTIV fuer Ordner:"
 
 msgctxt "#32108"
 msgid "'noautosubs' file IS CLEARED for folder:"
-msgstr "'noautosubs' Datei IST GELOESCHT fuer Ordner:""
+msgstr "'noautosubs' Datei IST GELOESCHT fuer Ordner:"
