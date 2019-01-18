@@ -58,7 +58,7 @@ msgstr "das Suchfenster nicht anzeigen, wenn lokale unverarbeitete Untertitel vo
 
 msgctxt "#32014"
 msgid "Don't invoke confirmation dialog if downloaded subs are not found"
-msgstr ""
+msgstr "Wenn keine heruntergeladenen Untertitel gefunden werden rufe keinen Bestätigungsdialog auf"
 
 msgctxt "#32020"
 msgid "Logging level"
@@ -110,7 +110,7 @@ msgstr "eine separate Protokolldatei (smangler.log)"
 
 msgctxt "#32033"
 msgid "Show 'noautosubs' context menu item"
-msgstr ""
+msgstr "Anzeigen von 'noautosubs" im Kontextmenü"
 
 msgctxt "#32040"
 msgid "No new subtitles file has been detected."
@@ -210,7 +210,7 @@ msgstr "Anpassung der Anzeigezeit der Untertitel"
 
 msgctxt "#32082"
 msgid "Shrink overlapping subtitle time"
-msgstr ""
+msgstr "Verkürzen der überlappenden Untertitelzeit"
 
 msgctxt "#32090"
 msgid "Scanning for subtitle files"
