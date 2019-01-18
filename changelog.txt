@@ -1,4 +1,4 @@
-v1.1.1 (2018-12-23)
+v1.2.0 (2019-01-18)
 - add configuration option to prevent showing confirmation dialog if no subtitles file was downloaded
 - add ability to shrink subtitle time if it overlaps the next subtitle
 v1.1.0 (2018-10-27)
