@@ -1,3 +1,5 @@
+v1.2.1 (2019-02-03)
+- add blank space before and after each line for better background outlook
 v1.2.0 (2019-01-18)
 - add configuration option to prevent showing confirmation dialog if no subtitles file was downloaded
 - add ability to shrink subtitle time if it overlaps the next subtitle
