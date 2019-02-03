@@ -880,6 +880,10 @@ def MangleSubtitles(originalinputfile):
             subs.remove(line)
             common.Log("    Resulting line is empty. Removing from file.", xbmc.LOGDEBUG)
         else:
+            # add blank space before and after each line for better background outlook
+            subsline = u"\u00A0".encode('utf-8') + subsline + u"\u00A0".encode('utf-8')
+            subsline = re.sub(r"\\N", u"\u00A0".encode('utf-8') + "\N" + u"\u00A0".encode('utf-8'), subsline, flags=re.I)
+
             # increase line spacing if subtitle is multiline
             # use Max Deryagin's solution: https://www.md-subs.com/line-spacing-in-ssa
             # FIXME - currently only 2-line is supported
