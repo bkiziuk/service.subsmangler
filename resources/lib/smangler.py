@@ -886,9 +886,10 @@ def MangleSubtitles(originalinputfile):
 
             # increase line spacing if subtitle is multiline
             # use Max Deryagin's solution: https://www.md-subs.com/line-spacing-in-ssa
+            # do it only if subtitle output format is Substation Alpha (setting_SubsOutputFormat == 0)
             # FIXME - currently only 2-line is supported
             # check if subtitle is multiline
-            if common.setting_MaintainBiggerLineSpacing and re.search(r"\N", subsline):
+            if common.setting_MaintainBiggerLineSpacing and re.search(r"\N", subsline) and common.setting_SubsOutputFormat == 0:
                 # line is multiline - add tags
                 subsline = r"{\org(-2000000,0)\fr0.00012}" + subsline
                 subsline = subsline.replace(r"\N", r"{\r}\N")
@@ -951,8 +952,12 @@ def MangleSubtitles(originalinputfile):
 
     common.Log("Filtering lists applied.", xbmc.LOGINFO)
 
-    #save subs
-    subs.save(tempoutputfile)
+    # save subs in a proper format
+    if common.setting_SubsOutputFormat == 0:
+        outfileformat = "ass"
+    else:
+        outfileformat = "srt"
+    subs.save(tempoutputfile, format_= outfileformat)
 
     # wait until file is saved
     wait_for_file(tempoutputfile, True)
