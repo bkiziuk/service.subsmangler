@@ -32,7 +32,6 @@
         <disclaimer lang="pl_PL">Wszechstronny asystent napisów</disclaimer>
         <disclaimer lang="sk_SK">Kompletný sprievodca titukly</disclaimer>
         <news>v1.2.2 (2019-02-05)
-- add blank space before and after each line for better background outlook
 - add ability to convert subtitles without enforcing .ass format (and therefore adding custom font/bacground color and opacity)
 v1.2.0 (2019-01-18)
 - add configuration option to prevent showing confirmation dialog if no subtitles file was downloaded
