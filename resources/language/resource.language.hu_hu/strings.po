@@ -62,7 +62,7 @@ msgstr "Ne hozza fel a megerõsítõ ablakot, ha a letöltött felirat fájlok n
 
 msgctxt "#32015"
 msgid "Subtitle output format"
-msgstr ""
+msgstr "Felirat kimeneti formátum"
 
 msgctxt "#32016"
 msgid "Substation Alpha"

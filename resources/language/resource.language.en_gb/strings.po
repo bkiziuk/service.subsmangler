@@ -66,11 +66,11 @@ msgstr ""
 
 msgctxt "#32016"
 msgid "Substation Alpha"
-msgstr "Substation Alpha"
+msgstr ""
 
 msgctxt "#32017"
 msgid "SubRip"
-msgstr "SubRip"
+msgstr ""
 
 msgctxt "#32020"
 msgid "Logging level"

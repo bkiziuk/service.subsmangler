@@ -62,7 +62,7 @@ msgstr "Nevyvolávat dialog potvrzení pokud nejsou nalezeny stáhnuté titulky"
 
 msgctxt "#32015"
 msgid "Subtitle output format"
-msgstr ""
+msgstr "Formát výstupu titulků"
 
 msgctxt "#32016"
 msgid "Substation Alpha"

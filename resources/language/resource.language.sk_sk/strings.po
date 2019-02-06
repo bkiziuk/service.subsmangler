@@ -62,7 +62,7 @@ msgstr "Nevyvolávať dialóg potvrdenie pokiaľ nie sú nájdené stiahnuté ti
 
 msgctxt "#32015"
 msgid "Subtitle output format"
-msgstr ""
+msgstr "Formát výstupu titulkov"
 
 msgctxt "#32016"
 msgid "Substation Alpha"
