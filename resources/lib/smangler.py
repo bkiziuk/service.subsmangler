@@ -192,7 +192,7 @@ def PreparePlugin():
             xbmc.log("SubsMangler: profile directory created: " + common.__addonworkdir__.encode('utf-8'), level=xbmc.LOGNOTICE)
         except OSError as e:
             xbmc.log("SubsMangler: Log: can't create directory: " + common.__addonworkdir__.encode('utf-8'), level=xbmc.LOGERROR)
-            xbmc.Log("Exception: " + str(e.message).encode('utf-8'), xbmc.LOGERROR)
+            xbmc.log("Exception: " + str(e.message).encode('utf-8'), xbmc.LOGERROR)
 
     # load settings
     common.GetSettings()
