@@ -592,9 +592,9 @@ def MangleSubtitles(originalinputfile):
 
     # get subtitles language by splitting it from filename
     # split file and extension
-    subfilebase, subfileext = os.path.splitext(originalinputfile)
+    subfilebase, _subfileext = os.path.splitext(originalinputfile)
     # from filename split language designation
-    subfilecore, subfilelang = os.path.splitext(subfilebase)
+    _subfilecore, subfilelang = os.path.splitext(subfilebase)
 
     common.Log("Read subtitle language designation: " + subfilelang[1:],xbmc.LOGINFO)
     # try to find ISO639-2 designation
@@ -661,7 +661,7 @@ def MangleSubtitles(originalinputfile):
     enc = ""
     try:
         with codecs.open(tempinputfile, mode="rb", encoding='utf-8') as reader:
-            temp = reader.read()
+            _temp = reader.read()
             # still no exception - seems to be a success
             common.Log("UTF-8 encoding seems to be valid.", xbmc.LOGINFO)
             enc = "utf-8"
@@ -681,7 +681,7 @@ def MangleSubtitles(originalinputfile):
             # try to read file using language specific encoding
             try:
                 with codecs.open(tempinputfile, mode="rb", encoding=enc) as reader:
-                    temp = reader.read()
+                    _temp = reader.read()
                     # still no exception - seems to be a success
                     common.Log("Chosen encoding: " + enc + " based on language: " + subslang + " seems to be valid.", xbmc.LOGINFO)
             except Exception as e:
@@ -702,7 +702,7 @@ def MangleSubtitles(originalinputfile):
         for enc in encodings:
             try:
                 with codecs.open(tempinputfile, mode="rb", encoding=enc) as reader:
-                    temp = reader.read()
+                    _temp = reader.read()
                     break
             except Exception as e:
                 # no encoding fits the file
@@ -973,7 +973,7 @@ def MangleSubtitles(originalinputfile):
         common.Log("Exception: " + str(e.message), xbmc.LOGERROR)
 
     # copy new file back to its original location changing only its extension
-    filebase, fileext = os.path.splitext(originalinputfile)
+    filebase, _fileext = os.path.splitext(originalinputfile)
     originaloutputfile = filebase + '.utf'
     copy_file(tempoutputfile, originaloutputfile)
 
@@ -1158,17 +1158,17 @@ def GetSubtitleFiles(subspath, substypelist):
 
     # use dictionary solution - load all files in directory to dictionary and remove those not fulfiling criteria
     # Python doesn't support smb:// paths. Use xbmcvfs: https://forum.kodi.tv/showthread.php?tid=211821
-    dirs, files = xbmcvfs.listdir(subtitlePath)
+    _dirs, files = xbmcvfs.listdir(subtitlePath)
     SubsFiles = dict ([(f, None) for f in files])
     # filter dictionary, leaving only subtitle files matching played video
     # https://stackoverflow.com/questions/5384914/how-to-delete-items-from-a-dictionary-while-iterating-over-it
-    playingFilenameBase, playingFilenameExt = os.path.splitext(playingFilename)
+    playingFilenameBase, _playingFilenameExt = os.path.splitext(playingFilename)
 
     for item in SubsFiles.keys():
         # split file and extension
         subfilebase, subfileext = os.path.splitext(item)
         # from filename split language designation
-        subfilecore, subfilelang = os.path.splitext(subfilebase)
+        subfilecore, _subfilelang = os.path.splitext(subfilebase)
         # remove files that do not meet criteria
         if not ((((subfilebase.lower() == playingFilenameBase.lower() or subfilecore.lower() == playingFilenameBase.lower()) and (subfileext.lower() in substypelist)) \
             or ((subfilebase.lower() == playingFilenameBase.lower()) and (subfileext.lower() == ".noautosubs"))) \
@@ -1514,7 +1514,7 @@ def RemoveOldSubs():
             # check every file in the current subdir and add it to appropriate list
             for thisfile in files:
                 fullfilepath = os.path.join(directory, thisfile.decode('utf-8'))
-                filebase, fileext = os.path.splitext(fullfilepath)
+                _filebase, fileext = os.path.splitext(fullfilepath)
                 if fileext in VideoExtList:
                     # this file is video - add to video list
                     common.Log("Adding to video list: " + fullfilepath.encode('utf-8'),xbmc.LOGDEBUG)
@@ -1542,7 +1542,7 @@ def RemoveOldSubs():
         dirs, files = xbmcvfs.listdir(subspath)
         for thisfile in files:
             fullfilepath = os.path.join(subspath, thisfile.decode('utf-8'))
-            filebase, fileext = os.path.splitext(fullfilepath)
+            _filebase, fileext = os.path.splitext(fullfilepath)
             if fileext in extRemovalList:
                 # this file is subs related - add to subs list
                 common.Log("Adding to subs list: " + fullfilepath,xbmc.LOGDEBUG)
@@ -1560,9 +1560,9 @@ def RemoveOldSubs():
         # split filename from full path
         subfilename = os.path.basename(subfile)
         # split filename and extension
-        subfilebase, subfileext = os.path.splitext(subfilename)
+        subfilebase, _subfileext = os.path.splitext(subfilename)
         # from filename split language designation
-        subfilecore, subfilelang = os.path.splitext(subfilebase)
+        subfilecore, _subfilelang = os.path.splitext(subfilebase)
 
         # check if there is a video matching subfile
         videoexists = False
@@ -1570,7 +1570,7 @@ def RemoveOldSubs():
             # split filename from full path
             videofilename = os.path.basename(videofile)
             # split filename and extension
-            videofilebase, videofileext = os.path.splitext(videofilename)
+            videofilebase, _videofileext = os.path.splitext(videofilename)
 
             # check if subfile basename or corename equals videofile basename
             if subfilebase.lower() == videofilebase.lower() or subfilecore.lower() == videofilebase.lower():

@@ -215,7 +215,7 @@ def CreateNoAutoSubsFile(file):
     # create .noautosubs file
     try:
         f = xbmcvfs.File (file, 'w')
-        result = f.write("# This file was created by Subtitles Mangler.\n# Presence of this file prevents automatical opening of subtitles search dialog.")
+        _result = f.write("# This file was created by Subtitles Mangler.\n# Presence of this file prevents automatical opening of subtitles search dialog.")
         f.close()
     except Exception as e:
         Log("Can not create noautosubs file.", xbmc.LOGERROR)
