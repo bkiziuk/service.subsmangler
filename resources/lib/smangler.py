@@ -387,15 +387,15 @@ def GetSubtitles():
                         common.Log("Video or subtitle language match Kodi's preferred settings. Not opening subtitle search dialog.", xbmc.LOGINFO)
                 else:
                     # enable .utf subtitles if they are present on the list
-                    asssubs = False
+                    utfsubs = False
                     for item in localsubs:
                         if ".utf" in item[-4:]:
                             common.Log("Local 'utf' subtitles matching video being played detected. Enabling subtitles: " + os.path.join(subtitlePath, item), xbmc.LOGINFO)
                             xbmc.Player().setSubtitles(os.path.join(subtitlePath, item))
-                            asssubs = True
+                            utfsubs = True
                             break
 
-                    if not asssubs:
+                    if not utfsubs:
                         common.Log("Local non 'utf' subtitles matching video being played detected. Not opening subtitle search dialog.", xbmc.LOGINFO)
             else:
                 common.Log("'noautosubs' file or extension detected. Not opening subtitle search dialog.", xbmc.LOGINFO)
