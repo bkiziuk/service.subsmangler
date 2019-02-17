@@ -414,13 +414,13 @@ def GetSubtitles():
 # https://stackoverflow.com/questions/2879856/get-system-language-in-iso-639-3-letter-codes-in-python
 # http://www.loc.gov/standards/iso639-2/ISO-639-2_utf-8.txt
 def GetIsoCode(lang):
-    """Find correct ISO-639-3 language code.
+    """Find correct ISO-639-2 language code.
 
     Arguments:
-        lang {str} -- language name, ISO-639-2 code or ISO-639-3 code
+        lang {str} -- language name, ISO-639-1 code or ISO-639-2 code
 
     Returns:
-        str -- ISO-639-3 code
+        str -- ISO-639-2 code
     """
 
     # "bibliographic" iso codes are derived from English word for the language
