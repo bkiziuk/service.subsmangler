@@ -1280,7 +1280,7 @@ def DetectNewSubs():
 
             # check if destination file exists
             if xbmcvfs.exists(ResultFile):
-                common.Log("Subtitles available.", xbmc.LOGNOTICE)
+                common.Log("Subtitles available and enabled.", xbmc.LOGNOTICE)
 
                 # load new subtitles and turn them on
                 xbmc.Player().setSubtitles(ResultFile)
