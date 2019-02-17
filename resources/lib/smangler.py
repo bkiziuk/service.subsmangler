@@ -432,15 +432,6 @@ def GetIsoCode(lang):
     if lang:
         # language code is not empty
         common.Log("Looking for language code for: " + lang, xbmc.LOGDEBUG)
-        # f = codecs.open(os.path.join(common.__addondir__, 'resources', 'ISO-639-2_utf-8.txt'), 'rb', 'utf-8')
-        # for line in f:
-        #     iD = {}
-        #     iD['bibliographic'], iD['terminologic'], iD['alpha2'], iD['english'], iD['french'] = line.strip().split('|')
-
-        #     if iD['bibliographic'].lower() == lang.lower() or iD['alpha2'].lower() == lang.lower() or iD['english'].lower() == lang.lower():
-        #         outlang = iD['bibliographic']
-        #         break
-        # f.close()
         outlang = xbmc.convertLanguage(lang, xbmc.ISO_639_2)
 
         if outlang:
