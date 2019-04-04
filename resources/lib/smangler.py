@@ -1543,15 +1543,14 @@ def RemoveOldSubs():
 
     # process custom subtitle path if it is set in Kodi configuration
     # get settings from Kodi configuration on assumed subtitles location
-    storagemode = GetKodiSetting("subtitles.storagemode") # 1=location defined by custompath; 0=location in movie dir
     custompath = GetKodiSetting("subtitles.custompath")   # path to non-standard dir with subtitles
 
-    if storagemode == 1:    # location == custompath
+    if custompath:
         if xbmcvfs.exists(custompath):
             subspath = custompath
         else:
             subspath = ""
-    else:   # location == movie dir
+    else:
         subspath = ""
 
     if subspath:
