@@ -1542,8 +1542,7 @@ def RemoveOldSubs():
                     subfiles.append(fullfilepath)
 
     # process custom subtitle path if it is set in Kodi configuration
-    # get settings from Kodi configuration on assumed subtitles location
-    custompath = GetKodiSetting("subtitles.custompath")   # path to non-standard dir with subtitles
+    custompath = xbmc.translatePath("special://subtitles")   # path to non-standard dir with subtitles
 
     if custompath:
         if xbmcvfs.exists(custompath):
@@ -1563,6 +1562,8 @@ def RemoveOldSubs():
                 # this file is subs related - add to subs list
                 common.Log("Adding to subs list: " + fullfilepath,xbmc.LOGDEBUG)
                 subfiles.append(fullfilepath)
+    else:
+        common.Log("Custom path not set. Skipping scanning it.", xbmc.LOGINFO)
 
     # process temp folder
     common.Log("Scanning for orphaned subtitle files on temp path: " + xbmc.translatePath("special://temp").encode('utf-8'), xbmc.LOGNOTICE)
