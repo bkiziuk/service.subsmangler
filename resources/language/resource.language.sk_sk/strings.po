@@ -42,7 +42,7 @@ msgstr "Priehľadnosť pozadia"
 
 msgctxt "#32009"
 msgid "Invoke also when playing internet stream"
-msgstr ""
+msgstr "Vyvolať aj pri prehrávaní streamov z Internetu"
 
 msgctxt "#32010"
 msgid "Invoke subtitles search dialog on playback start"
