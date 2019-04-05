@@ -873,7 +873,7 @@ def MangleSubtitles(originalinputfile):
             # increase line spacing if subtitle is multiline
             # use Max Deryagin's solution: https://www.md-subs.com/line-spacing-in-ssa
             # do it only if subtitle output format is Substation Alpha (setting_SubsOutputFormat == 0)
-            # FIXME - currently only 2-line is supported
+            # TODO - currently only 2-line is supported
             # check if subtitle is multiline
             if common.setting_MaintainBiggerLineSpacing and re.search(r"\N", subsline) and common.setting_SubsOutputFormat == 0:
                 # line is multiline - add tags
@@ -1024,35 +1024,24 @@ def copy_file(srcFile, dstFile):
         common.Log("copy_file: srcFile: " + srcFile, xbmc.LOGINFO)
         common.Log("           dstFile: " + dstFile, xbmc.LOGINFO)
         if xbmcvfs.exists(srcFile):
-            #FIXME - debug
-            common.Log("copy_file: srcFile exists.", xbmc.LOGINFO)
+            common.Log("copy_file: srcFile exists.", xbmc.LOGDEBUG)
         if xbmcvfs.exists(dstFile):
-            common.Log("copy_file: dstFile exists. Trying to remove.", xbmc.LOGINFO)
+            common.Log("copy_file: dstFile exists. Trying to remove.", xbmc.LOGDEBUG)
             delete_file(dstFile)
         else:
-            common.Log("copy_file: dstFile does not exist.", xbmc.LOGINFO)
-        common.Log("copy_file: Copy started.", xbmc.LOGINFO)
+            common.Log("copy_file: dstFile does not exist.", xbmc.LOGDEBUG)
+        common.Log("copy_file: Copy started.", xbmc.LOGDEBUG)
 
         # as xbmcvfs.copy() sometimes fails, make more tries to check if lock is permanent - test only
         counter = 0
         success = 0
         while not (success != 0 or counter >= 3):
             success = xbmcvfs.copy(srcFile, dstFile)
-            common.Log("copy_file: SuccessStatus: " + str(success), xbmc.LOGINFO)
+            common.Log("copy_file: SuccessStatus: " + str(success), xbmc.LOGDEBUG)
             counter += 1
             xbmc.sleep(500)
         if counter > 1:
             common.Log("copy_file: First copy try failed. Number of tries: " + str(counter), xbmc.LOGWARNING)
-
-        # #FIXME - debug
-        # filehandle = xbmcvfs.File(srcFile)
-        # buffer = filehandle.read()
-        # filehandle.close()
-        # Log("File data read: " + str(buffer), xbmc.LOGINFO)
-        # filehandle = xbmcvfs.File(dstFile, 'w')
-        # result = filehandle.write(buffer)
-        # filehandle.close()
-        # Log("File data write result: " + str(result), xbmc.LOGINFO)
 
     except Exception as e:
         common.Log("copy_file: Copy failed.", xbmc.LOGERROR)
@@ -1185,7 +1174,7 @@ def GetSubtitleFiles(subspath, substypelist):
             # subfilename matches video name AND fileext is on the list of supported extensions
             # OR subfilename matches video name AND fileext matches '.noautosubs'
             # OR subfilename matches 'noautosubs'
-            # FIXME - now we assume that .utf subtitle will not be processed
+            # note: we assume that .utf subtitle will not be processed
             del SubsFiles[item]
 
     return SubsFiles
