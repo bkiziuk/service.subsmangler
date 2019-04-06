@@ -1,3 +1,5 @@
+v1.4.0 (2019-04-06)
+- support for subtitles for internet streams
 v1.3.1 (2019-04-01)
 - fix settings display in Kodi 17.6
 v1.3.0 (2019-02-10)
