@@ -146,7 +146,7 @@ def PreparePlugin():
     global localdeffilename
     global sampledeffilename
     global tempdeffilename
-    deffileurl = "http://bkiziuk.github.io/kodi-repo/regexdef.txt"
+    deffileurl = "https://raw.githubusercontent.com/bkiziuk/service.subsmangler/master/resources/regexdef.def"
     localdeffilename = os.path.join(common.__addonworkdir__, 'regexdef.def')
     sampledeffilename = os.path.join(common.__addondir__, 'resources', 'regexdef.def')
     tempdeffilename = os.path.join(common.__addonworkdir__, 'tempdef.def')
