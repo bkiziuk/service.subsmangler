@@ -182,18 +182,6 @@ def PreparePlugin():
     global ClockTick
     ClockTick = 0
 
-    # prepare datadir
-    # directory and file is local to the filesystem
-    # no need to use xbmcvfs
-    if not os.path.isdir(common.__addonworkdir__):
-        xbmc.log("SubsMangler: profile directory doesn't exist: " + common.__addonworkdir__.encode('utf-8') + "   Trying to create.", level=xbmc.LOGNOTICE)
-        try:
-            os.mkdir(common.__addonworkdir__)
-            xbmc.log("SubsMangler: profile directory created: " + common.__addonworkdir__.encode('utf-8'), level=xbmc.LOGNOTICE)
-        except OSError as e:
-            xbmc.log("SubsMangler: Log: can't create directory: " + common.__addonworkdir__.encode('utf-8'), level=xbmc.LOGERROR)
-            xbmc.log("Exception: " + str(e.message).encode('utf-8'), xbmc.LOGERROR)
-
     # load settings
     common.GetSettings()
 

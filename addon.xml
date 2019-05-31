@@ -31,8 +31,9 @@
         <disclaimer lang="hu_HU">Egy teljeskörű felirat asszisztens</disclaimer>
         <disclaimer lang="pl_PL">Wszechstronny asystent napisów</disclaimer>
         <disclaimer lang="sk_SK">Kompletný sprievodca titukly</disclaimer>
-        <news>v1.4.1 (2019-05-08)
-- change definitions URL to update directly from SubsMagler master branch
+        <news>v1.4.1 (2019-06-01)
+- change definitions URL to update directly from SubsMangler master branch
+- fix creating data-dir before initiating external log file
 v1.4.0 (2019-04-06)
 - support for subtitles for internet streams
 v1.3.1 (2019-04-01)
