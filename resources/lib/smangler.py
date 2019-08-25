@@ -180,7 +180,7 @@ def PreparePlugin():
     global DetectionIsRunning
     DetectionIsRunning = False
     global ClockTick
-    ClockTick = 0
+    ClockTick = 180
 
     # load settings
     common.GetSettings()
