@@ -55,7 +55,8 @@
 .*movie info:.*
 .*web.?dl.*
 .*xvid.*
-
+# other
+.*Subtitles by.*
 
 
 # Language specific Ads sections include language specific definitions.
