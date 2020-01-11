@@ -127,7 +127,6 @@ class XBMCMonitor(xbmc.Monitor):
             rt.stop()
 
 
-
 # function prepares plugin environment
 def PreparePlugin():
     """Prepare plugin environment
