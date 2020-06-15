@@ -1,5 +1,9 @@
+v2.0.0 (TBD)
+- support for Kodi 19 Matrix (Python 3 only)
+
 v1.4.2 (2019-08-25)
 - delay the first run of cleaning after system start-up
+- last release that supports Kodi 17/18 with Python 2
 v1.4.1 (2019-06-01)
 - change definitions URL to update directly from SubsMangler master branch
 - fix creating data-dir before initiating external log file

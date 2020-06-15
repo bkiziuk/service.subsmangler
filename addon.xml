@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="service.subsmangler" name="Subtitles Mangler" version="1.4.2" provider-name="bkiziuk">
+<addon id="service.subsmangler" name="Subtitles Mangler" version="2.0.0" provider-name="bkiziuk">
     <requires>
-        <import addon="xbmc.python" version="2.25.0"/>
+        <import addon="xbmc.python" version="3.0.0"/>
     </requires>
     <extension point="xbmc.service" library="service.py" start="login"/>
     <extension point="kodi.context.item">
@@ -31,28 +31,8 @@
         <disclaimer lang="hu_HU">Egy teljeskörű felirat asszisztens</disclaimer>
         <disclaimer lang="pl_PL">Wszechstronny asystent napisów</disclaimer>
         <disclaimer lang="sk_SK">Kompletný sprievodca titukly</disclaimer>
-        <news>v1.4.2 (2019-08-25)
-- delay the first run of cleaning after system start-up
-v1.4.1 (2019-06-01)
-- change definitions URL to update directly from SubsMangler master branch
-- fix creating data-dir before initiating external log file
-v1.4.0 (2019-04-06)
-- support for subtitles for internet streams
-v1.3.1 (2019-04-01)
-- fix settings display in Kodi 17.6
-v1.3.0 (2019-02-10)
-- add ability to convert subtitles without enforcing .ass format (and therefore adding custom font/background color and opacity). In this case file is saved in SubRip format.
-- please note that the output file extension was changed to .utf. Therefore existing .ass subtitle file may be reconverted automatically at the next playback.
-v1.2.0 (2019-01-18)
-- add configuration option to prevent showing confirmation dialog if no subtitles file was downloaded
-- add ability to shrink subtitle time if it overlaps the next subtitle
-v1.1.0 (2018-10-27)
-- implement context menu for easier management of 'noautosubs' file/extension
-- change default logging destination to separate log file
-- decrease housekeeping timer only if player is idle
-- ignore 'plugin://' media path
-v1.0.0 (2018-09-09)
-- first release for Official Kodi Repo
+        <news>v2.0.0 (2020-06-01)
+- first release for Kodi 19 Matrix
 </news>
         <platform>all</platform>
         <license>GNU General Public License v3.0</license>
