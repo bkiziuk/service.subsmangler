@@ -12,10 +12,10 @@ def SupplementaryServices():
     # dir is local, no need to use xbmcvfs()
     if os.path.isfile(globals.localdeffilename):
         # downloaded file is available
-        deffilename = globals.localdeffilename
+        globals.deffilename = globals.localdeffilename
     else:
         # use sample file from addon's dir
-        deffilename = globals.sampledeffilename
+        globals.deffilename = globals.sampledeffilename
 
     # housekeeping services
     if globals.ClockTick <= 0 and not xbmc.getCondVisibility('Player.HasMedia'):
@@ -36,7 +36,6 @@ def SupplementaryServices():
     # avoid decreasing the timer to infinity
     if globals.ClockTick > 0 and not xbmc.getCondVisibility('Player.HasMedia'):
         globals.ClockTick -= 1
-
 
 
 # SubsMangler's service entry point

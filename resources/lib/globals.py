@@ -13,13 +13,17 @@ __addonlang__ = __addon__.getLocalizedString
 __kodiversion__ = xbmc.getInfoLabel('System.BuildVersion')[:4]
 
 # definitions file
+# path and file name of public definitions
 deffileurl = "https://raw.githubusercontent.com/bkiziuk/service.subsmangler/master/resources/regexdef.def"
+# location of locally stored subtitles
 localdeffilename = os.path.join(__addonworkdir__, 'regexdef.def')
+# location of sample definitions
 sampledeffilename = os.path.join(__addondir__, 'resources', 'regexdef.def')
+# location of temporary file used during download
 tempdeffilename = os.path.join(__addonworkdir__, 'tempdef.def')
+# file that will be used during subtitle processing
 deffilename = None
 
-# path and file name of public definitions
 # list of input file extensions
 # extensions in lowercase with leading dot
 # note: we do not include output extension .utf
@@ -29,35 +33,29 @@ SubExtList = ['.txt', '.srt', '.sub', '.subrip', '.microdvd', '.mpl', '.tmp', '.
 # extensions in lowercase with leading dot
 VideoExtList = ['.mkv', '.avi', '.mp4', '.mpg', '.mpeg']
 
-# detection of new subtitles
+# detection status of new subtitles
 DetectionIsRunning = False
-ClockTick = 1  # FIXME - should be 180
 
-# player
+# player objects
 player = None
 monitor = None
 
-# subtitles
+# timer object
+rt = None
+
+# video and subtitle variables
 subtitlePath = None
 playingFilename = None
 playingFilenamePath = None
 playingFps = None
-SubsSearchWasOpened = None
+SubsSearchWasOpened = False
 
-# timers
-rt = None
+# timer which triggers SupplementaryServices routine
 ClockTick = 180
 
 # user settings
-# declare initial values to be able to import variables to other files
 setting_ConversionServiceEnabled = False
 setting_AlsoConvertExistingSubtitles = False
-setting_SubsOutputFormat = 0
-setting_SubsFontSize = 0
-setting_ForegroundColor = 0
-setting_BackgroundColor = 0
-setting_BackgroundTransparency = 0
-setting_MaintainBiggerLineSpacing = False
 setting_RemoveCCmarks = False
 setting_RemoveAds = False
 setting_PauseOnConversion = False
@@ -74,8 +72,5 @@ setting_RemoveUnprocessedSubs = False
 setting_SimulateRemovalOnly = False
 setting_AdjustSubDisplayTime = False
 setting_FixOverlappingSubDisplayTime = False
-
-# subtitle detection
-DetectionIsRunning = False
-SubsSearchWasOpened = False
-subtitlePath = None
+setting_ShowNoautosubsContextItem = False
+setting_LogLevel = 0

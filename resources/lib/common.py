@@ -3,7 +3,6 @@
 import logging
 import os
 import xbmc
-import xbmcaddon
 import xbmcvfs
 
 from resources.lib import globals
@@ -21,17 +20,14 @@ if not os.path.isdir(globals.__addonworkdir__):
         xbmc.log("SubsMangler: profile directory created: " + globals.__addonworkdir__, level=xbmc.LOGINFO)
     except OSError as e:
         xbmc.log("SubsMangler: Log: can't create directory: " + globals.__addonworkdir__, level=xbmc.LOGERROR)
-        xbmc.log("Exception: " + str(e.message), xbmc.LOGERROR)
-
+        xbmc.log("Exception: " + str(e), xbmc.LOGERROR)
 
 
 # prepare external log handler
 # https://docs.python.org/2/library/logging.handlers.html
-global logger
 logger = logging.getLogger(__name__)
 loghandler = logging.handlers.TimedRotatingFileHandler(os.path.join(globals.__addonworkdir__, 'smangler.log',), when="midnight", interval=1, backupCount=2)
 logger.addHandler(loghandler)
-
 
 
 # function parses log events based on internal logging level
@@ -62,13 +58,7 @@ def Log(message, severity=xbmc.LOGDEBUG):
         # log the message to Log
         if setting_SeparateLogFile == 0:
             # use kodi.log for logging
-            # check if string is str
-            # FIXME: encode/decode not needed for Python3
-            if isinstance(message, str):
-                # convert to unicode string
-                message = message.decode('utf-8')
-            # re-encode to utf-8
-            xbmc.log("SubsMangler: " + message.encode('utf-8'), level=xbmc.LOGNONE)
+            xbmc.log("SubsMangler: " + message, level=xbmc.LOGNONE)
         else:
             # use smangler's own log file located in addon's datadir
             # construct log text
@@ -106,12 +96,6 @@ def GetSettings():
     globals.setting_ShowNoautosubsContextItem = GetBool(globals.__addon__.getSetting("ShowNoautosubsContextItem"))
     globals.setting_ConversionServiceEnabled = GetBool(globals.__addon__.getSetting("ConversionServiceEnabled"))
     globals.setting_AlsoConvertExistingSubtitles = GetBool(globals.__addon__.getSetting("AlsoConvertExistingSubtitles"))
-    globals.setting_SubsOutputFormat = int(globals.__addon__.getSetting("SubsOutputFormat"))
-    globals.setting_SubsFontSize = int(globals.__addon__.getSetting("SubsFontSize"))
-    globals.setting_ForegroundColor = int(globals.__addon__.getSetting("ForegroundColor"))
-    globals.setting_BackgroundColor = int(globals.__addon__.getSetting("BackgroundColor"))
-    globals.setting_BackgroundTransparency = int(globals.__addon__.getSetting("BackgroundTransparency"))
-    globals.setting_MaintainBiggerLineSpacing = GetBool(globals.__addon__.getSetting("MaintainBiggerLineSpacing"))
     globals.setting_RemoveCCmarks = GetBool(globals.__addon__.getSetting("RemoveCCmarks"))
     globals.setting_RemoveAds = GetBool(globals.__addon__.getSetting("RemoveAdds"))
     globals.setting_AdjustSubDisplayTime = GetBool(globals.__addon__.getSetting("AdjustSubDisplayTime"))
@@ -134,12 +118,6 @@ def GetSettings():
     Log("                    ShowNoautosubsContextItem = " + str(globals.setting_ShowNoautosubsContextItem), xbmc.LOGINFO)
     Log("                     ConversionServiceEnabled = " + str(globals.setting_ConversionServiceEnabled), xbmc.LOGINFO)
     Log("                 AlsoConvertExistingSubtitles = " + str(globals.setting_AlsoConvertExistingSubtitles), xbmc.LOGINFO)
-    Log("                             SubsOutputFormat = " + str(globals.setting_SubsOutputFormat), xbmc.LOGINFO)
-    Log("                                 SubsFontSize = " + str(globals.setting_SubsFontSize), xbmc.LOGINFO)
-    Log("                              ForegroundColor = " + str(globals.setting_ForegroundColor), xbmc.LOGINFO)
-    Log("                              BackgroundColor = " + str(globals.setting_BackgroundColor), xbmc.LOGINFO)
-    Log("                       BackgroundTransparency = " + str(globals.setting_BackgroundTransparency), xbmc.LOGINFO)
-    Log("                    MaintainBiggerLineSpacing = " + str(globals.setting_MaintainBiggerLineSpacing), xbmc.LOGINFO)
     Log("                                RemoveCCmarks = " + str(globals.setting_RemoveCCmarks), xbmc.LOGINFO)
     Log("                                    RemoveAds = " + str(globals.setting_RemoveAds), xbmc.LOGINFO)
     Log("                         AdjustSubDisplayTime = " + str(globals.setting_AdjustSubDisplayTime), xbmc.LOGINFO)
@@ -196,7 +174,7 @@ def CreateNoAutoSubsFile(file):
         f.close()
     except Exception as e:
         Log("Can not create noautosubs file.", xbmc.LOGERROR)
-        Log("  Exception: " + str(e.message), xbmc.LOGERROR)
+        Log("  Exception: " + str(e), xbmc.LOGERROR)
 
 
 
@@ -212,4 +190,4 @@ def DeleteFile(file):
         xbmcvfs.delete(file)
     except Exception as e:
         Log("Delete failed: " + file, xbmc.LOGERROR)
-        Log("    Exception: " + str(e.message), xbmc.LOGERROR)
+        Log("    Exception: " + str(e), xbmc.LOGERROR)
