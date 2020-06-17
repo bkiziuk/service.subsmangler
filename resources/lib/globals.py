@@ -40,6 +40,9 @@ DetectionIsRunning = False
 player = None
 monitor = None
 
+# logger object
+logger = None
+
 # timer object
 rt = None
 

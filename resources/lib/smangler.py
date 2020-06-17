@@ -9,10 +9,8 @@ import urllib.request, urllib.error
 import xbmc
 import xbmcgui
 import xbmcvfs
-from .common import Log, GetSettings, CreateNoAutoSubsFile
+from .common import Log, GetSettings, CreateNoAutoSubsFile, InitiateLogger
 from resources.lib import globals
-
-from datetime import datetime
 from json import loads
 from shutil import copyfile
 from threading import Timer
@@ -121,11 +119,12 @@ class XBMCMonitor(xbmc.Monitor):
             globals.rt.stop()
 
 
+
+
 # function prepares plugin environment
 def PreparePlugin():
     """Prepare plugin environment
     """
-
     #
     # execution starts here
     #
@@ -142,6 +141,22 @@ def PreparePlugin():
 
     xbmc.log("SubsMangler: started. Version: " + globals.__version__ + ". Kodi version: " + globals.__kodiversion__,
              level=xbmc.LOGINFO)
+
+    # prepare datadir
+    # directory and file is local to the filesystem
+    # no need to use xbmcvfs
+    if not os.path.isdir(globals.__addonworkdir__):
+        xbmc.log("SubsMangler: profile directory doesn't exist: " + globals.__addonworkdir__ + "   Trying to create.",
+                 level=xbmc.LOGINFO)
+        try:
+            os.mkdir(globals.__addonworkdir__)
+            xbmc.log("SubsMangler: profile directory created: " + globals.__addonworkdir__, level=xbmc.LOGINFO)
+        except OSError as e:
+            xbmc.log("SubsMangler: Log: can't create directory: " + globals.__addonworkdir__, level=xbmc.LOGERROR)
+            xbmc.log("Exception: " + str(e), xbmc.LOGERROR)
+
+    # initiate external log handler
+    InitiateLogger()
 
     # prepare timer to launch
     globals.rt = RepeatedTimer(2.0, DetectNewSubs)
@@ -589,8 +604,7 @@ def MangleSubtitles(originalinputfile):
         # the last position should be "NO_MATCH" to detect end of list
         # https://msdn.microsoft.com/en-us/library/windows/desktop/dd317756(v=vs.85).aspx
         # https://stackoverflow.com/questions/436220/determine-the-encoding-of-text-in-python
-        encodings = ["utf-8", "cp1250", "cp1251", "cp1252", "cp1253", "cp1254", "cp1255", "cp1256", "cp1257", "cp1258",
-                     "NO_MATCH"]
+        encodings = ["utf-8", "cp1250", "cp1251", "cp1252", "cp1253", "cp1254", "cp1255", "cp1256", "cp1257", "cp1258"]
 
         Log("Trying a list of encodings.", xbmc.LOGINFO)
         # try to detect valid encoding
@@ -601,15 +615,11 @@ def MangleSubtitles(originalinputfile):
                     _temp = reader.read()
                     break
             except Exception as e:
-                # no encoding fits the file
-                if enc == "NO_MATCH":
-                    break
                 # encoding does not match
                 Log("Input file test for: " + enc + " failed.", xbmc.LOGINFO)
                 continue
-
-        # no encodings match
-        if enc == "NO_MATCH":
+        else:
+            # no encodings match
             Log("No tried encodings match input file.", xbmc.LOGINFO)
             # subtitle processing aborted
             return
@@ -1071,11 +1081,7 @@ def DetectNewSubs():
 
             # hide busy animation
             # https://forum.kodi.tv/showthread.php?tid=280621&pid=2363462#pid2363462
-            if int(globals.__kodiversion__[:2]) == 17:
-                xbmc.executebuiltin('Dialog.Close(busydialog)')  # busydialog off - Kodi 17
-            else:
-                if int(globals.__kodiversion__[:2]) >= 18:
-                    xbmc.executebuiltin('Dialog.Close(busydialognocancel)')  # busydialog off - Kodi 18
+            xbmc.executebuiltin('Dialog.Close(busydialognocancel)')  # busydialog off - Kodi >= 18
 
             # record end time of processing
             RoutineEndTime = time.time()
@@ -1103,8 +1109,8 @@ def DetectNewSubs():
 
             # display YesNo dialog
             # http://mirrors.xbmc.org/docs/python-docs/13.0-gotham/xbmcgui.html#Dialog-yesno
-            YesNoDialog = xbmcgui.Dialog().yesno("Subtitles Mangler", globals.__addonlang__(32040),
-                                                 line2=globals.__addonlang__(32041),
+            YesNoDialog = xbmcgui.Dialog().yesno("Subtitles Mangler",
+                                                 globals.__addonlang__(32040) + "\n" + globals.__addonlang__(32041),
                                                  nolabel=globals.__addonlang__(32042),
                                                  yeslabel=globals.__addonlang__(32043))
             if YesNoDialog:
@@ -1284,10 +1290,10 @@ def RemoveOldSubs():
         startdir = source.get('file')
         Log("Processing source path: " + startdir, xbmc.LOGINFO)
         # calculate progressbar increase
-        source_number += 100
         progress = source_number // len(sources)
         # update background dialog
         pDialog.update(progress, message=globals.__addonlang__(32090) + ': ' + source.get('label'))
+        source_number += 100
 
         # http://code.activestate.com/recipes/435875-a-simple-non-recursive-directory-walker/
         directories = [startdir]
@@ -1357,10 +1363,10 @@ def RemoveOldSubs():
     # lists filled, compare subs list with video list
     for subfile in subfiles:
         # calculate progressbar increase
-        subfile_number += 100
         progress = subfile_number // len(subfiles)
         # update background dialog
         pDialog.update(progress, message=globals.__addonlang__(32091))
+        subfile_number += 100
 
         # split filename from full path
         subfilename = os.path.basename(subfile)
@@ -1401,3 +1407,38 @@ def RemoveOldSubs():
 
     # close background dialog
     pDialog.close()
+
+
+# supplementary code to be run periodically from main loop
+def SupplementaryServices():
+    """Supplementary services that have to run periodically
+    """
+
+    # set definitions file location
+    # dir is local, no need to use xbmcvfs()
+    if os.path.isfile(globals.localdeffilename):
+        # downloaded file is available
+        globals.deffilename = globals.localdeffilename
+    else:
+        # use sample file from addon's dir
+        globals.deffilename = globals.sampledeffilename
+
+    # housekeeping services
+    if globals.ClockTick <= 0 and not xbmc.getCondVisibility('Player.HasMedia'):
+        # check if auto-update is enabled and player does not play any content
+        if globals.setting_AutoUpdateDef:
+            # update regexdef file
+            UpdateDefFile()
+
+        if globals.setting_AutoRemoveOldSubs:
+            # clear old subtitle files
+            RemoveOldSubs()
+
+        # reset timer to 6 hours
+        # 1 tick per 5 sec * 60 min * 6 hrs = 4320 ticks
+        globals.ClockTick = 4320
+
+    # decrease timer if player is idle
+    # avoid decreasing the timer to infinity
+    if globals.ClockTick > 0 and not xbmc.getCondVisibility('Player.HasMedia'):
+        globals.ClockTick -= 1

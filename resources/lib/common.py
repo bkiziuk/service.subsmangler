@@ -1,33 +1,23 @@
 # This file includes parts of code that are shared between modules
 
-import logging
 import os
+import logging
 import xbmc
 import xbmcvfs
 
+from logging.handlers import RotatingFileHandler
 from resources.lib import globals
 from datetime import datetime
-from logging.handlers import RotatingFileHandler
 
 
-# prepare datadir
-# directory and file is local to the filesystem
-# no need to use xbmcvfs
-if not os.path.isdir(globals.__addonworkdir__):
-    xbmc.log("SubsMangler: profile directory doesn't exist: " + globals.__addonworkdir__ + "   Trying to create.", level=xbmc.LOGINFO)
-    try:
-        os.mkdir(globals.__addonworkdir__)
-        xbmc.log("SubsMangler: profile directory created: " + globals.__addonworkdir__, level=xbmc.LOGINFO)
-    except OSError as e:
-        xbmc.log("SubsMangler: Log: can't create directory: " + globals.__addonworkdir__, level=xbmc.LOGERROR)
-        xbmc.log("Exception: " + str(e), xbmc.LOGERROR)
-
-
-# prepare external log handler
-# https://docs.python.org/2/library/logging.handlers.html
-logger = logging.getLogger(__name__)
-loghandler = logging.handlers.TimedRotatingFileHandler(os.path.join(globals.__addonworkdir__, 'smangler.log',), when="midnight", interval=1, backupCount=2)
-logger.addHandler(loghandler)
+# function initiates external log handler for an instance of application
+def InitiateLogger():
+    # prepare external log handler
+    # https://docs.python.org/2/library/logging.handlers.html
+    globals.logger = logging.getLogger(__name__)
+    loghandler = logging.handlers.TimedRotatingFileHandler(os.path.join(globals.__addonworkdir__, 'smangler.log', ),
+                                                           when="midnight", interval=1, backupCount=2)
+    globals.logger.addHandler(loghandler)
 
 
 # function parses log events based on internal logging level
@@ -79,8 +69,7 @@ def Log(message, severity=xbmc.LOGDEBUG):
             logtext += message
             # append line to external log file
             # logging via warning level to prevent filtering of messages by default filtering level of ROOT logger
-            logger.warning(logtext)
-
+            globals.logger.warning(logtext)
 
 
 # read settings from configuration file
@@ -91,8 +80,10 @@ def GetSettings():
 
     globals.setting_AutoInvokeSubsDialog = GetBool(globals.__addon__.getSetting("AutoInvokeSubsDialog"))
     globals.setting_AutoInvokeSubsDialogOnStream = GetBool(globals.__addon__.getSetting("AutoInvokeSubsDialogOnStream"))
-    globals.setting_NoAutoInvokeIfLocalUnprocSubsFound = GetBool(globals.__addon__.getSetting("NoAutoInvokeIfLocalUnprocSubsFound"))
-    globals.setting_NoConfirmationInvokeIfDownloadedSubsNotFound = GetBool(globals.__addon__.getSetting("NoConfirmationInvokeIfDownloadedSubsNotFound"))
+    globals.setting_NoAutoInvokeIfLocalUnprocSubsFound = GetBool(
+        globals.__addon__.getSetting("NoAutoInvokeIfLocalUnprocSubsFound"))
+    globals.setting_NoConfirmationInvokeIfDownloadedSubsNotFound = GetBool(
+        globals.__addon__.getSetting("NoConfirmationInvokeIfDownloadedSubsNotFound"))
     globals.setting_ShowNoautosubsContextItem = GetBool(globals.__addon__.getSetting("ShowNoautosubsContextItem"))
     globals.setting_ConversionServiceEnabled = GetBool(globals.__addon__.getSetting("ConversionServiceEnabled"))
     globals.setting_AlsoConvertExistingSubtitles = GetBool(globals.__addon__.getSetting("AlsoConvertExistingSubtitles"))
@@ -112,16 +103,23 @@ def GetSettings():
 
     Log("Reading settings.", xbmc.LOGINFO)
     Log("Setting:                 AutoInvokeSubsDialog = " + str(globals.setting_AutoInvokeSubsDialog), xbmc.LOGINFO)
-    Log("                 AutoInvokeSubsDialogOnStream = " + str(globals.setting_AutoInvokeSubsDialogOnStream), xbmc.LOGINFO)
-    Log("           NoAutoInvokeIfLocalUnprocSubsFound = " + str(globals.setting_NoAutoInvokeIfLocalUnprocSubsFound), xbmc.LOGINFO)
-    Log(" NoConfirmationInvokeIfDownloadedSubsNotFound = " + str(globals.setting_NoConfirmationInvokeIfDownloadedSubsNotFound), xbmc.LOGINFO)
-    Log("                    ShowNoautosubsContextItem = " + str(globals.setting_ShowNoautosubsContextItem), xbmc.LOGINFO)
-    Log("                     ConversionServiceEnabled = " + str(globals.setting_ConversionServiceEnabled), xbmc.LOGINFO)
-    Log("                 AlsoConvertExistingSubtitles = " + str(globals.setting_AlsoConvertExistingSubtitles), xbmc.LOGINFO)
+    Log("                 AutoInvokeSubsDialogOnStream = " + str(globals.setting_AutoInvokeSubsDialogOnStream),
+        xbmc.LOGINFO)
+    Log("           NoAutoInvokeIfLocalUnprocSubsFound = " + str(globals.setting_NoAutoInvokeIfLocalUnprocSubsFound),
+        xbmc.LOGINFO)
+    Log(" NoConfirmationInvokeIfDownloadedSubsNotFound = " + str(
+        globals.setting_NoConfirmationInvokeIfDownloadedSubsNotFound), xbmc.LOGINFO)
+    Log("                    ShowNoautosubsContextItem = " + str(globals.setting_ShowNoautosubsContextItem),
+        xbmc.LOGINFO)
+    Log("                     ConversionServiceEnabled = " + str(globals.setting_ConversionServiceEnabled),
+        xbmc.LOGINFO)
+    Log("                 AlsoConvertExistingSubtitles = " + str(globals.setting_AlsoConvertExistingSubtitles),
+        xbmc.LOGINFO)
     Log("                                RemoveCCmarks = " + str(globals.setting_RemoveCCmarks), xbmc.LOGINFO)
     Log("                                    RemoveAds = " + str(globals.setting_RemoveAds), xbmc.LOGINFO)
     Log("                         AdjustSubDisplayTime = " + str(globals.setting_AdjustSubDisplayTime), xbmc.LOGINFO)
-    Log("                 FixOverlappingSubDisplayTime = " + str(globals.setting_FixOverlappingSubDisplayTime), xbmc.LOGINFO)
+    Log("                 FixOverlappingSubDisplayTime = " + str(globals.setting_FixOverlappingSubDisplayTime),
+        xbmc.LOGINFO)
     Log("                            PauseOnConversion = " + str(globals.setting_PauseOnConversion), xbmc.LOGINFO)
     Log("                                BackupOldSubs = " + str(globals.setting_BackupOldSubs), xbmc.LOGINFO)
     Log("                            AutoRemoveOldSubs = " + str(globals.setting_AutoRemoveOldSubs), xbmc.LOGINFO)
@@ -137,7 +135,6 @@ def GetSettings():
         xbmc.executebuiltin('Skin.SetString(SubsMangler_ShowContextItem, true)')
     else:
         xbmc.executebuiltin('Skin.SetString(SubsMangler_ShowContextItem, false)')
-
 
 
 # function parses input value and determines if it should be True or False value
@@ -158,7 +155,6 @@ def GetBool(stringvalue):
         return False
 
 
-
 # function creates '.noautosubs' file for a particular video file
 def CreateNoAutoSubsFile(file):
     """Create 'noautosubs' file.
@@ -169,13 +165,13 @@ def CreateNoAutoSubsFile(file):
 
     # create .noautosubs file
     try:
-        f = xbmcvfs.File (file, 'w')
-        _result = f.write("# This file was created by Subtitles Mangler.\n# Presence of this file prevents automatical opening of subtitles search dialog.")
+        f = xbmcvfs.File(file, 'w')
+        _result = f.write(
+            "# This file was created by Subtitles Mangler.\n# Presence of this file prevents automatical opening of subtitles search dialog.")
         f.close()
     except Exception as e:
         Log("Can not create noautosubs file.", xbmc.LOGERROR)
         Log("  Exception: " + str(e), xbmc.LOGERROR)
-
 
 
 # function deletes file
