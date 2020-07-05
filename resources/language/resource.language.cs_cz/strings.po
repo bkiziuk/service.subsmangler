@@ -88,10 +88,6 @@ msgctxt "#32023"
 msgid "Info"
 msgstr "Info"
 
-msgctxt "#32024"
-msgid "Notice"
-msgstr "Notice"
-
 msgctxt "#32025"
 msgid "Warning"
 msgstr "Warning"
@@ -99,10 +95,6 @@ msgstr "Warning"
 msgctxt "#32026"
 msgid "Error"
 msgstr "Error"
-
-msgctxt "#32027"
-msgid "Severe"
-msgstr "Severe"
 
 msgctxt "#32028"
 msgid "Fatal"
