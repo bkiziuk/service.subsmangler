@@ -25,12 +25,12 @@
 [Ads]
 # sites & tools
 .*netflix.*
-.*opensubtitles.org.*
+.*open.*subtitles.*
 .*podnapisi.net.*
 .*SRT Converter.*
 .*subedit.*
 .*subtitletools.com.*
-.*www.osdb.link.*
+.*osdb.link.*
 # domains
 .*facebook.com.*
 .*fb.com.*
@@ -38,6 +38,8 @@
 .*hotmail.com.*
 .*twitter.com.*
 .*yahoo.com.*
+.*cinematix.*
+.*yts.mx.*
 # email addresses
 # movie specs
 .*23.976.*
@@ -94,4 +96,5 @@
 .*Tłumaczenie ze słuchu.*
 .*napisy.*dopasowane.*wersji.*
 .*Napisy ze słuchu.*
+.*your.*live.*cinema.*
 .*wersja:.*
