@@ -1,10 +1,9 @@
-from __future__ import print_function, division, unicode_literals
 import re
 from numbers import Number
 from .formatbase import FormatBase
 from .ssaevent import SSAEvent
 from .ssastyle import SSAStyle
-from .common import text_type, Color
+from .common import Color
 from .time import make_time, ms_to_times, timestamp_to_ms, TIMESTAMP
 
 SSA_ALIGNMENT = (1, 2, 3, 9, 10, 11, 5, 6, 7)
@@ -60,20 +59,16 @@ def color_to_ass_rgba(c):
 def color_to_ssa_rgb(c):
     return "%d" % ((c.b << 16) | (c.g << 8) | c.r)
 
-def ass_rgba_to_color(s):
-    x = int(s[2:], base=16)
+def rgba_to_color(s):
+    if s[0] == '&':
+        x = int(s[2:], base=16)
+    else:
+        x = int(s)
     r = x & 0xff
     g = (x >> 8) & 0xff
     b = (x >> 16) & 0xff
     a = (x >> 24) & 0xff
     return Color(r, g, b, a)
-
-def ssa_rgb_to_color(s):
-    x = int(s)
-    r = x & 0xff
-    g = (x >> 8) & 0xff
-    b = (x >> 16) & 0xff
-    return Color(r, g, b)
 
 def is_valid_field_content(s):
     """
@@ -110,7 +105,7 @@ def parse_tags(text, style=SSAStyle.DEFAULT_STYLE, styles={}):
     
     def apply_overrides(all_overrides):
         s = style.copy()
-        for tag in re.findall(r"\\[ibus][10]|\\r[a-zA-Z_0-9 ]*", all_overrides):
+        for tag in re.findall(r"\\[ibusp][0-9]|\\r[a-zA-Z_0-9 ]*", all_overrides):
             if tag == r"\r":
                 s = style.copy() # reset to original line style
             elif tag.startswith(r"\r"):
@@ -122,6 +117,13 @@ def parse_tags(text, style=SSAStyle.DEFAULT_STYLE, styles={}):
                 elif "b" in tag: s.bold = "1" in tag
                 elif "u" in tag: s.underline = "1" in tag
                 elif "s" in tag: s.strikeout = "1" in tag
+                elif "p" in tag:
+                    try:
+                        scale = int(tag[2:])
+                    except (ValueError, IndexError):
+                        continue
+
+                    s.drawing = scale > 0
         return s
     
     overrides = SSAEvent.OVERRIDE_SEQUENCE.findall(text)
@@ -145,12 +147,14 @@ class SubstationFormat(FormatBase):
 
         def string_to_field(f, v):
             if f in {"start", "end"}:
-                return timestamp_to_ms(TIMESTAMP.match(v).groups())
-            elif "color" in f:
-                if format_ == "ass":
-                    return ass_rgba_to_color(v)
+                if v.startswith("-"):
+                    # handle negative timestamps
+                    v = v[1:]
+                    return -timestamp_to_ms(TIMESTAMP.match(v).groups())
                 else:
-                    return ssa_rgb_to_color(v)
+                    return timestamp_to_ms(TIMESTAMP.match(v).groups())
+            elif "color" in f:
+                return rgba_to_color(v)
             elif f in {"bold", "underline", "italic", "strikeout"}:
                 return v == "-1"
             elif f in {"borderstyle", "encoding", "marginl", "marginr", "marginv", "layer", "alphalevel"}:
@@ -184,22 +188,22 @@ class SubstationFormat(FormatBase):
             elif inside_info_section or inside_aegisub_section:
                 if line.startswith(";"): continue # skip comments
                 try:
-                    k, v = line.split(": ", 1)
+                    k, v = line.split(":", 1)
                     if inside_info_section:
-                        subs.info[k] = v
+                        subs.info[k] = v.strip()
                     elif inside_aegisub_section:
-                        subs.aegisub_project[k] = v
+                        subs.aegisub_project[k] = v.strip()
                 except ValueError:
                     pass
             elif line.startswith("Style:"):
-                _, rest = line.split(": ", 1)
+                _, rest = line.split(":", 1)
                 buf = rest.strip().split(",")
                 name, raw_fields = buf[0], buf[1:] # splat workaround for Python 2.7
                 field_dict = {f: string_to_field(f, v) for f, v in zip(STYLE_FIELDS[format_], raw_fields)}
                 sty = SSAStyle(**field_dict)
                 subs.styles[name] = sty
             elif line.startswith("Dialogue:") or line.startswith("Comment:"):
-                ev_type, rest = line.split(": ", 1)
+                ev_type, rest = line.split(":", 1)
                 raw_fields = rest.strip().split(",", len(EVENT_FIELDS[format_])-1)
                 field_dict = {f: string_to_field(f, v) for f, v in zip(EVENT_FIELDS[format_], raw_fields)}
                 field_dict["type"] = ev_type
@@ -222,34 +226,34 @@ class SubstationFormat(FormatBase):
             for k, v in subs.aegisub_project.items():
                 print(k, v, sep=": ", file=fp)
 
-        def field_to_string(f, v):
+        def field_to_string(f, v, line):
             if f in {"start", "end"}:
                 return ms_to_timestamp(v)
             elif f == "marked":
                 return "Marked=%d" % v
             elif f == "alignment" and format_ == "ssa":
-                return text_type(ass_to_ssa_alignment(v))
+                return str(ass_to_ssa_alignment(v))
             elif isinstance(v, bool):
                 return "-1" if v else "0"
-            elif isinstance(v, (text_type, Number)):
-                return text_type(v)
+            elif isinstance(v, (str, Number)):
+                return str(v)
             elif isinstance(v, Color):
                 if format_ == "ass":
                     return color_to_ass_rgba(v)
                 else:
                     return color_to_ssa_rgb(v)
             else:
-                raise TypeError("Unexpected type when writing a SubStation field")
+                raise TypeError("Unexpected type when writing a SubStation field {!r} for line {!r}".format(f, line))
 
         print("\n[V4+ Styles]" if format_ == "ass" else "\n[V4 Styles]", file=fp)
         print(STYLE_FORMAT_LINE[format_], file=fp)
         for name, sty in subs.styles.items():
-            fields = [field_to_string(f, getattr(sty, f)) for f in STYLE_FIELDS[format_]]
+            fields = [field_to_string(f, getattr(sty, f), sty) for f in STYLE_FIELDS[format_]]
             print("Style: %s" % name, *fields, sep=",", file=fp)
 
         print("\n[Events]", file=fp)
         print(EVENT_FORMAT_LINE[format_], file=fp)
         for ev in subs.events:
-            fields = [field_to_string(f, getattr(ev, f)) for f in EVENT_FIELDS[format_]]
+            fields = [field_to_string(f, getattr(ev, f), ev) for f in EVENT_FIELDS[format_]]
             print(ev.type, end=": ", file=fp)
             print(*fields, sep=",", file=fp)

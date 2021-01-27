@@ -1,4 +1,3 @@
-from __future__ import unicode_literals, print_function
 import argparse
 import codecs
 import os
@@ -8,38 +7,38 @@ import io
 from io import open
 import sys
 from textwrap import dedent
-from .formats import get_file_extension
+from .formats import get_file_extension, FORMAT_IDENTIFIERS
 from .time import make_time
 from .ssafile import SSAFile
-from .common import PY3, VERSION
+from .common import VERSION
 
 
-def positive_float(s):
+def positive_float(s: str) -> float:
     x = float(s)
     if not x > 0:
         raise argparse.ArgumentTypeError("%r is not a positive number" % s)
     return x
 
-def character_encoding(s):
+def character_encoding(s: str) -> str:
     try:
         codecs.lookup(s)
         return s
     except LookupError:
         raise argparse.ArgumentError
 
-def time(s):
+def time(s: str):
     d = {}
     for v, k in re.findall(r"(\d*\.?\d*)(ms|m|s|h)", s):
         d[k] = float(v)
     return make_time(**d)
 
 
-def change_ext(path, ext):
+def change_ext(path: str, ext: str) -> str:
     base, _ = op.splitext(path)
     return base + ext
 
 
-class Pysubs2CLI(object):
+class Pysubs2CLI:
     def __init__(self):
         parser = self.parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter,
                                                        prog="pysubs2",
@@ -63,10 +62,10 @@ class Pysubs2CLI(object):
 
         parser.add_argument("-v", "--version", action="version", version="pysubs2 %s" % VERSION)
 
-        parser.add_argument("-f", "--from", choices=["ass", "ssa", "srt", "microdvd", "json"], dest="input_format",
+        parser.add_argument("-f", "--from", choices=FORMAT_IDENTIFIERS, dest="input_format",
                             help="By default, subtitle format is detected from the file. This option can be used to "
                                  "skip autodetection and force specific format. Generally, it should never be needed.")
-        parser.add_argument("-t", "--to", choices=["ass", "ssa", "srt", "microdvd", "json"], dest="output_format",
+        parser.add_argument("-t", "--to", choices=FORMAT_IDENTIFIERS, dest="output_format",
                             help="Convert subtitle files to given format. By default, each file is saved in its "
                                  "original format.")
         parser.add_argument("--input-enc", metavar="ENCODING", default="iso-8859-1", type=character_encoding,
@@ -140,12 +139,8 @@ class Pysubs2CLI(object):
                     with open(outpath, "w", encoding=args.output_enc) as outfile:
                         subs.to_file(outfile, output_format, args.fps)
         else:
-            if PY3:
-                infile = io.TextIOWrapper(sys.stdin.buffer, args.input_enc)
-                outfile = io.TextIOWrapper(sys.stdout.buffer, args.output_enc)
-            else:
-                infile = io.TextIOWrapper(sys.stdin, args.input_enc)
-                outfile = io.TextIOWrapper(sys.stdout, args.output_enc)
+            infile = io.TextIOWrapper(sys.stdin.buffer, args.input_enc)
+            outfile = io.TextIOWrapper(sys.stdout.buffer, args.output_enc)
 
             subs = SSAFile.from_file(infile, args.input_format, args.fps)
             self.process(subs, args)
@@ -163,3 +158,13 @@ class Pysubs2CLI(object):
         elif args.transform_framerate is not None:
             in_fps, out_fps = args.transform_framerate
             subs.transform_framerate(in_fps, out_fps)
+
+
+def __main__():
+    cli = Pysubs2CLI()
+    rv = cli(sys.argv[1:])
+    sys.exit(rv)
+
+
+if __name__ == "__main__":
+    __main__()
