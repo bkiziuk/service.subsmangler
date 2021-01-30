@@ -263,3 +263,83 @@ msgstr "Flaga 'noautosubs' JEST ustawiona w folderze:"
 msgctxt "#32108"
 msgid "'noautosubs' file IS CLEARED for folder:"
 msgstr "Flaga 'noautosubs' NIE JEST ustawiona w folderze:"
+
+msgctxt "#32110"
+msgid "Automatically open subtitles search dialog when playback is started"
+msgstr "Automatycznie otwieraj okno wyszukiwania napisów po uruchomieniu odtwarzania"
+
+msgctxt "#32111"
+msgid "Automatically open subtitle search dialog when playing internet stream"
+msgstr "Automatycznie otwieraj okno wyszukiwania napisów dla strumieni internetowych"
+
+msgctxt "#32112"
+msgid "Search dialog will not be opened if local unprocessed subtitles are available"
+msgstr "Okno wyszukiwania napisów nie zostanie otwarte jeśli istnieją lokalne nieprzetworzone napisy"
+
+msgctxt "#32113"
+msgid "If subtitles were not downloaded after closing search dialog, the confirmation dialog asking if search dialog should be opened the next time this file is played back, will not be displayed"
+msgstr "Jeśli po zamknięciu okna wyszukiwania napisów nie zostaną znalezione napisy, okno potwierdzająe czy ma następić wyszukiwanie napisów następnym razem kiedy plik będzie odtwarzany, nie zostanie otwarte"
+
+msgctxt "#32114"
+msgid "What level of logs should be written to the log file"
+msgstr "Poziom logów jaki ma być zapisywany do pliku z logami"
+
+msgctxt "#32115"
+msgid "Place where addon's logs should be stored"
+msgstr "Miejsce przechowywania logów"
+
+msgctxt "#32116"
+msgid "Option for managing 'noautosubs' flag will be available in the context menu"
+msgstr "Określa czy menu kontekstowe ma zawierać opcję pozwalającą na zarządzanie flagą 'noautosubs'"
+
+msgctxt "#32117"
+msgid "If enabled, addon will try to convert subtitles"
+msgstr "Jeśli opcja jest włączona, wtyczka będzie próbować przetwarzać napisy"
+
+msgctxt "#32118"
+msgid "Addon will try to convert locally available subtitles if they are present instead of opening subtitle search dialog"
+msgstr "Lokalne nieprzetworzone napisy będą przetwarzane zamiast otwierania okna wyszukiwania napisów"
+
+msgctxt "#32119"
+msgid "Closed Captioning will be removed from subtitles file"
+msgstr "Usuwane będą podpisy dla osób niesłyszących"
+
+msgctxt "#32120"
+msgid "Advertisement texts matching loaded RegEx filters will be removed from subtitles file"
+msgstr "Usuwane będą teksty reklamowe spełniające załadowane filtry RegEx"
+
+msgctxt "#32121"
+msgid "Time for displaying subtitle entry will be increased if it is below calculated minimum value"
+msgstr "Czas wyświetlania linii napisów będzie zwiększany jeśli jest on poniżej obliczonej wartości minimlanej"
+
+msgctxt "#32122"
+msgid "Time for displaying subtitle entry will be shrunk if it overlaps the next subtitle line"
+msgstr "Czas wyświetlania linii napisów zostanie skrócony jeśli zachodzi na kolejną linię"
+
+msgctxt "#32123"
+msgid "Pause playback during subtitle conversion"
+msgstr "Odtwarzanie zostanie wstrzymane podczas trwania konwersji"
+
+msgctxt "#32124"
+msgid "Leave a backup copy of original subtitle file before processing it instead of removing it"
+msgstr "Przed przetwarzaniem pliku z napisami zostanie zachowana kopia oryginalnej zawartości zamiast jej usunięcia"
+
+msgctxt "#32125"
+msgid "Automatically update filtering definitions from the Internet"
+msgstr "Umożliwia automatyczną aktualizację list filtrowania"
+
+msgctxt "#32126"
+msgid "Remove subtitle file backups if associated video is deleted"
+msgstr "Pozwala na usuwanie kopii oryginalnych napisów po usunięciu pliku wideo"
+
+msgctxt "#32127"
+msgid "Remove original subtitle files if associated video is deleted"
+msgstr "Pozwala na usuwanie oryginalnych napisów po usunięciu pliku wideo"
+
+msgctxt "#32128"
+msgid "If enabled, no files will be removed but only a log entry will be created"
+msgstr "Jeśli opcja jest włączona, żadne pliki z napisami nie zostaną usunięte, utworzony zostanie tylko wpis w dzienniku"
+
+msgctxt "#32129"
+msgid "Periodically remove subtitle files if matching video files are not present any more"
+msgstr "Pliki z napisami będą okresowo usuwane jeśli odpowiadające im pliki wideo nie są już dostępne"

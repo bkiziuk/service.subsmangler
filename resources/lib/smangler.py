@@ -74,7 +74,7 @@ class XBMCPlayer(xbmc.Player):
         # player finished playing video
         Log("VideoPlayer END detected.", xbmc.LOGINFO)
 
-        # add 15 minutes to timer in case timer was close to 0 before playback start
+        # add 15 minutes to timer in case timer was close to 0 before playback started
         # this prevents starting cleanup immediatelly after playback ended
         # 1 tick per 5 sec * 15 min = 180 ticks
         globals.ClockTick += 180
@@ -87,7 +87,7 @@ class XBMCPlayer(xbmc.Player):
         # player has just been stopped
         Log("VideoPlayer STOP detected.", xbmc.LOGINFO)
 
-        # add 15 minutes to timer in case timer was close to 0 before playback start
+        # add 15 minutes to timer in case timer was close to 0 before playback started
         # this prevents starting cleanup immediatelly after playback ended
         # 1 tick per 5 sec * 15 min = 180 ticks
         globals.ClockTick += 180

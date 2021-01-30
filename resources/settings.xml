@@ -3,12 +3,12 @@
     <section id="service.subsmangler">
         <category id="main" label="32001" help="">
             <group id="1" label="">
-                <setting id="AutoInvokeSubsDialog" type="boolean" label="32010" help="">
+                <setting id="AutoInvokeSubsDialog" type="boolean" label="32010" help="32110">
                     <level>0</level>
                     <default>true</default>
                     <control type="toggle"/>
                 </setting>
-                <setting id="AutoInvokeSubsDialogOnStream" type="boolean" label="32009" help="" parent="AutoInvokeSubsDialog">
+                <setting id="AutoInvokeSubsDialogOnStream" type="boolean" label="32009" help="32111" parent="AutoInvokeSubsDialog">
                     <level>0</level>
                     <default>false</default>
                     <control type="toggle"/>
@@ -16,7 +16,7 @@
                         <dependency type="enable" setting="AutoInvokeSubsDialog">true</dependency>
                     </dependencies>
                 </setting>
-                <setting id="NoAutoInvokeIfLocalUnprocSubsFound" type="boolean" label="32013" help="" parent="AutoInvokeSubsDialog">
+                <setting id="NoAutoInvokeIfLocalUnprocSubsFound" type="boolean" label="32013" help="32112" parent="AutoInvokeSubsDialog">
                     <level>0</level>
                     <default>true</default>
                     <control type="toggle"/>
@@ -24,7 +24,7 @@
                         <dependency type="enable" setting="AutoInvokeSubsDialog">true</dependency>
                     </dependencies>
                 </setting>
-                <setting id="NoConfirmationInvokeIfDownloadedSubsNotFound" type="boolean" label="32014" help="" parent="AutoInvokeSubsDialog">
+                <setting id="NoConfirmationInvokeIfDownloadedSubsNotFound" type="boolean" label="32014" help="32113" parent="AutoInvokeSubsDialog">
                     <level>0</level>
                     <default>false</default>
                     <control type="toggle"/>
@@ -34,7 +34,7 @@
                 </setting>
             </group>
             <group id="2" label="">
-                <setting id="LogLevel" type="integer" label="32020" help="">
+                <setting id="LogLevel" type="integer" label="32020" help="32114">
                     <level>0</level>
                     <default>1</default>
                     <constraints>
@@ -51,7 +51,7 @@
                         <heading>32020</heading>
                     </control>
                 </setting>
-                <setting id="SeparateLogFile" type="integer" label="32030" lvalues="32031|32032" default="1">
+                <setting id="SeparateLogFile" type="integer" label="32030" help="32115">
                     <level>0</level>
                     <default>1</default>
                     <constraints>
@@ -66,7 +66,7 @@
                 </setting>
             </group>
             <group id="3" label="">
-                <setting id="ShowNoautosubsContextItem" type="boolean" label="32033" help="">
+                <setting id="ShowNoautosubsContextItem" type="boolean" label="32033" help="32116">
                     <level>0</level>
                     <default>true</default>
                     <control type="toggle"/>
@@ -75,12 +75,12 @@
         </category>
         <category  id="conversion" label="32080" help="">
             <group id="4">
-                <setting id="ConversionServiceEnabled" type="boolean" label="32002" help="">
+                <setting id="ConversionServiceEnabled" type="boolean" label="32002" help="32117">
                     <level>0</level>
                     <default>true</default>
                     <control type="toggle"/>
                 </setting>
-                <setting id="AlsoConvertExistingSubtitles" type="boolean" label="32012" help="" parent="ConversionServiceEnabled">
+                <setting id="AlsoConvertExistingSubtitles" type="boolean" label="32012" help="32118" parent="ConversionServiceEnabled">
                     <level>0</level>
                     <default>true</default>
                     <control type="toggle"/>
@@ -90,7 +90,7 @@
                 </setting>
             </group>
             <group id="5">
-                <setting id="RemoveCCmarks" type="boolean" label="32004" help="">
+                <setting id="RemoveCCmarks" type="boolean" label="32004" help="32119">
                     <level>0</level>
                     <default>true</default>
                     <control type="toggle"/>
@@ -98,7 +98,7 @@
                         <dependency type="enable" setting="ConversionServiceEnabled">true</dependency>
                     </dependencies>
                 </setting>
-                <setting id="RemoveAdds" type="boolean" label="32005" help="">
+                <setting id="RemoveAdds" type="boolean" label="32005" help="32120">
                     <level>0</level>
                     <default>true</default>
                     <control type="toggle"/>
@@ -106,7 +106,7 @@
                         <dependency type="enable" setting="ConversionServiceEnabled">true</dependency>
                     </dependencies>
                 </setting>
-                <setting id="AdjustSubDisplayTime" type="boolean" label="32081" help="">
+                <setting id="AdjustSubDisplayTime" type="boolean" label="32081" help="32121">
                     <level>0</level>
                     <default>true</default>
                     <control type="toggle"/>
@@ -114,7 +114,7 @@
                         <dependency type="enable" setting="ConversionServiceEnabled">true</dependency>
                     </dependencies>
                 </setting>
-                <setting id="FixOverlappingSubDisplayTime" type="boolean" label="32082" help="" parent="AdjustSubDisplayTime">
+                <setting id="FixOverlappingSubDisplayTime" type="boolean" label="32082" help="32122" parent="AdjustSubDisplayTime">
                     <level>0</level>
                     <default>false</default>
                     <control type="toggle"/>
@@ -122,7 +122,7 @@
                         <dependency type="enable" setting="AdjustSubDisplayTime">true</dependency>
                     </dependencies>
                 </setting>
-                <setting id="PauseOnConversion" type="boolean" label="32011" help="">
+                <setting id="PauseOnConversion" type="boolean" label="32011" help="32123">
                     <level>0</level>
                     <default>true</default>
                     <control type="toggle"/>
@@ -130,7 +130,7 @@
                         <dependency type="enable" setting="ConversionServiceEnabled">true</dependency>
                     </dependencies>
                 </setting>
-                <setting id="BackupOldSubs" type="boolean" label="32071" help="">
+                <setting id="BackupOldSubs" type="boolean" label="32071" help="32124">
                     <level>0</level>
                     <default>true</default>
                     <control type="toggle"/>
@@ -140,7 +140,7 @@
                 </setting>
             </group>
             <group id="6">
-                <setting id="AutoUpdateDef" type="boolean" label="32006" help="">
+                <setting id="AutoUpdateDef" type="boolean" label="32006" help="32125">
                     <level>0</level>
                     <default>true</default>
                     <control type="toggle"/>
@@ -152,20 +152,12 @@
         </category>
         <category id="housekeeping" label="32048" help="">
             <group id="7">
-                <setting id="AutoRemoveOldSubs" type="boolean" label="32070" help="">
+                <setting id="AutoRemoveOldSubs" type="boolean" label="32070" help="32129">
                     <level>0</level>
                     <default>true</default>
                     <control type="toggle"/>
                 </setting>
-                <setting id="RemoveSubsBackup" type="boolean" label="32072" help="" parent="AutoRemoveOldSubs">
-                    <level>0</level>
-                    <default>true</default>
-                    <control type="toggle"/>
-                    <dependencies>
-                        <dependency type="enable" setting="AutoRemoveOldSubs">true</dependency>
-                    </dependencies>
-                </setting>
-                <setting id="RemoveUnprocessedSubs" type="boolean" label="32074" help="" parent="AutoRemoveOldSubs">
+                <setting id="RemoveSubsBackup" type="boolean" label="32072" help="32126" parent="AutoRemoveOldSubs">
                     <level>0</level>
                     <default>true</default>
                     <control type="toggle"/>
@@ -173,7 +165,15 @@
                         <dependency type="enable" setting="AutoRemoveOldSubs">true</dependency>
                     </dependencies>
                 </setting>
-                <setting id="SimulateRemovalOnly" type="boolean" label="32073" help="" parent="AutoRemoveOldSubs">
+                <setting id="RemoveUnprocessedSubs" type="boolean" label="32074" help="32127" parent="AutoRemoveOldSubs">
+                    <level>0</level>
+                    <default>true</default>
+                    <control type="toggle"/>
+                    <dependencies>
+                        <dependency type="enable" setting="AutoRemoveOldSubs">true</dependency>
+                    </dependencies>
+                </setting>
+                <setting id="SimulateRemovalOnly" type="boolean" label="32073" help="32128" parent="AutoRemoveOldSubs">
                     <level>0</level>
                     <default>true</default>
                     <control type="toggle"/>

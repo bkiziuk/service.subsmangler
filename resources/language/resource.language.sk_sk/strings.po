@@ -263,3 +263,83 @@ msgstr "'.noautosubs'soubor je nstaven pre zložku:"
 msgctxt "#32108"
 msgid "'noautosubs' file IS CLEARED for folder:"
 msgstr "'.noautosubs' súbor je odobratie zložke:"
+
+msgctxt "#32110"
+msgid "Automatically open subtitles search dialog when playback is started"
+msgstr ""
+
+msgctxt "#32111"
+msgid "Automatically open subtitle search dialog when playing internet stream"
+msgstr ""
+
+msgctxt "#32112"
+msgid "Search dialog will not be opened if local unprocessed subtitles are available"
+msgstr ""
+
+msgctxt "#32113"
+msgid "If subtitles were not downloaded after closing search dialog, the confirmation dialog asking if search dialog should be opened the next time this file is played back, will not be displayed"
+msgstr ""
+
+msgctxt "#32114"
+msgid "What level of logs should be written to the log file"
+msgstr ""
+
+msgctxt "#32115"
+msgid "Place where addon's logs should be stored"
+msgstr ""
+
+msgctxt "#32116"
+msgid "Option for managing 'noautosubs' flag will be available in the context menu"
+msgstr ""
+
+msgctxt "#32117"
+msgid "If enabled, addon will try to convert subtitles"
+msgstr ""
+
+msgctxt "#32118"
+msgid "Addon will try to convert locally available subtitles if they are present instead of opening subtitle search dialog"
+msgstr ""
+
+msgctxt "#32119"
+msgid "Closed Captioning will be removed from subtitles file"
+msgstr ""
+
+msgctxt "#32120"
+msgid "Advertisement texts matching loaded RegEx filters will be removed from subtitles file"
+msgstr ""
+
+msgctxt "#32121"
+msgid "Time for displaying subtitle entry will be increased if it is below calculated minimum value"
+msgstr ""
+
+msgctxt "#32122"
+msgid "Time for displaying subtitle entry will be shrunk if it overlaps the next subtitle line"
+msgstr ""
+
+msgctxt "#32123"
+msgid "Pause playback during subtitle conversion"
+msgstr ""
+
+msgctxt "#32124"
+msgid "Leave a backup copy of original subtitle file before processing it instead of removing it"
+msgstr ""
+
+msgctxt "#32125"
+msgid "Automatically update filtering definitions from the Internet"
+msgstr ""
+
+msgctxt "#32126"
+msgid "Remove subtitle file backups if associated video is deleted"
+msgstr ""
+
+msgctxt "#32127"
+msgid "Remove original subtitle files if associated video is deleted"
+msgstr ""
+
+msgctxt "#32128"
+msgid "If enabled, no files will be removed but only a log entry will be created"
+msgstr ""
+
+msgctxt "#32129"
+msgid "Periodically remove subtitle files if matching video files are not present any more"
+msgstr ""
