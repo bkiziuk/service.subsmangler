@@ -1174,14 +1174,14 @@ def GetPlayingInfo():
         if custompath:
             subspath = custompath
         else:
-            subspath = xbmc.translatePath("special://temp")
+            subspath = xbmcvfs.translatePath("special://temp")
     else:
         # local file
         if storagemode == 1:  # location == custompath
             if xbmcvfs.exists(custompath):
                 subspath = custompath
             else:
-                subspath = xbmc.translatePath("special://temp")
+                subspath = xbmcvfs.translatePath("special://temp")
         else:  # location == movie dir
             subspath = xbmc.getInfoLabel('Player.Folderpath')
 
@@ -1319,7 +1319,7 @@ def RemoveOldSubs():
                     subfiles.append(fullfilepath)
 
     # process custom subtitle path if it is set in Kodi configuration
-    custompath = xbmc.translatePath("special://subtitles")  # path to non-standard dir with subtitles
+    custompath = xbmcvfs.translatePath("special://subtitles")  # path to non-standard dir with subtitles
 
     if custompath:
         if xbmcvfs.exists(custompath):
@@ -1343,10 +1343,10 @@ def RemoveOldSubs():
         Log("Custom path not set. Skipping scanning it.", xbmc.LOGINFO)
 
     # process temp folder
-    Log("Scanning for orphaned subtitle files on temp path: " + xbmc.translatePath("special://temp"), xbmc.LOGINFO)
-    dirs, files = xbmcvfs.listdir(xbmc.translatePath("special://temp"))
+    Log("Scanning for orphaned subtitle files on temp path: " + xbmcvfs.translatePath("special://temp"), xbmc.LOGINFO)
+    dirs, files = xbmcvfs.listdir(xbmcvfs.translatePath("special://temp"))
     for thisfile in files:
-        fullfilepath = os.path.join(xbmc.translatePath("special://temp"), thisfile)
+        fullfilepath = os.path.join(xbmcvfs.translatePath("special://temp"), thisfile)
         _filebase, fileext = os.path.splitext(fullfilepath)
         if fileext in extRemovalList:
             # this file is subs related - add to subs list

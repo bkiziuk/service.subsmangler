@@ -3,11 +3,12 @@
 import os
 import xbmc
 import xbmcaddon
+import xbmcvfs
 
 # addon globals
 __addon__ = xbmcaddon.Addon(id='service.subsmangler')
-__addondir__ = xbmc.translatePath(__addon__.getAddonInfo('path'))
-__addonworkdir__ = xbmc.translatePath(__addon__.getAddonInfo('profile'))
+__addondir__ = xbmcvfs.translatePath(__addon__.getAddonInfo('path'))
+__addonworkdir__ = xbmcvfs.translatePath(__addon__.getAddonInfo('profile'))
 __version__ = __addon__.getAddonInfo('version')
 __addonlang__ = __addon__.getLocalizedString
 __kodiversion__ = xbmc.getInfoLabel('System.BuildVersion')[:4]
