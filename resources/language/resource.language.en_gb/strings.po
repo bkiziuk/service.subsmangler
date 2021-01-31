@@ -157,7 +157,7 @@ msgid "Grey"
 msgstr ""
 
 msgctxt "#32053"
-msgid "Purple"
+msgid "Dark grey"
 msgstr ""
 
 msgctxt "#32054"
@@ -182,6 +182,22 @@ msgstr ""
 
 msgctxt "#32059"
 msgid "White"
+msgstr ""
+
+msgctxt "#32060"
+msgid "Light grey"
+msgstr ""
+
+msgctxt "#32061"
+msgid "Bright green"
+msgstr ""
+
+msgctxt "#32062"
+msgid "Yellow green"
+msgstr ""
+
+msgctxt "#32063"
+msgid "Cyan"
 msgstr ""
 
 msgctxt "#32070"
@@ -354,4 +370,68 @@ msgstr ""
 
 msgctxt "#32132"
 msgid "Behaviour when video file is no longer available"
+msgstr ""
+
+msgctxt "#32140"
+msgid "Subtitle appearance"
+msgstr ""
+
+msgctxt "#32141"
+msgid "Subtitle appearance settings.\nWarning! These settings are directly linked and modify Kodi's Settings/Player/Language/Subtitles parameters"
+msgstr ""
+
+msgctxt "#32145"
+msgid "Set the color to be used for the subtitle background"
+msgstr ""
+
+msgctxt "#32142"
+msgid "Background opacity"
+msgstr ""
+
+msgctxt "#32143"
+msgid "Set the subtitle background opacity"
+msgstr ""
+
+msgctxt "#32147"
+msgid "Set the font color to be used for subtitles"
+msgstr ""
+
+msgctxt "#32148"
+msgid "Font opacity"
+msgstr ""
+
+msgctxt "#32149"
+msgid "Set the subtitle opacity"
+msgstr ""
+
+msgctxt "#32150"
+msgid "Font size"
+msgstr ""
+
+msgctxt "#32151"
+msgid "Set the font size to be used for subtitles"
+msgstr ""
+
+msgctxt "#32152"
+msgid "Font style"
+msgstr ""
+
+msgctxt "#32153"
+msgid "Set the font style to be used for subtitles"
+msgstr ""
+
+msgctxt "#32154"
+msgid "Normal"
+msgstr ""
+
+msgctxt "#32155"
+msgid "Bold"
+msgstr ""
+
+msgctxt "#32156"
+msgid "Italics"
+msgstr ""
+
+msgctxt "#32157"
+msgid "Bold italics"
 msgstr ""
