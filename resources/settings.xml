@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <settings version="1">
     <section id="service.subsmangler">
-        <category id="main" label="32001" help="">
+        <category id="main" label="32001" help="32130">
             <group id="1" label="">
                 <setting id="AutoInvokeSubsDialog" type="boolean" label="32010" help="32110">
                     <level>0</level>
@@ -73,7 +73,7 @@
                 </setting>
             </group>
         </category>
-        <category  id="conversion" label="32080" help="">
+        <category  id="conversion" label="32080" help="32131">
             <group id="4">
                 <setting id="ConversionServiceEnabled" type="boolean" label="32002" help="32117">
                     <level>0</level>
@@ -150,7 +150,7 @@
                 </setting>
             </group>
         </category>
-        <category id="housekeeping" label="32048" help="">
+        <category id="housekeeping" label="32048" help="32132">
             <group id="7">
                 <setting id="AutoRemoveOldSubs" type="boolean" label="32070" help="32129">
                     <level>0</level>

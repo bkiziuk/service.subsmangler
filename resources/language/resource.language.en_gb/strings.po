@@ -343,3 +343,15 @@ msgstr ""
 msgctxt "#32129"
 msgid "Periodically remove subtitle files if matching video files are not present any more"
 msgstr ""
+
+msgctxt "#32130"
+msgid "Behaviour when video is started"
+msgstr ""
+
+msgctxt "#32131"
+msgid "Options for customizing conversion behaviour"
+msgstr ""
+
+msgctxt "#32132"
+msgid "Behaviour when video file is no longer available"
+msgstr ""
