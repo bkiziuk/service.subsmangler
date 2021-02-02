@@ -20,10 +20,6 @@ msgctxt "#32002"
 msgid "Convert subtitles"
 msgstr ""
 
-msgctxt "#32003"
-msgid "Font size"
-msgstr ""
-
 msgctxt "#32004"
 msgid "Remove Closed Captioning"
 msgstr ""
