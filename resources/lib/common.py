@@ -5,6 +5,7 @@ import logging
 import xbmc
 import xbmcvfs
 
+from json import loads
 from logging.handlers import RotatingFileHandler
 from resources.lib import globals
 from datetime import datetime
@@ -72,6 +73,31 @@ def Log(message, severity=xbmc.LOGDEBUG):
             globals.logger.warning(logtext)
 
 
+# set Kodi system setting
+# https://forum.kodi.tv/showthread.php?tid=209587&pid=1844182#pid1844182
+def SetKodiSetting(name, setting):
+    """Set Kodi setting value for given section name.
+
+    Arguments:
+        name {str} -- Kodi section name
+        setting {str} -- setting value
+    """
+
+    # Uses XBMC/Kodi JSON-RPC API to set value.
+    command = '''{
+    "jsonrpc": "2.0",
+    "id": 1,
+    "method": "Settings.SetSettingValue",
+    "params": {
+        "setting": "%s",
+        "value": %s
+    }
+}'''
+    result = xbmc.executeJSONRPC(command % (name, setting))
+    py = loads(result)
+    Log("JSON-RPC: Settings.SetSettingValue: " + str(py), xbmc.LOGDEBUG)
+
+
 # read settings from configuration file
 # settings are read only during addon's start - so for service type addon we need to re-read them after they are altered
 # https://forum.kodi.tv/showthread.php?tid=201423&pid=1766246#pid1766246
@@ -129,12 +155,27 @@ def GetSettings():
     Log("                                AutoUpdateDef = " + str(globals.setting_AutoUpdateDef), xbmc.LOGINFO)
     Log("                                     LogLevel = " + str(globals.setting_LogLevel), xbmc.LOGINFO)
     Log("                              SeparateLogFile = " + str(globals.setting_SeparateLogFile), xbmc.LOGINFO)
+    Log("                                     FontSize = " + str(globals.__addon__.getSetting("FontSize")), xbmc.LOGINFO)
+    Log("                                    FontStyle = " + str(globals.__addon__.getSetting("FontStyle")), xbmc.LOGINFO)
+    Log("                                    FontColor = " + str(globals.__addon__.getSetting("FontColor")), xbmc.LOGINFO)
+    Log("                                  FontOpacity = " + str(globals.__addon__.getSetting("FontOpacity")), xbmc.LOGINFO)
+    Log("                              BackgroundColor = " + str(globals.__addon__.getSetting("BackgroundColor")), xbmc.LOGINFO)
+    Log("                            BackgroundOpacity = " + str(globals.__addon__.getSetting("BackgroundOpacity")), xbmc.LOGINFO)
 
     # set setting value into the skin
     if globals.setting_ShowNoautosubsContextItem:
         xbmc.executebuiltin('Skin.SetString(SubsMangler_ShowContextItem, true)')
     else:
         xbmc.executebuiltin('Skin.SetString(SubsMangler_ShowContextItem, false)')
+
+    # set setting values into Kodi subtitles settings
+    Log("Writing Kodi's subtitle setting values:", xbmc.LOGDEBUG)
+    SetKodiSetting('subtitles.height', globals.__addon__.getSetting("FontSize"))
+    SetKodiSetting('subtitles.style', globals.__addon__.getSetting("FontStyle"))
+    SetKodiSetting('subtitles.color', globals.__addon__.getSetting("FontColor"))
+    SetKodiSetting('subtitles.opacity', globals.__addon__.getSetting("FontOpacity"))
+    SetKodiSetting('subtitles.bgcolor', globals.__addon__.getSetting("BackgroundColor"))
+    SetKodiSetting('subtitles.bgopacity', globals.__addon__.getSetting("BackgroundOpacity"))
 
 
 # function parses input value and determines if it should be True or False value

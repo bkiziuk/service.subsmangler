@@ -119,8 +119,6 @@ class XBMCMonitor(xbmc.Monitor):
             globals.rt.stop()
 
 
-
-
 # function prepares plugin environment
 def PreparePlugin():
     """Prepare plugin environment
@@ -132,12 +130,6 @@ def PreparePlugin():
     # https://forum.kodi.tv/showthread.php?tid=144677
     # https://nedbatchelder.com/text/unipain.html
     # https://www.joelonsoftware.com/2003/10/08/the-absolute-minimum-every-software-developer-absolutely-positively-must-know-about-unicode-and-character-sets-no-excuses/
-
-    # initiate monitoring of xbmc.Player events
-    globals.player = XBMCPlayer()
-
-    # initiate monitoring of xbmc events
-    globals.monitor = XBMCMonitor()
 
     xbmc.log("SubsMangler: started. Version: " + globals.__version__ + ". Kodi version: " + globals.__kodiversion__,
              level=xbmc.LOGINFO)
@@ -161,13 +153,22 @@ def PreparePlugin():
     # prepare timer to launch
     globals.rt = RepeatedTimer(2.0, DetectNewSubs)
 
-    # load settings
+    # get Kodi's subtitle settings
+    GetKodiSubtitleSettings()
+
+    # load addon settings
     GetSettings()
 
     # check if external log is configured
     if globals.setting_SeparateLogFile == 1:
         xbmc.log("SubsMangler: External log enabled: " + os.path.join(globals.__addonworkdir__, 'smangler.log'),
                  level=xbmc.LOGINFO)
+
+    # initiate monitoring of xbmc.Player events
+    globals.player = XBMCPlayer()
+
+    # initiate monitoring of xbmc events
+    globals.monitor = XBMCMonitor()
 
 
 # function checks if stream is a local file and tries to find matching subtitles
@@ -452,7 +453,21 @@ def RemoveStrings(line, deflist):
     return line
 
 
-# get subtitle location setting
+# get Kodi subtitle settings
+def GetKodiSubtitleSettings():
+    """
+    load Kodi's subtitle settings and save them to local addon settings
+    """
+    Log("Reading Kodi's subtitle settings and writing the local copy", xbmc.LOGDEBUG)
+    globals.__addon__.setSetting("FontSize", str(GetKodiSetting('subtitles.height')))
+    globals.__addon__.setSetting("FontStyle", str(GetKodiSetting('subtitles.style')))
+    globals.__addon__.setSetting("FontColor", str(GetKodiSetting('subtitles.color')))
+    globals.__addon__.setSetting("FontOpacity", str(GetKodiSetting('subtitles.opacity')))
+    globals.__addon__.setSetting("BackgroundColor", str(GetKodiSetting('subtitles.bgcolor')))
+    globals.__addon__.setSetting("BackgroundOpacity", str(GetKodiSetting('subtitles.bgopacity')))
+
+
+# get Kodi system setting
 # https://forum.kodi.tv/showthread.php?tid=209587&pid=1844182#pid1844182
 def GetKodiSetting(name):
     """Get Kodi setting value from given section name.
@@ -464,7 +479,7 @@ def GetKodiSetting(name):
         str -- setting value
     """
 
-    # Uses XBMC/Kodi JSON-RPC API to retrieve subtitles location settings values.
+    # Uses XBMC/Kodi JSON-RPC API to retrieve values.
     command = '''{
     "jsonrpc": "2.0",
     "id": 1,
@@ -601,7 +616,6 @@ def MangleSubtitles(originalinputfile):
     # if identification tries failed, try a list of encodings as a last resort
     if not enc:
         # list of encodings to try
-        # the last position should be "NO_MATCH" to detect end of list
         # https://msdn.microsoft.com/en-us/library/windows/desktop/dd317756(v=vs.85).aspx
         # https://stackoverflow.com/questions/436220/determine-the-encoding-of-text-in-python
         encodings = ["utf-8", "cp1250", "cp1251", "cp1252", "cp1253", "cp1254", "cp1255", "cp1256", "cp1257", "cp1258"]

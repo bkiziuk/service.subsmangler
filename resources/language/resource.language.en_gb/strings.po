@@ -377,11 +377,11 @@ msgid "Subtitle appearance"
 msgstr ""
 
 msgctxt "#32141"
-msgid "Subtitle appearance settings.\nWarning! These settings are directly linked and modify Kodi's Settings/Player/Language/Subtitles parameters"
+msgid "Subtitle appearance settings\nThese settings are directly linked and modify Kodi's parameters in:  Settings / Player / Language / Subtitles"
 msgstr ""
 
 msgctxt "#32145"
-msgid "Set the color to be used for the subtitle background"
+msgid "Set the color to be used for the subtitle background\nThis setting links to Kodi's:  Settings / Player / Language / Subtitles / Background Color"
 msgstr ""
 
 msgctxt "#32142"
@@ -389,11 +389,11 @@ msgid "Background opacity"
 msgstr ""
 
 msgctxt "#32143"
-msgid "Set the subtitle background opacity"
+msgid "Set the subtitle background opacity\nThis setting links to Kodi's:  Settings / Player / Language / Subtitles / Background Opacity"
 msgstr ""
 
 msgctxt "#32147"
-msgid "Set the font color to be used for subtitles"
+msgid "Set the font color to be used for subtitles\nThis setting links to Kodi's:  Settings / Player / Language / Subtitles / Color"
 msgstr ""
 
 msgctxt "#32148"
@@ -401,7 +401,7 @@ msgid "Font opacity"
 msgstr ""
 
 msgctxt "#32149"
-msgid "Set the subtitle opacity"
+msgid "Set the subtitle opacity\nThis setting links to Kodi's:  Settings / Player / Language / Subtitles / Opacity"
 msgstr ""
 
 msgctxt "#32150"
@@ -409,7 +409,7 @@ msgid "Font size"
 msgstr ""
 
 msgctxt "#32151"
-msgid "Set the font size to be used for subtitles"
+msgid "Set the font size to be used for subtitles\nThis setting links to Kodi's:  Settings / Player / Language / Subtitles / Size"
 msgstr ""
 
 msgctxt "#32152"
@@ -417,7 +417,7 @@ msgid "Font style"
 msgstr ""
 
 msgctxt "#32153"
-msgid "Set the font style to be used for subtitles"
+msgid "Set the font style to be used for subtitles\nThis setting links to Kodi's:  Settings / Player / Language / Subtitles / Style"
 msgstr ""
 
 msgctxt "#32154"
