@@ -8,7 +8,7 @@
         <menu id="kodi.core.main">
             <item library="context.py">
                 <label>32100</label>
-                <visible>Skin.String(SubsMangler_ShowContextItem, true) + [Container.Content(movies) | Container.Content(episodes)] + ![ListItem.IsParentFolder | ListItem.IsCollection]</visible>
+                <visible>Skin.String(SubsMangler_ShowContextItem, true) + [Container.Content(movies) | Container.Content(tvshows) | Container.Content(episodes)] + ![ListItem.IsParentFolder | ListItem.IsCollection]</visible>
             </item>
         </menu>
     </extension>
