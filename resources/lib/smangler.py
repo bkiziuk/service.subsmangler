@@ -327,6 +327,7 @@ def GetSubtitles():
             else:
                 Log("'noautosubs' file or extension detected. Not opening subtitle search dialog.", xbmc.LOGINFO)
         else:
+            Log("AutoInvokeSubsDialog option is disabled. Not opening subtitle search dialog", xbmc.LOGINFO)
             # enable subtitles if there are any
             xbmc.Player().showSubtitles(True)
 
