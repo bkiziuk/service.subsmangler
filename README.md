@@ -22,3 +22,8 @@ Note:
 - As Kodi 18 (Leia) introduced native support for adding solid background to displayed subtitles and also because Substation Alpha type subtitles are scaled to fit within the bottom of the movie image (not the bottom of the physical screen), file is converted to SubRip format.
 - Beginning with version 1.3.0 the file extension of subtitle output file was changed to .utf (instead of previous .ass) in order to distinguish converted subtitles from original ones. Substation Alpha format (.ass) is now supported as input format.
 - Beginning with version 2.0.0 the plugin was redesigned to support Python 3 only. Therefore, newer versions will only work with Kodi 19 (Matrix) onwards.
+
+
+Known issues:
+- so far the plugin does not work well with streaming services
+- Kodi's subtitle settings (Font size, Font style, Font color, Font opacity, Background color, Background opacity) are synchronized from Kodi UI to the plugin only at Kodi start

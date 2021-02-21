@@ -262,7 +262,7 @@
                 </setting>
                 <setting id="BackgroundOpacity" type="integer" label="32142" help="32143">
                     <level>0</level>
-                    <default>100</default>
+                    <default>0</default>
                     <constraints>
                         <minimum>0</minimum>
                         <step>1</step>
