@@ -3,7 +3,7 @@
     <requires>
         <import addon="xbmc.python" version="3.0.0"/>
     </requires>
-    <extension point="xbmc.service" library="service.py" start="login"/>
+    <extension point="xbmc.service" library="service.py"/>
     <extension point="kodi.context.item">
         <menu id="kodi.core.main">
             <item library="context.py">
