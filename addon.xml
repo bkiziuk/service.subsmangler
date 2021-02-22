@@ -35,7 +35,7 @@
 - first release for Kodi 19 Matrix
 </news>
         <platform>all</platform>
-        <license>GNU General Public License v3.0</license>
+        <license>GPL-3.0-or-later</license>
         <forum>https://forum.kodi.tv/showthread.php?tid=328763</forum>
         <source>https://github.com/bkiziuk/service.subsmangler</source>
         <assets>
