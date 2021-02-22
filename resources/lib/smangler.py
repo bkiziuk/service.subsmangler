@@ -14,7 +14,7 @@ from resources.lib import globals
 from json import loads
 from shutil import copyfile
 from threading import Timer
-from resources.lib import pysubs2
+import pysubs2
 
 
 # timer class
