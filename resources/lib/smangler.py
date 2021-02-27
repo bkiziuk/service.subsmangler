@@ -1015,9 +1015,10 @@ def PlaybackResume():
 def DetectNewSubs():
     """Detect new subtitle files matching video name being played."""
 
+    #Log("DetectNewSubs process called.", xbmc.LOGDEBUG)
     # if function is already running, exit this instance
     if globals.DetectionIsRunning:
-        # Log("Duplicate DetectNewSubs call.", LogWARNING)
+        # Log("Duplicate DetectNewSubs call.", xbmc.LOGWARNING)
         return
 
     # stop timer in order to not duplicate threads
