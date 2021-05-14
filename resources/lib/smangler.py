@@ -291,7 +291,7 @@ def GetSubtitles():
         guilanguage = guilanguage.replace('resource.language.', '')
         guilanguage = GetIsoCode(guilanguage[:2])
 
-        if prefaudiolanguage == 'default':
+        if prefaudiolanguage == 'default' or prefaudiolanguage == 'mediadefault':
             prefaudiolanguage = guilanguage
         elif prefaudiolanguage == 'original':
             pass
