@@ -217,17 +217,20 @@ def GetSubtitles():
         #   none == (only for subtitles) no subtitles
         #   English == English, Polish == Polish, etc.
         # GUI language
+        Log("Getting Kodi's UI language", xbmc.LOGDEBUG)
         guilanguage = GetKodiSetting('locale.language')
         # preferred audio language
+        Log("Getting Kodi's preferred audio language", xbmc.LOGDEBUG)
         prefaudiolanguage = GetKodiSetting('locale.audiolanguage')
         # preferred subtitle language
+        Log("Getting Kodi's preferred subtitle language", xbmc.LOGDEBUG)
         prefsubtitlelanguage = GetKodiSetting('locale.subtitlelanguage')
 
         # map values to ISO 639-2
         guilanguage = guilanguage.replace('resource.language.', '')
         guilanguage = GetIsoCode(guilanguage[:2])
 
-        if prefaudiolanguage == 'mediadefault':
+        if prefaudiolanguage == 'mediadefault' or prefaudiolanguage == 'default':
             prefaudiolanguage = guilanguage
         elif prefaudiolanguage == 'original':
             pass
@@ -1173,6 +1176,7 @@ def GetPlayingInfo():
     """
 
     # get settings from Kodi configuration on assumed subtitles location
+    Log("Getting Kodi's subtitle storage mode (0 is movie dir; 1 is custompath) and custompath", xbmc.LOGDEBUG)
     storagemode = GetKodiSetting("subtitles.storagemode")  # 1=location defined by custompath; 0=location in movie dir
     custompath = GetKodiSetting(
         "subtitles.custompath")  # path to non-standard dir with subtitles, also returned by "special://subtitles"
