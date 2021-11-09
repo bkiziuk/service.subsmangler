@@ -34,6 +34,10 @@
         <disclaimer lang="sk_SK">Kompletný sprievodca titukly</disclaimer>
         <news>v2.0.0 (2021-03-01)
 - first release for Kodi 19 Matrix
+v2.0.1 (2021-11-08)
+- fix encoding crashes
+- improve matching multiline texts
+
 </news>
         <platform>all</platform>
         <license>GPL-3.0-or-later</license>

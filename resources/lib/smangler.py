@@ -392,7 +392,7 @@ def GetDefinitions(section):
     # check if definitions file exists
     if os.path.isfile(globals.deffilename):
         # open file
-        with open(globals.deffilename, "rt") as f:
+        with open(globals.deffilename, "rt", encoding='utf-8') as f:
             thissection = False
             for line in f:
                 # truncate any comment at the end of line
@@ -447,9 +447,9 @@ def RemoveStrings(line, deflist):
     # iterate over every entry on the list
     for pattern in deflist:
         try:
-            if re.search(pattern, line, re.IGNORECASE):
+            if re.search(pattern, line, (re.IGNORECASE | re.DOTALL)):
                 Log("    matches regex: " + pattern, xbmc.LOGDEBUG)
-                line = re.sub(pattern, '', line, flags=re.I)
+                line = re.sub(pattern, '', line, flags=re.IGNORECASE | re.DOTALL)
                 Log("    Resulting string: " + line, xbmc.LOGDEBUG)
         except Exception as e:
             Log("    Regex error: '" + str(e) + "' in Regex: " + pattern, xbmc.LOGERROR)
