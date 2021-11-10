@@ -13,6 +13,18 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
 "X-Generator: Weblate 4.4.2\n"
 
+msgctxt "Addon Summary"
+msgid "A comprehensive subtitle companion"
+msgstr "Wszechstronny asystent napisów"
+
+msgctxt "Addon Description"
+msgid "Automatically invokes subtitle search dialog if local subtitles matching user's preferences are not detected. Removes subtitle files if original video was deleted. Also, allows to remove advertisement texts and texts for the Hearing Impaired. Supports: microDVD, SubRip, MPL2 and TMP formats."
+msgstr "Umożliwia automatyczne uruchamianie okna wyszukiwania napisów w sytuacji, gdy nie zostały wykryte preferowane lokalne napisy. Usuwa pliki z napisami dla skasowanych filmów. Pozwala również na usuwanie z napisów podpisów reklamowych oraz znaczników dla niesłyszących. Obsługuje formaty microDVD, SubRip, MPL2 i TMP."
+
+msgctxt "Addon Disclaimer"
+msgid "A comprehensive subtitle companion"
+msgstr "Wszechstronny asystent napisów"
+
 msgctxt "#32001"
 msgid "Main"
 msgstr "Główne"

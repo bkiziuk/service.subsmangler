@@ -14,6 +14,21 @@
         </menu>
     </extension>
     <extension point="xbmc.addon.metadata">
+        <news>v2.0.0 (2021-03-01)
+- first release for Kodi 19 Matrix
+v2.0.1 (2021-11-08)
+- fix encoding crashes
+- improve matching multiline texts
+
+</news>
+        <platform>all</platform>
+        <license>GPL-3.0-or-later</license>
+        <forum>https://forum.kodi.tv/showthread.php?tid=328763</forum>
+        <source>https://github.com/bkiziuk/service.subsmangler</source>
+        <assets>
+            <icon>resources/icon.png</icon>
+            <fanart>resources/fanart.jpg</fanart>
+        </assets>
         <summary lang="cs_CZ">Kompletní průvodce titukly</summary>
         <summary lang="de_DE">Ein umfassendes Tool für Untertitel</summary>
         <summary lang="en_GB">A comprehensive subtitle companion</summary>
@@ -32,20 +47,5 @@
         <disclaimer lang="hu_HU">Egy teljeskörű felirat asszisztens</disclaimer>
         <disclaimer lang="pl_PL">Wszechstronny asystent napisów</disclaimer>
         <disclaimer lang="sk_SK">Kompletný sprievodca titukly</disclaimer>
-        <news>v2.0.0 (2021-03-01)
-- first release for Kodi 19 Matrix
-v2.0.1 (2021-11-08)
-- fix encoding crashes
-- improve matching multiline texts
-
-</news>
-        <platform>all</platform>
-        <license>GPL-3.0-or-later</license>
-        <forum>https://forum.kodi.tv/showthread.php?tid=328763</forum>
-        <source>https://github.com/bkiziuk/service.subsmangler</source>
-        <assets>
-            <icon>resources/icon.png</icon>
-            <fanart>resources/fanart.jpg</fanart>
-        </assets>
     </extension>
 </addon>
