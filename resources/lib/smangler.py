@@ -170,6 +170,9 @@ def PreparePlugin():
     # initiate monitoring of xbmc events
     globals.monitor = XBMCMonitor()
 
+    # update regexdef file
+    UpdateDefFile()
+
 
 # function checks if stream is a local file and tries to find matching subtitles
 # if subtitles are not found, it opens search dialog
