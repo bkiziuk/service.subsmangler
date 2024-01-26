@@ -1269,8 +1269,9 @@ def RemoveOldSubs():
 
     # create background dialog
     # http://mirrors.kodi.tv/docs/python-docs/13.0-gotham/xbmcgui.html#DialogProgressBG
-    pDialog = xbmcgui.DialogProgressBG()
-    pDialog.create('Subtitles Mangler', globals.__addonlang__(32090))
+    if not globals.setting_HideOrphanedSubsCleaningProgress:
+        pDialog = xbmcgui.DialogProgressBG()
+        pDialog.create('Subtitles Mangler', globals.__addonlang__(32090))
 
     # initiate empty lists
     videofiles = list()
@@ -1298,7 +1299,9 @@ def RemoveOldSubs():
         # calculate progressbar increase
         progress = source_number // len(sources)
         # update background dialog
-        pDialog.update(progress, message=globals.__addonlang__(32090) + ': ' + source.get('label'))
+        if not globals.setting_HideOrphanedSubsCleaningProgress:
+            pDialog.update(progress, message=globals.__addonlang__(32090) + ': ' + source.get('label'))
+
         source_number += 100
 
         # http://code.activestate.com/recipes/435875-a-simple-non-recursive-directory-walker/
@@ -1371,7 +1374,9 @@ def RemoveOldSubs():
         # calculate progressbar increase
         progress = subfile_number // len(subfiles)
         # update background dialog
-        pDialog.update(progress, message=globals.__addonlang__(32091))
+        if not globals.setting_HideOrphanedSubsCleaningProgress:
+            pDialog.update(progress, message=globals.__addonlang__(32091))
+
         subfile_number += 100
 
         # split filename from full path
@@ -1412,7 +1417,8 @@ def RemoveOldSubs():
             ClearEndTime - ClearScanTime) + " seconds.", xbmc.LOGINFO)
 
     # close background dialog
-    pDialog.close()
+    if not globals.setting_HideOrphanedSubsCleaningProgress:
+        pDialog.close()
 
 
 # supplementary code to be run periodically from main loop

@@ -77,4 +77,5 @@ setting_SimulateRemovalOnly = False
 setting_AdjustSubDisplayTime = False
 setting_FixOverlappingSubDisplayTime = False
 setting_ShowNoautosubsContextItem = False
+setting_HideOrphanedSubsCleaningProgress = False
 setting_LogLevel = 0
