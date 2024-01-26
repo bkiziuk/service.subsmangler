@@ -233,6 +233,10 @@ msgctxt "#32075"
 msgid "Try to maintain bigger line spacing"
 msgstr "Tente manter um espaçamento de linha maior"
 
+msgctxt "#32076"
+msgid "Hide cleaning progress"
+msgstr ""
+
 msgctxt "#32080"
 msgid "Conversion"
 msgstr "Conversão"
@@ -380,6 +384,10 @@ msgstr "Opções para personalizar o comportamento de conversão"
 msgctxt "#32132"
 msgid "Behaviour when video file is no longer available"
 msgstr "Comportamento quando o arquivo de vídeo não está mais disponível"
+
+msgctxt "#32133"
+msgid "Hides the cleaning progress bar"
+msgstr ""
 
 msgctxt "#32140"
 msgid "Subtitle appearance"
