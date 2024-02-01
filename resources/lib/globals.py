@@ -24,6 +24,8 @@ sampledeffilename = os.path.join(__addondir__, 'resources', 'regexdef.def')
 tempdeffilename = os.path.join(__addonworkdir__, 'tempdef.def')
 # file that will be used during subtitle processing
 deffilename = None
+# file holding excluded paths for cleaning process
+cleaningexclusionsfilename = os.path.join(__addonworkdir__, 'cleanexcl.def')
 
 # list of input file extensions
 # extensions in lowercase with leading dot
